@@ -1,0 +1,532 @@
+[/
+          Copyright Oliver Kowalke 2009.
+ Distributed under the Boost Software License, Version 1.0.
+    (See accompanying file LICENSE_1_0.txt or copy at
+          http://www.boost.org/LICENSE_1_0.txt
+]
+
+[section:coroutine Coroutine]
+
+Each instance of __coro__ represents a context (CPU registers and stack
+space) of execution or __not_a_coro__. Objects of type __coro__ are
+moveable but not copyable and can be returned by a function.
+
+        boost::coro::coroutine< void() > make_coroutine();
+
+        void f()
+        {
+            boost::coro::coroutine< void() > c( make_coroutine() );
+            c();
+        }
+
+[note __boost_move__ is used to emulate rvalue references.]
+
+[warning If __coro__ is used in a multithreaded application, it can
+migrated between threads, but must not reference __tls__.]
+
+[note If __fls__ is used on Windows, the user is responsible for calling 
+__fls_alloc__, __fls_free__.]
+
+
+[heading Executing a coroutine]
+
+A new __coro__ is created from a callable object (known as the
+__coro_fn__). The stack size, stack unwinding and floating-point
+preserving behavior are determined by additional arguments.
+
+The __coro__ constructor uses the __stack_allocator_concept__ from
+__boost_context__ to allocate an associated stack, and the destructor uses the
+same __stack_allocator_concept__ to deallocate the stack.  The default
+__stack_allocator_concept__ is __stack_allocator__, but a custom stack-allocator
+can be passed to the constructor (see documentation of __boost_context__).
+
+The first argument of __coro_fn__  must be of type __coro_self__, used for yielding
+the active coroutine.
+
+        typedef boost::coro::coroutine< void(int) > coro_t;
+
+        void f( coro_t::self_t & self, int i)
+        {
+            int x;
+            ...
+            self.yield( x);
+            ...
+        }
+
+        coro_t c( boost::bind( f, _1) );
+        c( 7);
+
+The __coro_fn__, as well as its arguments, if any, are copied into the
+coroutine's state.  If a reference is required, use boost::ref.
+
+[note The maximum number of arguments of __coro_fn__ is 10.]
+
+The first invocation of __coro_op__ invokes the __coro_fn__ in a newly created
+coroutine complete with registers, flags, stack and instruction pointers. When 
+control should be returned to the original calling coroutine, call __coro_yield__ or
+__coro_yield_break__.
+The current coroutine information (registers, flags, and stack and instruction
+pointers) is saved and the original coroutine information is restored. Calling
+__coro_op__ resumes execution in the second coroutine after saving the new
+state of the original coroutine.
+
+        typedef boost::coro::coroutine< void() > coro_t;
+
+        void fn( coro_t::self_t & self, int j)
+        {
+            for( int i = 0; i < j; ++i)
+            {
+                std::cout << "fn(): local variable i == " << i << std::endl;
+
+                // save current coroutine
+                // value of local variable is preserved
+                // transfer execution control back to main()
+                self.yield();
+
+                // coroutine<>::operator()() was called
+                // execution control transfered back from main()    
+            }
+        }
+
+        int main( int argc, char * argv[])
+        {
+            coro_t c( boost::bind( fn, _1, 7) );
+
+            std::cout << "main() starts coroutine c" << std::endl;
+
+            // yield was called so we returned
+            while ( ! ctx.is_complete() )
+            {
+                std::cout << "main() calls coroutine c" << std::endl;
+                // execution control is transfered to c
+                c();
+
+                // yield() was called within fn()
+            }
+
+            std::cout << "Done" << std::endl;
+
+            return EXIT_SUCCESS;
+        }
+
+        output:
+            main() starts coroutine c
+            fn(): local variable i == 0
+            main() calls coroutine c
+            fn(): local variable i == 1
+            main() calls coroutine c
+            fn(): local variable i == 2
+            main() calls coroutine c
+            fn(): local variable i == 3
+            main() calls coroutine c
+            fn(): local variable i == 4
+            main() calls coroutine c
+            fn(): local variable i == 5
+            main() calls coroutine c
+            fn(): local variable i == 6
+            main() calls coroutine c
+            Done
+
+[warning Calling __coro_op__ from inside the same coroutine results in
+undefined behaviour.]
+
+[note In contrast to threads, which are preemtive, __coro__ switches are
+cooperative (programmer controls when switch will happen). The kernel is not
+involved in the coroutine switches.]
+
+
+[heading Transfer of data]
+
+The first template argument of __coro__, __signature__, defines the signature of
+the __coro_fn__ and its return type.
+
+[note __coro_self__ is not part of __signature__ and is allways expected to be the first
+argument of __coro_fn__.]
+
+__coro_op__  accepts arguments as defined in __signature__ and has the same return
+type. The arguments passed to __coro_op__, in one coroutine, is returned by __coro_yield__
+in the other coroutine or, if it is the first call to __coro_op__ (__coro__ was not
+started), the __coro_fn__ will be entered and the arguments are passed to __coro_fn__
+on entry.
+
+The value given to __coro_yield__, in one coroutine, is returned by __coro_op__ in
+the other coroutine. 
+
+        typedef boost::coro::coroutine< int( int) >    coro_t;
+
+        int fn( coro_t::self_t & self, int i)
+        {
+            std::cout << "fn(): local variable i == " << i << std::endl;
+
+            // save current coroutine context
+            // transfer execution control back to caller
+            // pass content of variable back
+            int j = self.yield( i);
+            // j == 10 because c( 10) in main()
+            std::cout << "fn(): local variable j == " << j << std::endl;
+
+            return j;
+        }
+
+        int main( int argc, char * argv[])
+        {
+            coro_t c( boost::bind( fn, _1, _2) );
+
+            std::cout << "main(): call coroutine c" << std::endl;
+
+            int x = c( 7);
+            std::cout << "main(): transfered value: " << x << std::endl;
+
+            x = c( 10);
+            std::cout << "main(): transfered value: " << x << std::endl;
+
+            std::cout << "Done" << std::endl;
+
+            return EXIT_SUCCESS;
+        }
+
+        output:
+            main(): call coroutine c
+            fn(): local variable i == 7
+            main(): transfered value: 7
+            fn(): local variable j == 10
+            main(): transfered value: 10
+            Done
+
+
+[heading __coro_fn__ with multiple arguments]
+
+If __coro_fn__ has more than one argument __coro_op__ has the same size of arguments
+and __coro_yield__ returns a ['boost::tuple] coresponding to __signature__.
+
+        typedef boost::coro::coroutine< int(int,int) > coro_t;
+
+        int fn( coro_t::self_t & self, int a, int b)
+        {
+            int tmp = a + b;
+            boost::tuple< int, int > ret = self.yield( tmp);
+            return ret.get< 0 >() + ret.get< 1 >();
+        }
+
+        int main( int argc, char * argv[])
+        {
+            coro_t coro( boost::bind( fn, _1, _2, _3) );
+
+            std::cout << "main(): call coroutine c" << std::endl;
+            int res = coro( 3, 7);
+            std::cout << "main(): 3 + 7 == " << res << std::endl;
+
+            res = coro( 5, 7);
+            std::cout << "main(): 5 + 7 == " << res << std::endl;
+
+            std::cout << "Done" << std::endl;
+
+            return EXIT_SUCCESS;
+        }
+
+        output:
+            main(): call coroutine c
+            main(): 3 + 7 == 10
+            main(): 5 + 7 == 12
+            Done
+
+[heading Exit a __coro_fn__]
+
+__coro_yield_break__ does not take arguments and returns nothing, it leaved the current
+__coro__ and jumps back to the calling __coro__ throwing the exception __terminated_ex__. 
+
+        typedef boost::coro::coroutine< int(int,int) > coro_t;
+
+        int fn( coro_t::self_t & self, int a, int b)
+        {
+            int tmp = a + b;
+            boost::tuple< int, int > ret = self.yield( tmp);
+            self.yield_return();
+            return -1;
+        }
+
+        int main( int argc, char * argv[])
+        {
+            try
+            {
+                coro_t coro( boost::bind( fn, _1, _2, _3) );
+
+                std::cout << "main(): call coroutine c" << std::endl;
+                int res = coro( 3, 7);
+                std::cout << "main(): 3 + 7 == " << res << std::endl;
+
+                res = coro( 5, 7);
+                std::cout << "main(): 5 + 7 == " << res << std::endl;
+
+                std::cout << "Done" << std::endl;
+
+                return EXIT_SUCCESS;
+            }
+            catch ( boost::coro::coroutine_terminated const&)
+            { std::cerr << "coroutine terminated" << std::endl; }
+
+            return EXIT_FAILURE;
+        }
+
+        output:
+            main(): call coroutine c
+            main(): 3 + 7 == 10
+            coroutine terminated
+
+
+[heading Exceptions in __coro_fn__]
+
+A excepton thrown by __coro_fn__ is transfered by exception-pointer
+(see documentation of __boost_exception__ for details and requirements)
+and will be re-thrown by __coro_op__.
+
+[important Code executed by coroutine must not prevent the propagation of the
+__forced_unwind__ exception.  Absorbing that exception will cause stack
+unwinding to fail.  Thus, any code that catches all exceptions must rethrow the
+pending exception.]
+
+        try
+        {
+            // code that might throw
+        }
+        catch( forced_unwind)
+        {
+            throw;
+        }
+        catch(...)
+        {
+            // possibly not rethrow pending exception
+        }
+
+
+[heading Stack unwinding]
+
+Sometimes it is necessary to unwind the stack of an unfinished coroutine to
+destroy local stack variables so they can release allocated resources (RAII
+pattern). The third argument of the coroutine constructor, `do_unwind`,
+indicates whether the destructor should unwind the stack (unwind stack as default).
+
+Stack unwinding assumes the following preconditions:
+
+* The coroutine is not __not_a_coro__
+* The coroutine is not complete
+* The coroutine is not running
+* The coroutine owns a stack
+
+After unwinding, a __coro__ is complete.
+
+
+        typedef boost::coro::coroutine< void() >    coro_t;
+
+        struct X
+        {
+            X()
+            { std::cout << "X()" << std::endl; }
+
+            ~X()
+            { std::cout << "~X()" << std::endl; }
+        };
+
+        void fn()
+        {
+            X x;
+
+            for( int i = 0;; ++i)
+            {
+                std::cout << "fn(): " << i << std::endl;
+                // transfer execution control back to main()
+                self.yield();
+            }
+        }
+
+        int main( int argc, char * argv[])
+        {
+            {
+                coro_t c( boost::bind( fn, _1),
+                        boost::coro::default_stacksize(),
+                        boost::coro::stack_unwind);
+                for ( int i = 0; i < 5; ++i)
+                {
+                    // transfer execution control to fn()
+                    c();
+                }
+
+                std::cout << "c is complete: " << std::boolalpha << c.is_complete() << "\n";
+            }
+
+            std::cout << "Done" << std::endl;
+
+            return EXIT_SUCCESS;
+        }
+
+        output:
+            X()
+            fn(): 0
+            fn(): 1
+            fn(): 2
+            fn(): 3
+            fn(): 4
+            fn(): 5
+            c is complete: false
+            ~X()
+            Done
+
+[important You must not swallow __forced_unwind__ exceptions!]
+
+
+[heading FPU preserving]
+
+Some applications do not use floating-point registers and can disable preserving
+fpu registers for perfromance reasons (see chapter performance).
+
+[note In order to be combatible to the ABIs the FPU registers are preserved by default.]
+
+
+[section:coroutine Class `coroutine`]
+
+    #include <boost/coroutine/coroutine.hpp>
+
+    template<
+        typename Signature,
+        typename Allocator = ctx::stack_allocator
+    >
+    class coroutine
+    {
+    public:
+        class self_t
+        {
+        public:
+            T yield( R);
+
+            void yield_break();
+        };
+
+        coroutine();
+
+        template< typename Fn >
+        coroutine( Fn fn,
+                   std::size_t size = ctx::default_stacksize(),
+                   flag_unwind_t do_unwind = stack_unwind,
+                   bool preserve_fpu = true,
+                   Allocator alloc = Allocator() );
+
+        template< typename Fn >
+        coroutine( Fn && fn,
+                   std::size_t size = ctx::default_stacksize(),
+                   flag_unwind_t do_unwind = stack_unwind,
+                   bool preserve_fpu = true,
+                   Allocator alloc = Allocator() );
+
+        coroutine( coroutine && other);
+
+        coroutine & operator=( coroutine && other);
+
+        operator unspecified-bool-type() const;
+
+        bool operator!() const;
+
+        void swap( coroutine & other);
+
+        bool is_complete() const;
+
+        R operator()(A0 a0, ..., A9 a9);
+    };
+
+    void swap( coroutine & l, coroutine & r);
+
+[heading `coroutine()`]
+[variablelist
+[[Effects:] [Creates a coroutine representing a __not_a_coro__.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading `template< typename Fn > coroutine( Fn fn, std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu, Allocator alloc)`]
+[variablelist
+[[Preconditions:] [`size` > ctx::minimum_stacksize(), `size` < ctx::maximum_stacksize()
+when ! ctx::is_stack_unbound().]]
+[[Effects:] [Creates a coroutine which will execute `fn`. If `do_unwind` is
+`stack_unwind` the destructor of `*this` unwinds the stack before destructing
+it. If `preserve_fpu` is `true` the floating-point registers are preserved between
+context switches.]]
+[[Throws:] [__invalid_ex__ if a precondition is not satisfied.]]
+]
+
+[heading `coroutine( coroutine && other)`]
+[variablelist
+[[Effects:] [Moves the internal data of `other` to `*this`.
+`other` becomes __not_a_coro__.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading `coroutine & operator=( coroutine && other)`]
+[variablelist
+[[Effects:] [Destroys the internal data of `*this` and moves the
+internal data of `other` to `*this`. `other` becomes __not_a_coro__.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading `operator unspecified-bool-type() const`]
+[variablelist
+[[Returns:] [If `*this` refers to __not_a_coro__, the function returns
+false. Otherwise true.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading `bool operator!() const`]
+[variablelist
+[[Returns:] [If `*this` refers not to __not_a_coro__, the function returns
+true. Otherwise false.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading `void swap( coroutine & other)`]
+[variablelist
+[[Effects:] [Swaps the internal data from `*this` with the values
+of `other`.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading `bool is_complete() const`]
+[variablelist
+[[Preconditions:] [`*this` is not a __not_a_coro__.]]
+[[Effects:] [Returns `true` if coroutine-function of `*this` has returned.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading `R operator()(A0 a0, A9 a9)`]
+[variablelist
+[[Preconditions:] [`*this` is not a __not_a_coro__, `! is_complete()`.]]
+[[Effects:] [__coro_fn__ is entered and the arguments are passed to the
+__coro__. The return value is the argument passed to __coro_yield__.]] 
+[[Throws:] [__terminated_ex__ if __coro_yield_break__ was called or other
+exceptions thrown inside __coro_fn__.]]
+]
+
+[heading `T self_t::yield( R)`]
+[variablelist
+[[Effects:] [Gives execution control back to calling context by returning
+a value of type R. The return type of this function is a __tuple__ containing
+the arguments passed to __coro_op__.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading `void self_t::yield_break()`]
+[variablelist
+[[Effects:] [Gives execution control back to calling context and sets the 
+__coro__ to be complete. __coro_op__ in the other coroutine throws exception
+__terminated_ex__.]]
+[[Postconditions:] [`*this` is complete, which is `is_complete()` returns
+`true`.]]
+]
+
+[heading Non-member function `swap()`]
+
+    void swap( coroutine & l, coroutine & r);
+
+[variablelist
+[[Effects:] [As if 'l.swap( r)'.]]
+]
+
+[endsect]
+
+[endsect]
