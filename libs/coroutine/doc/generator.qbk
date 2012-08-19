@@ -26,11 +26,11 @@ and can be returned by a function.
 
 [note __boost_move__ is used to emulate rvalue references.]
 
-[warning If __gen__ is used in a multithreaded application, it can
-migrated between threads, but must not reference __tls__.]
-
 [note If __fls__ is used on Windows, the user is responsible for calling 
 __fls_alloc__, __fls_free__.]
+
+[warning If __gen__ is used in a multithreaded application, it can
+migrated between threads, but must not reference __tls__.]
 
 
 [heading Executing a generator]
@@ -65,7 +65,7 @@ The __gen_fn__, as well as its arguments, if any, are copied into the
 generator's state.  If a reference is required, use boost::ref.
 
 Usally a __gen__ is called inside loops. The __gen_fn__ executed until
-__gen_yield__ is called. The value passed ot __gen_yield__ is used as the
+__gen_yield__ is called. The value passed to __gen_yield__ is used as the
 generated value.
 The next time the same __gen__ is called in a subsequent iteration, the
 execution of the __gen_fn__ is resumed after __gen_yield__, until __gen_yield__
@@ -111,9 +111,8 @@ __gen_fn__ is invoked the first time inside the constructor of __gen__.
 __gen_op__ can be called as long as __gen__ remains valid, e.g. __gen_eval__
 returns `true`.
 If __gen_fn__ can not return valid values anymore __gen_yield_break__ should be
-called. This function returns the execution cotnrol back to the caller and sets
+called. This function returns the execution control back to the caller and sets
 the __gen__ to be complete (`is_complete()` returns `true`). In this case
-__gen_op__ does not throw an exception like __coro__ In this case
 __gen_op__ does not throw an exception like __coro__. Of curse the __gen_fn__
 can be exited with a `return` expression.
 
@@ -125,12 +124,12 @@ can be exited with a `return` expression.
             {
                 std::cout << "fn(): local variable i == " << i << std::endl;
 
-                // save current coroutine
+                // save current generator
                 // value of local variable is preserved
                 // transfer execution control back to main()
                 self.yield( i);
 
-                // coroutine<>::operator()() was called
+                // generator<>::operator()() was called
                 // execution control transfered back from main()    
             }
             self.yield_break();
@@ -173,20 +172,19 @@ can be exited with a `return` expression.
             main(): generated == 6
             Done
 
-[warning Calling __gen_op__ from inside the same coroutine results in
-undefined behaviour.]
-
 [note In contrast to threads, which are preemtive, __gen__ switches are
 cooperative (programmer controls when switch will happen). The kernel is not
-involved in the coroutine switches.]
+involved in the generator switches.]
+
+[warning Calling __gen_op__ from inside the same generator results in
+undefined behaviour.]
 
 [heading Exceptions in __gen_fn__]
 
-A excepton thrown by __gen_fn__ is transfered by exception-pointer
-(see documentation of __boost_exception__ for details and requirements)
-and will be re-thrown by __gen_op__.
+An excepton thrown inside __gen_fn__ (transfered via exception-pointer - see
+__boost_exception__ for details and requirements) will be re-thrown by __gen_op__.
 
-[important Code executed by coroutine must not prevent the propagation of the
+[important Code executed by generator must not prevent the propagation of the
 __forced_unwind__ exception.  Absorbing that exception will cause stack
 unwinding to fail.  Thus, any code that catches all exceptions must rethrow the
 pending exception.]
@@ -207,17 +205,17 @@ pending exception.]
 
 [heading Stack unwinding]
 
-Sometimes it is necessary to unwind the stack of an unfinished coroutine to
+Sometimes it is necessary to unwind the stack of an unfinished generator to
 destroy local stack variables so they can release allocated resources (RAII
-pattern). The third argument of the coroutine constructor, `do_unwind`,
+pattern). The third argument of the generator constructor, `do_unwind`,
 indicates whether the destructor should unwind the stack (unwind stack as default).
 
 Stack unwinding assumes the following preconditions:
 
-* The coroutine is not __not_a_gen__
-* The coroutine is not complete
-* The coroutine is not running
-* The coroutine owns a stack
+* The generator is not __not_a_gen__
+* The generator is not complete
+* The generator is not running
+* The generator owns a stack
 
 After unwinding, a __gen__ is complete.
 
@@ -227,9 +225,9 @@ After unwinding, a __gen__ is complete.
 [heading FPU preserving]
 
 Some applications do not use floating-point registers and can disable preserving
-fpu registers for perfromance reasons (see chapter performance).
+fpu registers for perfromance reasons.
 
-[note In order to be combatible to the ABIs the FPU registers are preserved by default.]
+[note According to the ABIs the FPU registers are preserved by default.]
 
 
 [section:generator Class `generator`]

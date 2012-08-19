@@ -24,7 +24,7 @@ moveable but not copyable and can be returned by a function.
 [warning If __coro__ is used in a multithreaded application, it can
 migrated between threads, but must not reference __tls__.]
 
-[note If __fls__ is used on Windows, the user is responsible for calling 
+[warning If __fls__ is used on Windows, the user is responsible for calling 
 __fls_alloc__, __fls_free__.]
 
 
@@ -37,11 +37,12 @@ preserving behavior are determined by additional arguments.
 The __coro__ constructor uses the __stack_allocator_concept__ from
 __boost_context__ to allocate an associated stack, and the destructor uses the
 same __stack_allocator_concept__ to deallocate the stack.  The default
-__stack_allocator_concept__ is __stack_allocator__, but a custom stack-allocator
-can be passed to the constructor (see documentation of __boost_context__).
+__stack_allocator_concept__ is __stack_allocator__ (see documentation of
+__boost_context__), but a custom stack-allocator can be passed to the
+constructor.
 
-The first argument of __coro_fn__  must be of type __coro_self__, used for yielding
-the active coroutine.
+The first argument of __coro_fn__  must be a reference of type __coro_self__,
+used for yielding the active coroutine.
 
         typedef boost::coro::coroutine< void(int) > coro_t;
 
@@ -62,13 +63,13 @@ coroutine's state.  If a reference is required, use boost::ref.
 [note The maximum number of arguments of __coro_fn__ is 10.]
 
 The first invocation of __coro_op__ invokes the __coro_fn__ in a newly created
-coroutine complete with registers, flags, stack and instruction pointers. When 
-control should be returned to the original calling coroutine, call __coro_yield__ or
-__coro_yield_break__.
+coroutine complete with registers, flags, stack and instruction pointer. When 
+control should be returned to the original calling routine, call __coro_yield__
+or __coro_yield_break__.
 The current coroutine information (registers, flags, and stack and instruction
-pointers) is saved and the original coroutine information is restored. Calling
-__coro_op__ resumes execution in the second coroutine after saving the new
-state of the original coroutine.
+pointer) is saved and the original context information is restored. Calling
+__coro_op__ resumes execution in the coroutine after saving the new state of the
+original routine.
 
         typedef boost::coro::coroutine< void() > coro_t;
 
@@ -127,12 +128,12 @@ state of the original coroutine.
             main() calls coroutine c
             Done
 
+[note In contrast to threads, which are preemtive, __coro__ switches are
+cooperative (programmer controls when a switch will happen). The kernel is not
+involved in the coroutine switches.]
+
 [warning Calling __coro_op__ from inside the same coroutine results in
 undefined behaviour.]
-
-[note In contrast to threads, which are preemtive, __coro__ switches are
-cooperative (programmer controls when switch will happen). The kernel is not
-involved in the coroutine switches.]
 
 
 [heading Transfer of data]
@@ -150,7 +151,7 @@ started), the __coro_fn__ will be entered and the arguments are passed to __coro
 on entry.
 
 The value given to __coro_yield__, in one coroutine, is returned by __coro_op__ in
-the other coroutine. 
+the other routine. 
 
         typedef boost::coro::coroutine< int( int) >    coro_t;
 
@@ -232,8 +233,9 @@ and __coro_yield__ returns a ['boost::tuple] coresponding to __signature__.
 
 [heading Exit a __coro_fn__]
 
-__coro_yield_break__ does not take arguments and returns nothing, it leaved the current
-__coro__ and jumps back to the calling __coro__ throwing the exception __terminated_ex__. 
+__coro_yield_break__ does not take arguments and returns nothing, it leaves the
+current __coro__ and jumps back to the calling routine throwing an exception of
+type __terminated_ex__. 
 
         typedef boost::coro::coroutine< int(int,int) > coro_t;
 
@@ -273,12 +275,14 @@ __coro__ and jumps back to the calling __coro__ throwing the exception __termina
             main(): 3 + 7 == 10
             coroutine terminated
 
+[important After calling __coro_yield_break__ the __coro__ is complete (can not
+resumed with __coro_op__).]
+
 
 [heading Exceptions in __coro_fn__]
 
-A excepton thrown by __coro_fn__ is transfered by exception-pointer
-(see documentation of __boost_exception__ for details and requirements)
-and will be re-thrown by __coro_op__.
+An exception thrown inside __coro_fn__ (transfered via exception-pointer - see
+__boost_exception__ for details and requirements) will be re-thrown by __coro_op__.
 
 [important Code executed by coroutine must not prevent the propagation of the
 __forced_unwind__ exception.  Absorbing that exception will cause stack
@@ -304,7 +308,8 @@ pending exception.]
 Sometimes it is necessary to unwind the stack of an unfinished coroutine to
 destroy local stack variables so they can release allocated resources (RAII
 pattern). The third argument of the coroutine constructor, `do_unwind`,
-indicates whether the destructor should unwind the stack (unwind stack as default).
+indicates whether the destructor should unwind the stack (stack is unwound by
+default).
 
 Stack unwinding assumes the following preconditions:
 
@@ -377,9 +382,9 @@ After unwinding, a __coro__ is complete.
 [heading FPU preserving]
 
 Some applications do not use floating-point registers and can disable preserving
-fpu registers for perfromance reasons (see chapter performance).
+fpu registers for performance reasons.
 
-[note In order to be combatible to the ABIs the FPU registers are preserved by default.]
+[note According to the ABIs the FPU registers are preserved by default.]
 
 
 [section:coroutine Class `coroutine`]
