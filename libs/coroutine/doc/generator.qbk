@@ -52,9 +52,8 @@ the active generator.
 
         void f( gen_t::self_t & self, int i)
         {
-            int x;
             ...
-            self.yield( x);
+            self.yield();
             ...
         }
 
@@ -178,6 +177,48 @@ involved in the generator switches.]
 
 [warning Calling __gen_op__ from inside the same generator results in
 undefined behaviour.]
+
+[heading Exit a __gen_fn__]
+
+__gen_yield_break__ does not take arguments and returns nothing, it leaves the
+current __gen__ and jumps back to the calling routine. __gen_eval__ will return
+`false`.
+
+        typedef boost::coro::generator< int(int) > gen_t;
+
+        int fn( coro_t::self_t & self, int a)
+        {
+            for ( int i = 0; i < a; ++i)
+                self_yield( i);
+            self.yield_return();
+            return -1;
+        }
+
+        int main( int argc, char * argv[])
+        {
+            gen_t g( boost::bind( fn, _1, _2) );
+
+            std::cout << "main(): call generator g" << std::endl;
+            while ( g)
+            {
+                int res = g();
+                std::cout << "main(): == " << res << std::endl;
+            }
+
+            std::cout << "Done" << std::endl;
+
+            return EXIT_SUCCESS;
+        }
+
+        output:
+            main(): call generator g
+            main(): == 0
+            main(): == 1
+            main(): == 2
+            Done
+
+[important After calling __gen_yield_break__ the __gen__ is complete (can not
+resumed with __gen_op__).]
 
 [heading Exceptions in __gen_fn__]
 

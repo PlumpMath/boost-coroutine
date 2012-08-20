@@ -48,9 +48,8 @@ used for yielding the active coroutine.
 
         void f( coro_t::self_t & self, int i)
         {
-            int x;
             ...
-            self.yield( x);
+            self.yield();
             ...
         }
 
@@ -197,8 +196,9 @@ the other routine.
 
 [heading __coro_fn__ with multiple arguments]
 
-If __coro_fn__ has more than one argument __coro_op__ has the same size of arguments
-and __coro_yield__ returns a ['boost::tuple] coresponding to __signature__.
+If __coro_fn__ has more than one argument __coro_op__ has the same size of
+arguments and __coro_yield__ returns a ['boost::tuple] coresponding to the
+arguments of __signature__.
 
         typedef boost::coro::coroutine< int(int,int) > coro_t;
 
