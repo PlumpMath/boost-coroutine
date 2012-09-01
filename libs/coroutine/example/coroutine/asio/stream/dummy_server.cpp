@@ -4,6 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
+#define NOMINMAX
+
 #include <cstdlib>
 #include <cstring>
 #include <iterator>
@@ -36,7 +38,8 @@ private:
 
     std::size_t fetch_()
     {
-        std::streamsize num = std::min( gptr() - eback(), pb_size);
+        std::streamsize num = std::min(
+            static_cast< std::streamsize >( gptr() - eback() ), pb_size);
 
         std::memmove(
             buffer_ + ( pb_size - num),

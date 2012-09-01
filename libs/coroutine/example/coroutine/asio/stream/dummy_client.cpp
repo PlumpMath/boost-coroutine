@@ -11,7 +11,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+
 #include <boost/asio.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/thread.hpp>
 
 using boost::asio::ip::tcp;
 
@@ -41,10 +44,10 @@ int main(int argc, char* argv[])
 
             boost::asio::write(s, boost::asio::buffer(msg1, msg1.size()));
             std::cout << msg1 << " sendet" << std::endl;
-            sleep(5);
+            boost::this_thread::sleep(boost::posix_time::seconds( 5) );
             boost::asio::write(s, boost::asio::buffer(msg2, msg2.size()));
             std::cout << msg2 << " sendet" << std::endl;
-            sleep(5);
+            boost::this_thread::sleep(boost::posix_time::seconds( 5) );
             boost::asio::write(s, boost::asio::buffer(msg3, msg3.size()));
             std::cout << msg3 << " sendet" << std::endl;
         }
