@@ -30,13 +30,13 @@ template< typename D >
 class generator_resume< void, D >
 {
 public:
-    generator_resume() :
+    generator_resume() BOOST_NOEXCEPT :
         nxt_( false)
     {}
 
     void operator()()
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
         BOOST_ASSERT( dp->impl_);
 
         fetch_();
@@ -45,7 +45,7 @@ public:
 protected:
     void fetch_()
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
         BOOST_ASSERT( dp->impl_);
         try
         {
@@ -79,7 +79,7 @@ public:
 
     result_t operator()()
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
         BOOST_ASSERT( dp->impl_);
 
         result_t tmp( * result_);
@@ -90,7 +90,7 @@ public:
 protected:
     void fetch_()
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
         BOOST_ASSERT( dp->impl_);
         try
         {
@@ -105,10 +105,10 @@ protected:
         { result_ = none; }
     }
 
-    bool has_value_() const
+    bool has_value_() const BOOST_NOEXCEPT
     { return result_; }
 
-    void swap_( generator_resume & other)
+    void swap_( generator_resume & other) BOOST_NOEXCEPT
     { result_.swap( other.result_); }
 
 private:

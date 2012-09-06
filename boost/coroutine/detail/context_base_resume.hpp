@@ -40,7 +40,7 @@ struct context_base_resume< Signature, D, void, 0 >
 {
     void resume()
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
 
         dp->native_resume( 0);
     }
@@ -49,15 +49,15 @@ struct context_base_resume< Signature, D, void, 0 >
 template< typename Signature, typename D, typename Result >
 struct context_base_resume< Signature, D, Result, 0 >
 {
-    typedef Result	result_t;
+    typedef Result  result_t;
 
     result_t resume()
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
 
         intptr_t ret = dp->native_resume( 0);
-		if ( dp->is_complete() ) return * dp->result_;
-		else return * ( typename remove_reference< result_t >::type *) ret;
+        if ( dp->is_complete() ) return * dp->result_;
+        else return * ( typename remove_reference< result_t >::type *) ret;
     }
 };
 
@@ -65,7 +65,7 @@ struct context_base_resume< Signature, D, Result, 0 >
 #define BOOST_CONTEXT_BASE_RESUME_VAL(z,n,unused) BOOST_CONTEXT_BASE_RESUME_COMMA(n) BOOST_PP_CAT(a,n)
 #define BOOST_CONTEXT_BASE_RESUME_VALS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_CONTEXT_BASE_RESUME_VAL,~)
 #define BOOST_CONTEXT_BASE_RESUME_ARG_TYPE(n) \
-	typename function_traits< Signature >::BOOST_PP_CAT(BOOST_PP_CAT(arg,n),_type)
+    typename function_traits< Signature >::BOOST_PP_CAT(BOOST_PP_CAT(arg,n),_type)
 #define BOOST_CONTEXT_BASE_RESUME_ARG(z,n,unused) BOOST_CONTEXT_BASE_RESUME_COMMA(n) BOOST_CONTEXT_BASE_RESUME_ARG_TYPE(n) BOOST_PP_CAT(a,n)
 #define BOOST_CONTEXT_BASE_RESUME_ARGS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_CONTEXT_BASE_RESUME_ARG,~)
 #define BOOST_CONTEXT_BASE_RESUME(z,n,unused) \
@@ -74,9 +74,9 @@ struct context_base_resume< Signature, D, void, n > \
 { \
     void resume( BOOST_CONTEXT_BASE_RESUME_ARGS(n)) \
     { \
-		D * dp = static_cast< D * >( this); \
+        D * dp = static_cast< D * >( this); \
 \
-		typename arg< Signature >::type_t args(BOOST_CONTEXT_BASE_RESUME_VALS(n)); \
+        typename arg< Signature >::type_t args(BOOST_CONTEXT_BASE_RESUME_VALS(n)); \
         dp->native_resume( ( intptr_t) & args); \
     } \
 }; \
@@ -84,16 +84,16 @@ struct context_base_resume< Signature, D, void, n > \
 template< typename Signature, typename D, typename Result > \
 struct context_base_resume< Signature, D, Result, n > \
 { \
-    typedef Result	result_t; \
+    typedef Result  result_t; \
 \
     result_t resume( BOOST_CONTEXT_BASE_RESUME_ARGS(n)) \
     { \
-		D * dp = static_cast< D * >( this); \
+        D * dp = static_cast< D * >( this); \
 \
-		typename arg< Signature >::type_t args(BOOST_CONTEXT_BASE_RESUME_VALS(n)); \
+        typename arg< Signature >::type_t args(BOOST_CONTEXT_BASE_RESUME_VALS(n)); \
         intptr_t ret = dp->native_resume( ( intptr_t) & args); \
-		if ( dp->is_complete() ) return * dp->result_; \
-		else return * ( typename remove_reference< result_t >::type *) ret; \
+        if ( dp->is_complete() ) return * dp->result_; \
+        else return * ( typename remove_reference< result_t >::type *) ret; \
     } \
 };
 BOOST_PP_REPEAT_FROM_TO( 1, 11, BOOST_CONTEXT_BASE_RESUME, ~)

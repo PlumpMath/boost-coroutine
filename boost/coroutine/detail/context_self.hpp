@@ -33,17 +33,17 @@ class context_self< Signature, Allocator, void, 0 >
 private:
     typedef detail::context_base<
         Signature, Allocator, void, 0
-    >                                       	base_t;
-	typedef base_t                         *	ptr_t; 
+    >                                           base_t;
+    typedef base_t                         *    ptr_t; 
 
-	template< typename X, typename Y, typename Z, int >
+    template< typename X, typename Y, typename Z, int >
     friend class event_object;
-	template< typename X, typename Y, typename Z, typename R, int >
-	friend class context_exec;
-    
-	ptr_t  impl_;
+    template< typename X, typename Y, typename Z, typename R, int >
+    friend class context_exec;
 
-    context_self( ptr_t impl) :
+    ptr_t  impl_;
+
+    context_self( ptr_t impl) BOOST_NOEXCEPT :
         impl_( impl)
     { BOOST_ASSERT( impl_); }
 
@@ -65,20 +65,20 @@ template< typename Signature, typename Allocator, int arity >
 class context_self< Signature, Allocator, void, arity >
 {
 private:
-	typedef typename arg< Signature >::type_t	arg_t;
+    typedef typename arg< Signature >::type_t   arg_t;
     typedef detail::context_base<
         Signature, Allocator, void, arity
-    >                                       	base_t;
-	typedef base_t                         *	ptr_t; 
+    >                                           base_t;
+    typedef base_t                         *    ptr_t; 
 
-	template< typename X, typename Y, typename Z, int >
+    template< typename X, typename Y, typename Z, int >
     friend class event_object;
-	template< typename X, typename Y, typename Z, typename R, int >
-	friend class context_exec;
-    
-	ptr_t  impl_;
+    template< typename X, typename Y, typename Z, typename R, int >
+    friend class context_exec;
 
-    context_self( ptr_t impl) :
+    ptr_t  impl_;
+
+    context_self( ptr_t impl) BOOST_NOEXCEPT :
         impl_( impl)
     { BOOST_ASSERT( impl_); }
 
@@ -100,20 +100,20 @@ template< typename Signature, typename Allocator, typename Result >
 class context_self< Signature, Allocator, Result, 0 >
 {
 private:
-	typedef Result								result_t;
+    typedef Result                              result_t;
     typedef detail::context_base<
         Signature, Allocator, Result, 0
-    >                                       	base_t;
-	typedef base_t                         *	ptr_t; 
+    >                                           base_t;
+    typedef base_t                         *    ptr_t; 
 
-	template< typename X, typename Y, typename Z, int >
+    template< typename X, typename Y, typename Z, int >
     friend class event_object;
-	template< typename X, typename Y, typename Z, typename R, int >
-	friend class context_exec;
-    
-	ptr_t  impl_;
+    template< typename X, typename Y, typename Z, typename R, int >
+    friend class context_exec;
 
-    context_self( ptr_t impl) :
+    ptr_t  impl_;
+
+    context_self( ptr_t impl) BOOST_NOEXCEPT :
         impl_( impl)
     { BOOST_ASSERT( impl_); }
 
@@ -135,21 +135,21 @@ template< typename Signature, typename Allocator, typename Result, int arity >
 class context_self
 {
 private:
-	typedef Result								result_t;
-	typedef typename arg< Signature >::type_t	arg_t;
+    typedef Result                              result_t;
+    typedef typename arg< Signature >::type_t   arg_t;
     typedef detail::context_base<
         Signature, Allocator, Result, arity
-    >                                       	base_t;
-	typedef base_t                         *	ptr_t; 
+    >                                           base_t;
+    typedef base_t                         *    ptr_t; 
 
-	template< typename X, typename Y, typename Z, int >
+    template< typename X, typename Y, typename Z, int >
     friend class event_object;
-	template< typename X, typename Y, typename Z, typename R, int >
-	friend class context_exec;
-    
-	ptr_t  impl_;
+    template< typename X, typename Y, typename Z, typename R, int >
+    friend class context_exec;
 
-    context_self( ptr_t impl) :
+    ptr_t  impl_;
+
+    context_self( ptr_t impl) BOOST_NOEXCEPT :
         impl_( impl)
     { BOOST_ASSERT( impl_); }
 

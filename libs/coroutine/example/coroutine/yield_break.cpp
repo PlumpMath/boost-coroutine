@@ -33,9 +33,9 @@ int main( int argc, char * argv[])
 {
     try
     {
-		X x; x.i = 0;
+        X x; x.i = 0;
         boost::coro::coroutine< int() > coro(
-			boost::bind( & X::f, boost::ref( x), _1) );
+            boost::bind( & X::f, boost::ref( x), _1) );
         int result = coro();
         std::cout << result << std::endl;
         result = coro();

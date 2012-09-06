@@ -27,25 +27,25 @@ namespace coro {
 namespace detail {
 
 template<
-	typename Signature,
-	int arity = function_traits< Signature >::arity >
+    typename Signature,
+    int arity = function_traits< Signature >::arity >
 struct arg;
 
 template< typename Signature >
 struct arg< Signature, 1 >
 {
-	typedef typename function_traits< Signature >::arg1_type	type_t;
+    typedef typename function_traits< Signature >::arg1_type    type_t;
 };
 
 #define BOOST_CONTEXT_TUPLE_COMMA(n) BOOST_PP_COMMA_IF(BOOST_PP_SUB(n,1))
 #define BOOST_CONTEXT_TUPLE_TYPE(z,n,unused) \
-	BOOST_CONTEXT_TUPLE_COMMA(n) typename function_traits< Signature >::BOOST_PP_CAT(BOOST_PP_CAT(arg,n),_type)
+    BOOST_CONTEXT_TUPLE_COMMA(n) typename function_traits< Signature >::BOOST_PP_CAT(BOOST_PP_CAT(arg,n),_type)
 #define BOOST_CONTEXT_TUPLE_TYPES(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_CONTEXT_TUPLE_TYPE,~)
 #define BOOST_CONTEXT_TUPLE(z,n,unused) \
 template< typename Signature > \
 struct arg< Signature, n > \
 { \
-	typedef tuple< BOOST_CONTEXT_TUPLE_TYPES(n) >	type_t; \
+    typedef tuple< BOOST_CONTEXT_TUPLE_TYPES(n) >   type_t; \
 };
 BOOST_PP_REPEAT_FROM_TO(2,11,BOOST_CONTEXT_TUPLE,~)
 #undef BOOST_CONTEXT_TUPLE

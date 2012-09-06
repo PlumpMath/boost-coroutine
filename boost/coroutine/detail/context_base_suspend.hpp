@@ -33,7 +33,7 @@ struct context_base_suspend< Signature, D, void, 0 >
 {
     void suspend()
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
 
         dp->native_suspend( 0);
     }
@@ -42,25 +42,25 @@ struct context_base_suspend< Signature, D, void, 0 >
 template< typename Signature, typename D, int arity >
 struct context_base_suspend< Signature, D, void, arity >
 {
-	typedef typename arg< Signature >::type_t	arg_t;
+    typedef typename arg< Signature >::type_t   arg_t;
 
     arg_t suspend()
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
 
         intptr_t ret = dp->native_suspend( 0);
-		return * ( typename remove_reference< arg_t >::type *) ret;
+        return * ( typename remove_reference< arg_t >::type *) ret;
     }
 };
 
 template< typename Signature, typename D, typename Result >
 struct context_base_suspend< Signature, D, Result, 0 >
 {
-    typedef Result	result_t;
+    typedef Result  result_t;
 
     void suspend( typename param_type< result_t >::type param)
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
 
         dp->native_suspend( ( intptr_t) & param);
     }
@@ -69,15 +69,15 @@ struct context_base_suspend< Signature, D, Result, 0 >
 template< typename Signature, typename D, typename Result, int arity >
 struct context_base_suspend
 {
-    typedef Result	result_t;
-	typedef typename arg< Signature >::type_t	arg_t;
+    typedef Result  result_t;
+    typedef typename arg< Signature >::type_t   arg_t;
 
     arg_t suspend( typename param_type< result_t >::type param)
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
 
         intptr_t ret = dp->native_suspend( ( intptr_t) & param);
-		return * ( typename remove_reference< arg_t >::type *) ret;
+        return * ( typename remove_reference< arg_t >::type *) ret;
     }
 };
 

@@ -32,94 +32,94 @@ namespace boost {
 namespace coro {
 
 template<
-	typename Result,
-	typename Allocator = ctx::stack_allocator
+    typename Result,
+    typename Allocator = ctx::stack_allocator
 >
 class generator :
-	public detail::generator_resume<
+    public detail::generator_resume<
         Result, generator< Result, Allocator >
     >
 {
 private:
     typedef detail::context_base<
         Result(), Allocator, Result, 0
-     >	                                   	base_t;
-	typedef typename base_t::ptr_t			ptr_t;
+     >                                      base_t;
+    typedef typename base_t::ptr_t          ptr_t;
 
-	template< typename X, typename Y >
-	friend class detail::generator_resume;
+    template< typename X, typename Y >
+    friend class detail::generator_resume;
 
-	ptr_t  impl_;
+    ptr_t  impl_;
 
     BOOST_MOVABLE_BUT_NOT_COPYABLE( generator);
 
 public:
-	typedef detail::context_self<
+    typedef detail::context_self<
         Result(), Allocator, Result, 0
-    >                                 		self_t;
+    >                                       self_t;
     typedef void ( * unspecified_bool_type)( generator ***);
 
     static void unspecified_bool( generator ***) {}
 
-    generator() :
-		detail::generator_resume<
+    generator() BOOST_NOEXCEPT :
+        detail::generator_resume<
             Result, generator< Result, Allocator >
         >(),
         impl_()
     {}
 
 #ifndef BOOST_NO_RVALUE_REFERENCES
-	template< typename Fn >
+    template< typename Fn >
     generator( Fn && fn, std::size_t size = ctx::default_stacksize(),
                flag_unwind_t do_unwind = stack_unwind,
                bool preserve_fpu = true,
                Allocator const& alloc = Allocator() ) :
-		detail::generator_resume<
+        detail::generator_resume<
             Result, generator< Result, Allocator >
         >(),
         impl_(
-			new detail::context_object<
+            new detail::context_object<
                 Fn, Result(), Allocator, Result, 0
             >( static_cast< Fn && >( fn), alloc, size, do_unwind, preserve_fpu) )
     { this->fetch_(); }
 #else
-	template< typename Fn >
+    template< typename Fn >
     generator( Fn fn, std::size_t size = ctx::default_stacksize(),
                flag_unwind_t do_unwind = stack_unwind,
                bool preserve_fpu = true,
                Allocator const& alloc = Allocator() ) :
-		detail::generator_resume<
+        detail::generator_resume<
             Result, generator< Result, Allocator >
         >(),
         impl_(
-			new detail::context_object<
+            new detail::context_object<
                 Fn, Result(), Allocator, Result, 0
             >( fn, alloc, size, do_unwind, preserve_fpu) )
     { this->fetch_(); }
 
-	template< typename Fn >
+    template< typename Fn >
     generator( BOOST_RV_REF( Fn) fn, std::size_t size = ctx::default_stacksize(),
                flag_unwind_t do_unwind = stack_unwind,
                bool preserve_fpu = true,
                Allocator const& alloc = Allocator() ) :
-		detail::generator_resume<
+        detail::generator_resume<
             Result, generator< Result, Allocator >
         >(),
         impl_(
-			new detail::context_object<
+            new detail::context_object<
                 Fn, Result(), Allocator, Result, 0
             >( fn, alloc, size, do_unwind, preserve_fpu) )
     { this->fetch_(); }
 #endif
 
-    generator( BOOST_RV_REF( generator) other) :
-		detail::generator_resume<
+    generator( BOOST_RV_REF( generator) other) BOOST_NOEXCEPT :
+        detail::generator_resume<
             Result, generator< Result, Allocator >
         >(),
         impl_()
     { swap( other); }
 
-    generator & operator=( BOOST_RV_REF( generator) other)
+    generator & operator=( BOOST_RV_REF( generator) other) BOOST_NOEXCEPT
     {
         if ( this == & other) return * this;
         generator tmp( boost::move( other) );
@@ -127,13 +127,13 @@ public:
         return * this;
     }
 
-    operator unspecified_bool_type() const
+    operator unspecified_bool_type() const BOOST_NOEXCEPT
     { return impl_ && this->has_value_() ? unspecified_bool : 0; }
 
-    bool operator!() const
+    bool operator!() const BOOST_NOEXCEPT
     { return ! impl_ || ! this->has_value_(); }
 
-    void swap( generator & other)
+    void swap( generator & other) BOOST_NOEXCEPT
     {
         impl_.swap( other.impl_);
         this->swap_( other);
@@ -141,10 +141,10 @@ public:
 };
 
 template<
-	typename Result,
-	typename Allocator
+    typename Result,
+    typename Allocator
 >
-void swap( generator< Result, Allocator > & l, generator< Result, Allocator > & r)
+void swap( generator< Result, Allocator > & l, generator< Result, Allocator > & r) BOOST_NOEXCEPT
 { l.swap( r); }
 
 }}

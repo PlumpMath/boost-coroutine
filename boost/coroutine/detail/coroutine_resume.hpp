@@ -35,24 +35,24 @@ struct coroutine_resume< Signature, D, void, 0 >
 {
     void operator()()
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
         BOOST_ASSERT( dp->impl_);
-		if ( ! dp->impl_->is_started() ) dp->impl_->start();
-		else dp->impl_->resume();
+        if ( ! dp->impl_->is_started() ) dp->impl_->start();
+        else dp->impl_->resume();
     }
 };
 
 template< typename Signature, typename D, typename Result >
 struct coroutine_resume< Signature, D, Result, 0 >
 {
-    typedef Result	result_t;
+    typedef Result  result_t;
 
     result_t operator()()
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
         BOOST_ASSERT( dp->impl_);
-		if ( ! dp->impl_->is_started() ) return dp->impl_->start();
-		else return dp->impl_->resume();
+        if ( ! dp->impl_->is_started() ) return dp->impl_->start();
+        else return dp->impl_->resume();
     }
 };
 
@@ -60,7 +60,7 @@ struct coroutine_resume< Signature, D, Result, 0 >
 #define BOOST_COROUTINE_RESUME_VAL(z,n,unused) BOOST_COROUTINE_RESUME_COMMA(n) BOOST_PP_CAT(a,n)
 #define BOOST_COROUTINE_RESUME_VALS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_COROUTINE_RESUME_VAL,~)
 #define BOOST_COROUTINE_RESUME_ARG_TYPE(n) \
-	typename function_traits< Signature >::BOOST_PP_CAT(BOOST_PP_CAT(arg,n),_type)
+    typename function_traits< Signature >::BOOST_PP_CAT(BOOST_PP_CAT(arg,n),_type)
 #define BOOST_COROUTINE_RESUME_ARG(z,n,unused) BOOST_COROUTINE_RESUME_COMMA(n) BOOST_COROUTINE_RESUME_ARG_TYPE(n) BOOST_PP_CAT(a,n)
 #define BOOST_COROUTINE_RESUME_ARGS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_COROUTINE_RESUME_ARG,~)
 #define BOOST_coroutine_resume(z,n,unused) \
@@ -69,28 +69,28 @@ struct coroutine_resume< Signature, D, void, n > \
 { \
     void operator()( BOOST_COROUTINE_RESUME_ARGS(n)) \
     { \
-		D * dp = static_cast< D * >( this); \
+        D * dp = static_cast< D * >( this); \
         BOOST_ASSERT( dp->impl_); \
-		if ( ! dp->impl_->is_started() ) \
-			dp->impl_->start( BOOST_COROUTINE_RESUME_VALS(n)); \
-		else \
-			dp->impl_->resume( BOOST_COROUTINE_RESUME_VALS(n)); \
+        if ( ! dp->impl_->is_started() ) \
+            dp->impl_->start( BOOST_COROUTINE_RESUME_VALS(n)); \
+        else \
+            dp->impl_->resume( BOOST_COROUTINE_RESUME_VALS(n)); \
     } \
 }; \
 \
 template< typename Signature, typename D, typename Result > \
 struct coroutine_resume< Signature, D, Result, n > \
 { \
-    typedef Result	result_t; \
+    typedef Result  result_t; \
 \
     result_t operator()( BOOST_COROUTINE_RESUME_ARGS(n)) \
     { \
-		D * dp = static_cast< D * >( this); \
+        D * dp = static_cast< D * >( this); \
         BOOST_ASSERT( dp->impl_); \
-		if ( ! dp->impl_->is_started() ) \
-			return dp->impl_->start( BOOST_COROUTINE_RESUME_VALS(n)); \
-		else \
-			return dp->impl_->resume( BOOST_COROUTINE_RESUME_VALS(n)); \
+        if ( ! dp->impl_->is_started() ) \
+            return dp->impl_->start( BOOST_COROUTINE_RESUME_VALS(n)); \
+        else \
+            return dp->impl_->resume( BOOST_COROUTINE_RESUME_VALS(n)); \
     } \
 };
 BOOST_PP_REPEAT_FROM_TO(1,11,BOOST_coroutine_resume,~)

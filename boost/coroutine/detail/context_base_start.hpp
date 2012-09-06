@@ -39,7 +39,7 @@ struct context_base_start< Signature, D, void, 0 >
 {
     void start()
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
 
         dp->native_start();
     }
@@ -48,15 +48,15 @@ struct context_base_start< Signature, D, void, 0 >
 template< typename Signature, typename D, typename Result >
 struct context_base_start< Signature, D, Result, 0 >
 {
-    typedef Result	result_t;
+    typedef Result  result_t;
 
     result_t start()
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
 
         intptr_t ret = dp->native_start();
-		if ( dp->is_complete() ) return * dp->result_;
-		else return * ( typename remove_reference< result_t >::type *) ret;
+        if ( dp->is_complete() ) return * dp->result_;
+        else return * ( typename remove_reference< result_t >::type *) ret;
     }
 };
 
@@ -64,7 +64,7 @@ struct context_base_start< Signature, D, Result, 0 >
 #define BOOST_CONTEXT_BASE_START_VAL(z,n,unused) BOOST_CONTEXT_BASE_START_COMMA(n) BOOST_PP_CAT(a,n)
 #define BOOST_CONTEXT_BASE_START_VALS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_CONTEXT_BASE_START_VAL,~)
 #define BOOST_CONTEXT_BASE_START_ARG_TYPE(n) \
-	typename function_traits< Signature >::BOOST_PP_CAT(BOOST_PP_CAT(arg,n),_type)
+    typename function_traits< Signature >::BOOST_PP_CAT(BOOST_PP_CAT(arg,n),_type)
 #define BOOST_CONTEXT_BASE_START_ARG(z,n,unused) BOOST_CONTEXT_BASE_START_COMMA(n) BOOST_CONTEXT_BASE_START_ARG_TYPE(n) BOOST_PP_CAT(a,n)
 #define BOOST_CONTEXT_BASE_START_ARGS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_CONTEXT_BASE_START_ARG,~)
 #define BOOST_CONTEXT_BASE_START(z,n,unused) \
@@ -73,9 +73,9 @@ struct context_base_start< Signature, D, void, n > \
 { \
     void start( BOOST_CONTEXT_BASE_START_ARGS(n)) \
     { \
-		D * dp = static_cast< D * >( this); \
+        D * dp = static_cast< D * >( this); \
 \
-		dp->args_ = typename arg< Signature >::type_t(BOOST_CONTEXT_BASE_START_VALS(n)); \
+        dp->args_ = typename arg< Signature >::type_t(BOOST_CONTEXT_BASE_START_VALS(n)); \
         dp->native_start(); \
     } \
 }; \
@@ -83,16 +83,16 @@ struct context_base_start< Signature, D, void, n > \
 template< typename Signature, typename D, typename Result > \
 struct context_base_start< Signature, D, Result, n > \
 { \
-    typedef Result	result_t; \
+    typedef Result  result_t; \
 \
     result_t start( BOOST_CONTEXT_BASE_START_ARGS(n)) \
     { \
-		D * dp = static_cast< D * >( this); \
+        D * dp = static_cast< D * >( this); \
 \
-		dp->args_ = typename arg< Signature >::type_t(BOOST_CONTEXT_BASE_START_VALS(n)); \
+        dp->args_ = typename arg< Signature >::type_t(BOOST_CONTEXT_BASE_START_VALS(n)); \
         intptr_t ret = dp->native_start(); \
-		if ( dp->is_complete() ) return * dp->result_; \
-		else return * ( typename remove_reference< result_t >::type *) ret; \
+        if ( dp->is_complete() ) return * dp->result_; \
+        else return * ( typename remove_reference< result_t >::type *) ret; \
     } \
 };
 BOOST_PP_REPEAT_FROM_TO(1,11,BOOST_CONTEXT_BASE_START,~)

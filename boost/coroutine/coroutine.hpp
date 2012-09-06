@@ -31,11 +31,11 @@ namespace boost {
 namespace coro {
 
 template<
-	typename Signature,
-	typename Allocator = ctx::stack_allocator
+    typename Signature,
+    typename Allocator = ctx::stack_allocator
 >
 class coroutine :
-	public detail::coroutine_resume<
+    public detail::coroutine_resume<
         Signature, coroutine< Signature, Allocator >,
         typename function_traits< Signature >::result_type,
         function_traits< Signature >::arity
@@ -46,28 +46,28 @@ private:
         Signature, Allocator,
         typename function_traits< Signature >::result_type,
         function_traits< Signature >::arity
-     >	                                                    	base_t;
-	typedef typename base_t::ptr_t								ptr_t;
+     >                                                          base_t;
+    typedef typename base_t::ptr_t                              ptr_t;
 
-	template< typename X, typename Y, typename Z, int >
-	friend struct detail::coroutine_resume;
+    template< typename X, typename Y, typename Z, int >
+    friend struct detail::coroutine_resume;
 
-	ptr_t  impl_;
+    ptr_t  impl_;
 
     BOOST_MOVABLE_BUT_NOT_COPYABLE( coroutine);
 
 public:
-	typedef detail::context_self<
+    typedef detail::context_self<
         Signature, Allocator,
         typename function_traits< Signature >::result_type,
         function_traits< Signature >::arity
-    >                                                   		self_t;
+    >                                                           self_t;
     typedef void ( * unspecified_bool_type)( coroutine ***);
 
     static void unspecified_bool( coroutine ***) {}
 
-    coroutine() :
-		detail::coroutine_resume<
+    coroutine() BOOST_NOEXCEPT :
+        detail::coroutine_resume<
             Signature, coroutine< Signature, Allocator >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -76,54 +76,54 @@ public:
     {}
 
 #ifndef BOOST_NO_RVALUE_REFERENCES
-	template< typename Fn >
+    template< typename Fn >
     coroutine( Fn && fn, std::size_t size = ctx::default_stacksize(),
                flag_unwind_t do_unwind = stack_unwind,
                bool preserve_fpu = true,
                Allocator const& alloc = Allocator() ) :
-		detail::coroutine_resume<
+        detail::coroutine_resume<
             Signature, coroutine< Signature, Allocator >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
         >(),
         impl_(
-			new detail::context_object<
+            new detail::context_object<
                 Fn, Signature, Allocator,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity
             >( static_cast< Fn && >( fn), alloc, size, do_unwind, preserve_fpu) )
     {}
 #else
-	template< typename Fn >
+    template< typename Fn >
     coroutine( Fn fn, std::size_t size = ctx::default_stacksize(),
                flag_unwind_t do_unwind = stack_unwind,
                bool preserve_fpu = true,
                Allocator const& alloc = Allocator() ) :
-		detail::coroutine_resume<
+        detail::coroutine_resume<
             Signature, coroutine< Signature, Allocator >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
         >(),
         impl_(
-			new detail::context_object<
+            new detail::context_object<
                 Fn, Signature, Allocator,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity
             >( fn, alloc, size, do_unwind, preserve_fpu) )
     {}
 
-	template< typename Fn >
+    template< typename Fn >
     coroutine( BOOST_RV_REF( Fn) fn, std::size_t size = ctx::default_stacksize(),
                flag_unwind_t do_unwind = stack_unwind,
                bool preserve_fpu = true,
                Allocator const& alloc = Allocator() ) :
-		detail::coroutine_resume<
+        detail::coroutine_resume<
             Signature, coroutine< Signature, Allocator >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
         >(),
         impl_(
-			new detail::context_object<
+            new detail::context_object<
                 Fn, Signature, Allocator,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity
@@ -131,8 +131,8 @@ public:
     {}
 #endif
 
-    coroutine( BOOST_RV_REF( coroutine) other) :
-		detail::coroutine_resume<
+    coroutine( BOOST_RV_REF( coroutine) other) BOOST_NOEXCEPT :
+        detail::coroutine_resume<
             Signature, coroutine< Signature, Allocator >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -140,7 +140,7 @@ public:
         impl_()
     { swap( other); }
 
-    coroutine & operator=( BOOST_RV_REF( coroutine) other)
+    coroutine & operator=( BOOST_RV_REF( coroutine) other) BOOST_NOEXCEPT
     {
         if ( this == & other) return * this;
         coroutine tmp( boost::move( other) );
@@ -148,16 +148,16 @@ public:
         return * this;
     }
 
-    operator unspecified_bool_type() const
+    operator unspecified_bool_type() const BOOST_NOEXCEPT
     { return impl_ ? unspecified_bool : 0; }
 
-    bool operator!() const
+    bool operator!() const BOOST_NOEXCEPT
     { return ! impl_; }
 
-    void swap( coroutine & other)
+    void swap( coroutine & other) BOOST_NOEXCEPT
     { impl_.swap( other.impl_); }
 
-    bool is_complete() const
+    bool is_complete() const BOOST_NOEXCEPT
     {
         BOOST_ASSERT( impl_);
         return impl_->is_complete();
@@ -165,10 +165,10 @@ public:
 };
 
 template<
-	typename Signature,
-	typename Allocator
+    typename Signature,
+    typename Allocator
 >
-void swap( coroutine< Signature, Allocator > & l, coroutine< Signature, Allocator > & r)
+void swap( coroutine< Signature, Allocator > & l, coroutine< Signature, Allocator > & r) BOOST_NOEXCEPT
 { l.swap( r); }
 
 }}

@@ -61,22 +61,22 @@ void trampoline( intptr_t vp)
 
 template< typename Signature, typename Allocator, typename Result, int arity >
 class context_base :
-	private noncopyable,
-	public context_base_start<
+    private noncopyable,
+    public context_base_start<
         Signature, context_base< Signature, Allocator, Result, arity >, Result, arity
     >,
-	public context_base_resume<
+    public context_base_resume<
         Signature, context_base< Signature, Allocator, Result, arity >, Result, arity
     >,
-	public context_base_suspend<
+    public context_base_suspend<
         Signature, context_base< Signature, Allocator, Result, arity >, Result, arity
     >,
-	public context_base_run<
+    public context_base_run<
         Signature, context_base< Signature, Allocator, Result, arity >, Result, arity
     >
 {
 public:
-    typedef intrusive_ptr< context_base >	ptr_t;
+    typedef intrusive_ptr< context_base >   ptr_t;
 
 private:
     template< typename T >
@@ -90,8 +90,8 @@ private:
     template< typename X, typename Y, typename Z, int >
     friend struct context_base_suspend;
 
-    std::size_t		    use_count_;
-	Allocator		    alloc_;
+    std::size_t         use_count_;
+    Allocator           alloc_;
     ctx::fcontext_t     caller_;
     ctx::fcontext_t     callee_;
     int                 flags_;
@@ -101,20 +101,20 @@ private:
 public:
     context_base( Allocator const& alloc, std::size_t size,
                   flag_unwind_t do_unwind, bool preserve_fpu) :
-		context_base_start<
+        context_base_start<
             Signature, context_base< Signature, Allocator, Result, arity >, Result, arity
         >(),
-		context_base_resume<
+        context_base_resume<
             Signature, context_base< Signature, Allocator, Result, arity >, Result, arity
         >(),
-		context_base_suspend<
+        context_base_suspend<
             Signature, context_base< Signature, Allocator, Result, arity >, Result, arity
         >(),
-		context_base_run<
+        context_base_run<
             Signature, context_base< Signature, Allocator, Result, arity >, Result, arity
         >(),
         use_count_( 0), alloc_( alloc), 
-		caller_(),
+        caller_(),
         callee_(),
         flags_( stack_unwind == do_unwind ? flag_force_unwind : flag_dont_force_unwind),
         except_(),
@@ -125,31 +125,31 @@ public:
         ctx::make_fcontext( & callee_, trampoline< context_base>);
     }
 
-	virtual ~context_base()
+    virtual ~context_base() BOOST_NOEXCEPT
     {
         if ( ! is_complete()
                 && ( is_started() || is_resumed() )
                 && ( unwind_requested() ) )
             unwind_stack();
-		alloc_.deallocate( callee_.fc_stack.base, callee_.fc_stack.size);
+        alloc_.deallocate( callee_.fc_stack.base, callee_.fc_stack.size);
     }
 
-    bool unwind_requested() const
+    bool unwind_requested() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_force_unwind); }
 
-    bool is_complete() const
+    bool is_complete() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_complete); }
 
-    bool is_started() const
+    bool is_started() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_started); }
 
-    bool is_resumed() const
+    bool is_resumed() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_resumed); }
 
-    bool is_running() const
+    bool is_running() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_running); }
 
-    void unwind_stack()
+    void unwind_stack() BOOST_NOEXCEPT
     {
         BOOST_ASSERT( ! is_complete() );
         BOOST_ASSERT( ! is_running() );
@@ -199,13 +199,13 @@ public:
         intptr_t ret = ctx::jump_fcontext( & callee_, & caller_, param, preserve_fpu_);
         if ( 0 != ( flags_ & flag_unwind_stack) )
             throw forced_unwind();
-		return ret;
+        return ret;
     }
 
-    friend inline void intrusive_ptr_add_ref( context_base * p)
+    friend inline void intrusive_ptr_add_ref( context_base * p) BOOST_NOEXCEPT
     { ++p->use_count_; }
 
-    friend inline void intrusive_ptr_release( context_base * p)
+    friend inline void intrusive_ptr_release( context_base * p) BOOST_NOEXCEPT
     { if ( --p->use_count_ == 0) delete p; }
 };
 

@@ -37,20 +37,20 @@ class context_exec;
 
 template< typename Signature, typename Allocator, typename D >
 class context_exec< Signature, Allocator, D, void, 0 > :
-	public context_base< Signature, Allocator, void, 0 >
+    public context_base< Signature, Allocator, void, 0 >
 {
 private:
     void exec_()
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
 
-		context_self< Signature, Allocator, void, 0 > self( this);
-		dp->fn_( self);
-	}
+        context_self< Signature, Allocator, void, 0 > self( this);
+        dp->fn_( self);
+    }
 
 public:
     context_exec( Allocator const& alloc, std::size_t size,
-                  flag_unwind_t do_unwind, bool preserve_fpu) :
+                  flag_unwind_t do_unwind, bool preserve_fpu) BOOST_NOEXCEPT :
         context_base< Signature, Allocator, void, 0 >(
             alloc, size, do_unwind, preserve_fpu)
     {}
@@ -58,22 +58,22 @@ public:
 
 template< typename Signature, typename Allocator, typename D, typename Result >
 class context_exec< Signature, Allocator, D, Result, 0 > :
-	public context_base< Signature, Allocator, Result, 0 >
+    public context_base< Signature, Allocator, Result, 0 >
 {
 private:
-	typedef Result		result_t;
+    typedef Result      result_t;
 
     result_t exec_()
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
 
-		context_self< Signature, Allocator, Result, 0 > self( this);
-		return dp->fn_( self);
-	}
+        context_self< Signature, Allocator, Result, 0 > self( this);
+        return dp->fn_( self);
+    }
 
 public:
     context_exec( Allocator const& alloc, std::size_t size,
-                  flag_unwind_t do_unwind, bool preserve_fpu) :
+                  flag_unwind_t do_unwind, bool preserve_fpu) BOOST_NOEXCEPT :
         context_base< Signature, Allocator, Result, 0 >(
             alloc, size, do_unwind, preserve_fpu)
     {}
@@ -81,22 +81,22 @@ public:
 
 template< typename Signature, typename Allocator, typename D >
 class context_exec< Signature, Allocator, D, void, 1 > :
-	public context_base< Signature, Allocator, void, 1 >
+    public context_base< Signature, Allocator, void, 1 >
 {
 private:
-	typedef typename arg< Signature >::type_t	arg_t;
+    typedef typename arg< Signature >::type_t   arg_t;
 
     void exec_( arg_t a)
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
 
-		context_self< Signature, Allocator, void, 1 > self( this);
-		dp->fn_( self, a);
-	}
+        context_self< Signature, Allocator, void, 1 > self( this);
+        dp->fn_( self, a);
+    }
 
 public:
     context_exec( Allocator const& alloc, std::size_t size,
-                  flag_unwind_t do_unwind, bool preserve_fpu) :
+                  flag_unwind_t do_unwind, bool preserve_fpu) BOOST_NOEXCEPT :
         context_base< Signature, Allocator, void, 1 >(
             alloc, size, do_unwind, preserve_fpu)
     {}
@@ -104,23 +104,23 @@ public:
 
 template< typename Signature, typename Allocator, typename D, typename Result >
 class context_exec< Signature, Allocator, D, Result, 1 > :
-	public context_base< Signature, Allocator, Result, 1 >
+    public context_base< Signature, Allocator, Result, 1 >
 {
 private:
-	typedef typename arg< Signature >::type_t	arg_t;
-	typedef Result								result_t;
+    typedef typename arg< Signature >::type_t   arg_t;
+    typedef Result                              result_t;
 
     result_t exec_( arg_t a)
     {
-		D * dp = static_cast< D * >( this);
+        D * dp = static_cast< D * >( this);
 
-		context_self< Signature, Allocator, Result, 1 > self( this);
-		return dp->fn_( self, a);
-	}
+        context_self< Signature, Allocator, Result, 1 > self( this);
+        return dp->fn_( self, a);
+    }
 
 public:
     context_exec( Allocator const& alloc, std::size_t size,
-                  flag_unwind_t do_unwind, bool preserve_fpu) :
+                  flag_unwind_t do_unwind, bool preserve_fpu) BOOST_NOEXCEPT :
         context_base< Signature, Allocator, Result, 1 >(
             alloc, size, do_unwind, preserve_fpu)
     {}
@@ -130,26 +130,26 @@ public:
 #define BOOST_CONTEXT_EXEC_VAL(z,n,unused) BOOST_CONTEXT_EXEC_COMMA(n) BOOST_PP_CAT(a,n)
 #define BOOST_CONTEXT_EXEC_VALS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_CONTEXT_EXEC_VAL,~)
 #define BOOST_CONTEXT_EXEC_ARG_TYPE(n) \
-	typename function_traits< Signature >::BOOST_PP_CAT(BOOST_PP_CAT(arg,n),_type)
+    typename function_traits< Signature >::BOOST_PP_CAT(BOOST_PP_CAT(arg,n),_type)
 #define BOOST_CONTEXT_EXEC_ARG(z,n,unused) BOOST_CONTEXT_EXEC_COMMA(n) BOOST_CONTEXT_EXEC_ARG_TYPE(n) BOOST_PP_CAT(a,n)
 #define BOOST_CONTEXT_EXEC_ARGS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_CONTEXT_EXEC_ARG,~)
 #define BOOST_CONTEXT_EXEC(z,n,unused) \
 template< typename Signature, typename Allocator, typename D > \
 class context_exec< Signature, Allocator, D, void, n > : \
-	public context_base< Signature, Allocator, void, n > \
+    public context_base< Signature, Allocator, void, n > \
 { \
 private:\
     void exec_( BOOST_CONTEXT_EXEC_ARGS(n)) \
     { \
-		D * dp = static_cast< D * >( this); \
+        D * dp = static_cast< D * >( this); \
 \
-		context_self< Signature, Allocator, void, n > self( this); \
-		dp->fn_( self, BOOST_CONTEXT_EXEC_VALS(n)); \
-	} \
+        context_self< Signature, Allocator, void, n > self( this); \
+        dp->fn_( self, BOOST_CONTEXT_EXEC_VALS(n)); \
+    } \
 \
 public: \
     context_exec( Allocator const& alloc, std::size_t size, \
-                  flag_unwind_t do_unwind, bool preserve_fpu) : \
+                  flag_unwind_t do_unwind, bool preserve_fpu) BOOST_NOEXCEPT : \
         context_base< Signature, Allocator, void, n >( \
             alloc, size, do_unwind, preserve_fpu) \
     {} \
@@ -157,22 +157,22 @@ public: \
 \
 template< typename Signature, typename Allocator, typename D, typename Result > \
 class context_exec< Signature, Allocator, D, Result, n > : \
-	public context_base< Signature, Allocator, Result, n > \
+    public context_base< Signature, Allocator, Result, n > \
 { \
 private: \
-	typedef Result		result_t; \
+    typedef Result      result_t; \
 \
     result_t exec_( BOOST_CONTEXT_EXEC_ARGS(n)) \
     { \
-		D * dp = static_cast< D * >( this); \
+        D * dp = static_cast< D * >( this); \
 \
-		context_self< Signature, Allocator, Result, n > self( this); \
-		return dp->fn_( self, BOOST_CONTEXT_EXEC_VALS(n)); \
-	} \
+        context_self< Signature, Allocator, Result, n > self( this); \
+        return dp->fn_( self, BOOST_CONTEXT_EXEC_VALS(n)); \
+    } \
 \
 public: \
     context_exec( Allocator const& alloc, std::size_t size, \
-                  flag_unwind_t do_unwind, bool preserve_fpu) : \
+                  flag_unwind_t do_unwind, bool preserve_fpu) BOOST_NOEXCEPT : \
         context_base< Signature, Allocator, Result, n >( \
             alloc, size, do_unwind, preserve_fpu) \
     {} \

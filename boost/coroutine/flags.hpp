@@ -12,8 +12,8 @@ namespace coro {
 
 enum flag_unwind_t
 {
-	stack_unwind = 0,
-	no_stack_unwind
+    stack_unwind = 0,
+    no_stack_unwind
 };
 
 }}

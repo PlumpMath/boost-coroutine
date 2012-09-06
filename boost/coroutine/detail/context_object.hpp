@@ -26,16 +26,16 @@ namespace detail {
 
 template< typename Fn, typename Signature, typename Allocator, typename Result, int arity >
 class context_object :
-	public context_exec<
+    public context_exec<
         Signature, Allocator, context_object< Fn, Signature, Allocator, Result, arity >,
         Result, arity
     >
 {
 private:
-	template< typename X, typename Y, typename Z, typename R, int >
-	friend class context_exec;
+    template< typename X, typename Y, typename Z, typename R, int >
+    friend class context_exec;
 
-	Fn	fn_;
+    Fn  fn_;
 
     context_object( context_object &);
     context_object & operator=( context_object const&);
@@ -43,8 +43,8 @@ private:
 public:
 #ifndef BOOST_NO_RVALUE_REFERENCES
     context_object( Fn && fn, Allocator const& alloc,
-					std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu) :
-		context_exec<
+                    std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu) :
+        context_exec<
             Signature, Allocator, context_object< Fn, Signature, Allocator, Result, arity >,
             Result, arity
         >( alloc, size, do_unwind, preserve_fpu),
@@ -52,8 +52,8 @@ public:
     {}
 #else
     context_object( Fn fn, Allocator const& alloc,
-					std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu) :
-		context_exec<
+                    std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu) :
+        context_exec<
             Signature, Allocator, context_object< Fn, Signature, Allocator, Result, arity >,
             Result, arity
         >( alloc, size, do_unwind, preserve_fpu),
@@ -61,8 +61,8 @@ public:
     {}
 
     context_object( BOOST_RV_REF( Fn) fn, Allocator const& alloc,
-					std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu) :
-		context_exec<
+                    std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu) :
+        context_exec<
             Signature, Allocator, context_object< Fn, Signature, Allocator, Result, arity >,
             Result, arity
         >( alloc, size, do_unwind, preserve_fpu),
@@ -73,24 +73,24 @@ public:
 
 template< typename Fn, typename Signature, typename Allocator, typename Result, int arity >
 class context_object< reference_wrapper< Fn >, Signature, Allocator, Result, arity > :
-	public context_exec<
+    public context_exec<
         Signature, Allocator, context_object< Fn, Signature, Allocator, Result, arity >,
         Result, arity
     >
 {
 private:
-	template< typename X, typename Y, typename Z, typename R, int >
-	friend class context_exec;
+    template< typename X, typename Y, typename Z, typename R, int >
+    friend class context_exec;
 
-	Fn		fn_;
+    Fn      fn_;
 
     context_object( context_object &);
     context_object & operator=( context_object const&);
 
 public:
     context_object( reference_wrapper< Fn > fn, Allocator const& alloc,
-					std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu) :
-		context_exec<
+                    std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu) :
+        context_exec<
             Signature, Allocator, context_object< Fn, Signature, Allocator, Result, arity >,
             Result, arity
         >( alloc, size, do_unwind, preserve_fpu),
@@ -100,16 +100,16 @@ public:
 
 template< typename Fn, typename Signature, typename Allocator, typename Result, int arity >
 class context_object< const reference_wrapper< Fn >, Signature, Allocator, Result, arity > :
-	public context_exec<
+    public context_exec<
         Signature, Allocator, context_object< Fn, Signature, Allocator, Result, arity >,
         Result, arity
     >
 {
 private:
-	template< typename X, typename Y, typename Z, typename R, int >
-	friend class context_exec;
+    template< typename X, typename Y, typename Z, typename R, int >
+    friend class context_exec;
 
-	Fn		fn_;
+    Fn      fn_;
 
     context_object( context_object &);
     context_object & operator=( context_object const&);
@@ -117,7 +117,7 @@ private:
 public:
     context_object( const reference_wrapper< Fn > fn, Allocator const& alloc,
             std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu) :
-		context_exec<
+        context_exec<
             Signature, Allocator, context_object< Fn, Signature, Allocator, Result, arity >,
             Result, arity
         >( alloc, size, do_unwind, preserve_fpu),
