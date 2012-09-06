@@ -395,13 +395,20 @@ fpu registers for performance reasons.
         typename Signature,
         typename Allocator = ctx::stack_allocator
     >
-    class coroutine
+    class coroutine;
+
+    template<
+        typename  R,
+        typename  ArgTypes...,
+        typename  Allocator
+    >
+    class coroutine< R ( ArgTypes...)>
     {
     public:
         class self_t
         {
         public:
-            T yield( R);
+            tuple< ArgTypes... > yield( R);
 
             void yield_break();
         };
