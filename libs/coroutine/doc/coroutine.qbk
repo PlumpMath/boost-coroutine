@@ -22,7 +22,7 @@ moveable but not copyable and can be returned by a function.
 [note __boost_move__ is used to emulate rvalue references.]
 
 [warning If __coro__ is used in a multithreaded application, it can
-migrated between threads, but must not reference __tls__.]
+migrate between threads, but must not reference __tls__.]
 
 [warning If __fls__ is used on Windows, the user is responsible for calling 
 __fls_alloc__, __fls_free__.]
@@ -243,7 +243,7 @@ type __terminated_ex__.
         {
             int tmp = a + b;
             boost::tuple< int, int > ret = self.yield( tmp);
-            self.yield_return();
+            self.yield_break();
             return -1;
         }
 
@@ -457,6 +457,17 @@ fpu registers for performance reasons.
 [[Preconditions:] [`size` > ctx::minimum_stacksize(), `size` < ctx::maximum_stacksize()
 when ! ctx::is_stack_unbound().]]
 [[Effects:] [Creates a coroutine which will execute `fn`. If `do_unwind` is
+`stack_unwind` the destructor of `*this` unwinds the stack before destructing
+it. If `preserve_fpu` is `true` the floating-point registers are preserved between
+context switches.]]
+[[Throws:] [__invalid_ex__ if a precondition is not satisfied.]]
+]
+
+[heading `template< typename Fn > coroutine( Fn && fn, std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu, StackAllocator alloc)`]
+[variablelist
+[[Preconditions:] [`size` > ctx::minimum_stacksize(), `size` < ctx::maximum_stacksize()
+when ! ctx::is_stack_unbound().]]
+[[Effects:] [Creates a coroutine which will execute `fn` from a movable Fn. If `do_unwind` is
 `stack_unwind` the destructor of `*this` unwinds the stack before destructing
 it. If `preserve_fpu` is `true` the floating-point registers are preserved between
 context switches.]]
