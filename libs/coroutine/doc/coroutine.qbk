@@ -393,14 +393,14 @@ fpu registers for performance reasons.
 
     template<
         typename Signature,
-        typename Allocator = ctx::stack_allocator
+        typename StackAllocator = ctx::stack_allocator
     >
     class coroutine;
 
     template<
         typename  R,
         typename  ArgTypes...,
-        typename  Allocator
+        typename  StackAllocator
     >
     class coroutine< R ( ArgTypes...)>
     {
@@ -420,14 +420,14 @@ fpu registers for performance reasons.
                    std::size_t size = ctx::default_stacksize(),
                    flag_unwind_t do_unwind = stack_unwind,
                    bool preserve_fpu = true,
-                   Allocator alloc = Allocator() );
+                   StackAllocator alloc = StackAllocator() );
 
         template< typename Fn >
         coroutine( Fn && fn,
                    std::size_t size = ctx::default_stacksize(),
                    flag_unwind_t do_unwind = stack_unwind,
                    bool preserve_fpu = true,
-                   Allocator alloc = Allocator() );
+                   StackAllocator alloc = StackAllocator() );
 
         coroutine( coroutine && other);
 
@@ -452,7 +452,7 @@ fpu registers for performance reasons.
 [[Throws:] [Nothing.]]
 ]
 
-[heading `template< typename Fn > coroutine( Fn fn, std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu, Allocator alloc)`]
+[heading `template< typename Fn > coroutine( Fn fn, std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu, StackAllocator alloc)`]
 [variablelist
 [[Preconditions:] [`size` > ctx::minimum_stacksize(), `size` < ctx::maximum_stacksize()
 when ! ctx::is_stack_unbound().]]

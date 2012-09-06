@@ -32,18 +32,18 @@ namespace coro {
 
 template<
     typename Signature,
-    typename Allocator = ctx::stack_allocator
+    typename StackAllocator = ctx::stack_allocator
 >
 class coroutine :
     public detail::coroutine_resume<
-        Signature, coroutine< Signature, Allocator >,
+        Signature, coroutine< Signature, StackAllocator >,
         typename function_traits< Signature >::result_type,
         function_traits< Signature >::arity
     >
 {
 private:
     typedef detail::context_base<
-        Signature, Allocator,
+        Signature, StackAllocator,
         typename function_traits< Signature >::result_type,
         function_traits< Signature >::arity
      >                                                          base_t;
@@ -58,7 +58,7 @@ private:
 
 public:
     typedef detail::context_self<
-        Signature, Allocator,
+        Signature, StackAllocator,
         typename function_traits< Signature >::result_type,
         function_traits< Signature >::arity
     >                                                           self_t;
@@ -68,7 +68,7 @@ public:
 
     coroutine() BOOST_NOEXCEPT :
         detail::coroutine_resume<
-            Signature, coroutine< Signature, Allocator >,
+            Signature, coroutine< Signature, StackAllocator >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
         >(),
@@ -80,15 +80,15 @@ public:
     coroutine( Fn && fn, std::size_t size = ctx::default_stacksize(),
                flag_unwind_t do_unwind = stack_unwind,
                bool preserve_fpu = true,
-               Allocator const& alloc = Allocator() ) :
+               StackAllocator const& alloc = StackAllocator() ) :
         detail::coroutine_resume<
-            Signature, coroutine< Signature, Allocator >,
+            Signature, coroutine< Signature, StackAllocator >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
         >(),
         impl_(
             new detail::context_object<
-                Fn, Signature, Allocator,
+                Fn, Signature, StackAllocator,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity
             >( static_cast< Fn && >( fn), alloc, size, do_unwind, preserve_fpu) )
@@ -98,15 +98,15 @@ public:
     coroutine( Fn fn, std::size_t size = ctx::default_stacksize(),
                flag_unwind_t do_unwind = stack_unwind,
                bool preserve_fpu = true,
-               Allocator const& alloc = Allocator() ) :
+               StackAllocator const& alloc = StackAllocator() ) :
         detail::coroutine_resume<
-            Signature, coroutine< Signature, Allocator >,
+            Signature, coroutine< Signature, StackAllocator >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
         >(),
         impl_(
             new detail::context_object<
-                Fn, Signature, Allocator,
+                Fn, Signature, StackAllocator,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity
             >( fn, alloc, size, do_unwind, preserve_fpu) )
@@ -116,15 +116,15 @@ public:
     coroutine( BOOST_RV_REF( Fn) fn, std::size_t size = ctx::default_stacksize(),
                flag_unwind_t do_unwind = stack_unwind,
                bool preserve_fpu = true,
-               Allocator const& alloc = Allocator() ) :
+               StackAllocator const& alloc = StackAllocator() ) :
         detail::coroutine_resume<
-            Signature, coroutine< Signature, Allocator >,
+            Signature, coroutine< Signature, StackAllocator >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
         >(),
         impl_(
             new detail::context_object<
-                Fn, Signature, Allocator,
+                Fn, Signature, StackAllocator,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity
             >( fn, alloc, size, do_unwind, preserve_fpu) )
@@ -133,7 +133,7 @@ public:
 
     coroutine( BOOST_RV_REF( coroutine) other) BOOST_NOEXCEPT :
         detail::coroutine_resume<
-            Signature, coroutine< Signature, Allocator >,
+            Signature, coroutine< Signature, StackAllocator >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
         >(),
@@ -166,9 +166,9 @@ public:
 
 template<
     typename Signature,
-    typename Allocator
+    typename StackAllocator
 >
-void swap( coroutine< Signature, Allocator > & l, coroutine< Signature, Allocator > & r) BOOST_NOEXCEPT
+void swap( coroutine< Signature, StackAllocator > & l, coroutine< Signature, StackAllocator > & r) BOOST_NOEXCEPT
 { l.swap( r); }
 
 }}

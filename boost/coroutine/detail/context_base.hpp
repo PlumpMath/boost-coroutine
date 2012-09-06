@@ -59,20 +59,20 @@ void trampoline( intptr_t vp)
     ctx::jump_fcontext( & context->callee_, & context->caller_, 0, context->preserve_fpu_);
 }
 
-template< typename Signature, typename Allocator, typename Result, int arity >
+template< typename Signature, typename StackAllocator, typename Result, int arity >
 class context_base :
     private noncopyable,
     public context_base_start<
-        Signature, context_base< Signature, Allocator, Result, arity >, Result, arity
+        Signature, context_base< Signature, StackAllocator, Result, arity >, Result, arity
     >,
     public context_base_resume<
-        Signature, context_base< Signature, Allocator, Result, arity >, Result, arity
+        Signature, context_base< Signature, StackAllocator, Result, arity >, Result, arity
     >,
     public context_base_suspend<
-        Signature, context_base< Signature, Allocator, Result, arity >, Result, arity
+        Signature, context_base< Signature, StackAllocator, Result, arity >, Result, arity
     >,
     public context_base_run<
-        Signature, context_base< Signature, Allocator, Result, arity >, Result, arity
+        Signature, context_base< Signature, StackAllocator, Result, arity >, Result, arity
     >
 {
 public:
@@ -91,7 +91,7 @@ private:
     friend struct context_base_suspend;
 
     std::size_t         use_count_;
-    Allocator           alloc_;
+    StackAllocator           alloc_;
     ctx::fcontext_t     caller_;
     ctx::fcontext_t     callee_;
     int                 flags_;
@@ -99,19 +99,19 @@ private:
     bool                preserve_fpu_;
 
 public:
-    context_base( Allocator const& alloc, std::size_t size,
+    context_base( StackAllocator const& alloc, std::size_t size,
                   flag_unwind_t do_unwind, bool preserve_fpu) :
         context_base_start<
-            Signature, context_base< Signature, Allocator, Result, arity >, Result, arity
+            Signature, context_base< Signature, StackAllocator, Result, arity >, Result, arity
         >(),
         context_base_resume<
-            Signature, context_base< Signature, Allocator, Result, arity >, Result, arity
+            Signature, context_base< Signature, StackAllocator, Result, arity >, Result, arity
         >(),
         context_base_suspend<
-            Signature, context_base< Signature, Allocator, Result, arity >, Result, arity
+            Signature, context_base< Signature, StackAllocator, Result, arity >, Result, arity
         >(),
         context_base_run<
-            Signature, context_base< Signature, Allocator, Result, arity >, Result, arity
+            Signature, context_base< Signature, StackAllocator, Result, arity >, Result, arity
         >(),
         use_count_( 0), alloc_( alloc), 
         caller_(),

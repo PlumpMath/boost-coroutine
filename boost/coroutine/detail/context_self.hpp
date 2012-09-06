@@ -24,15 +24,15 @@ namespace boost {
 namespace coro {
 namespace detail {
 
-template< typename Signature, typename Allocator, typename Result, int arity >
+template< typename Signature, typename StackAllocator, typename Result, int arity >
 class context_self;
 
-template< typename Signature, typename Allocator >
-class context_self< Signature, Allocator, void, 0 >
+template< typename Signature, typename StackAllocator >
+class context_self< Signature, StackAllocator, void, 0 >
 {
 private:
     typedef detail::context_base<
-        Signature, Allocator, void, 0
+        Signature, StackAllocator, void, 0
     >                                           base_t;
     typedef base_t                         *    ptr_t; 
 
@@ -61,13 +61,13 @@ public:
     }
 };
 
-template< typename Signature, typename Allocator, int arity >
-class context_self< Signature, Allocator, void, arity >
+template< typename Signature, typename StackAllocator, int arity >
+class context_self< Signature, StackAllocator, void, arity >
 {
 private:
     typedef typename arg< Signature >::type_t   arg_t;
     typedef detail::context_base<
-        Signature, Allocator, void, arity
+        Signature, StackAllocator, void, arity
     >                                           base_t;
     typedef base_t                         *    ptr_t; 
 
@@ -96,13 +96,13 @@ public:
     }
 };
 
-template< typename Signature, typename Allocator, typename Result >
-class context_self< Signature, Allocator, Result, 0 >
+template< typename Signature, typename StackAllocator, typename Result >
+class context_self< Signature, StackAllocator, Result, 0 >
 {
 private:
     typedef Result                              result_t;
     typedef detail::context_base<
-        Signature, Allocator, Result, 0
+        Signature, StackAllocator, Result, 0
     >                                           base_t;
     typedef base_t                         *    ptr_t; 
 
@@ -131,14 +131,14 @@ public:
     }
 };
 
-template< typename Signature, typename Allocator, typename Result, int arity >
+template< typename Signature, typename StackAllocator, typename Result, int arity >
 class context_self
 {
 private:
     typedef Result                              result_t;
     typedef typename arg< Signature >::type_t   arg_t;
     typedef detail::context_base<
-        Signature, Allocator, Result, arity
+        Signature, StackAllocator, Result, arity
     >                                           base_t;
     typedef base_t                         *    ptr_t; 
 

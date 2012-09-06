@@ -24,10 +24,10 @@ namespace boost {
 namespace coro {
 namespace detail {
 
-template< typename Fn, typename Signature, typename Allocator, typename Result, int arity >
+template< typename Fn, typename Signature, typename StackAllocator, typename Result, int arity >
 class context_object :
     public context_exec<
-        Signature, Allocator, context_object< Fn, Signature, Allocator, Result, arity >,
+        Signature, StackAllocator, context_object< Fn, Signature, StackAllocator, Result, arity >,
         Result, arity
     >
 {
@@ -42,28 +42,28 @@ private:
 
 public:
 #ifndef BOOST_NO_RVALUE_REFERENCES
-    context_object( Fn && fn, Allocator const& alloc,
+    context_object( Fn && fn, StackAllocator const& alloc,
                     std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu) :
         context_exec<
-            Signature, Allocator, context_object< Fn, Signature, Allocator, Result, arity >,
+            Signature, StackAllocator, context_object< Fn, Signature, StackAllocator, Result, arity >,
             Result, arity
         >( alloc, size, do_unwind, preserve_fpu),
         fn_( static_cast< Fn && >( fn) )
     {}
 #else
-    context_object( Fn fn, Allocator const& alloc,
+    context_object( Fn fn, StackAllocator const& alloc,
                     std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu) :
         context_exec<
-            Signature, Allocator, context_object< Fn, Signature, Allocator, Result, arity >,
+            Signature, StackAllocator, context_object< Fn, Signature, StackAllocator, Result, arity >,
             Result, arity
         >( alloc, size, do_unwind, preserve_fpu),
         fn_( fn)
     {}
 
-    context_object( BOOST_RV_REF( Fn) fn, Allocator const& alloc,
+    context_object( BOOST_RV_REF( Fn) fn, StackAllocator const& alloc,
                     std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu) :
         context_exec<
-            Signature, Allocator, context_object< Fn, Signature, Allocator, Result, arity >,
+            Signature, StackAllocator, context_object< Fn, Signature, StackAllocator, Result, arity >,
             Result, arity
         >( alloc, size, do_unwind, preserve_fpu),
         fn_( fn)
@@ -71,10 +71,10 @@ public:
 #endif
 };
 
-template< typename Fn, typename Signature, typename Allocator, typename Result, int arity >
-class context_object< reference_wrapper< Fn >, Signature, Allocator, Result, arity > :
+template< typename Fn, typename Signature, typename StackAllocator, typename Result, int arity >
+class context_object< reference_wrapper< Fn >, Signature, StackAllocator, Result, arity > :
     public context_exec<
-        Signature, Allocator, context_object< Fn, Signature, Allocator, Result, arity >,
+        Signature, StackAllocator, context_object< Fn, Signature, StackAllocator, Result, arity >,
         Result, arity
     >
 {
@@ -88,20 +88,20 @@ private:
     context_object & operator=( context_object const&);
 
 public:
-    context_object( reference_wrapper< Fn > fn, Allocator const& alloc,
+    context_object( reference_wrapper< Fn > fn, StackAllocator const& alloc,
                     std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu) :
         context_exec<
-            Signature, Allocator, context_object< Fn, Signature, Allocator, Result, arity >,
+            Signature, StackAllocator, context_object< Fn, Signature, StackAllocator, Result, arity >,
             Result, arity
         >( alloc, size, do_unwind, preserve_fpu),
         fn_( fn)
     {}
 };
 
-template< typename Fn, typename Signature, typename Allocator, typename Result, int arity >
-class context_object< const reference_wrapper< Fn >, Signature, Allocator, Result, arity > :
+template< typename Fn, typename Signature, typename StackAllocator, typename Result, int arity >
+class context_object< const reference_wrapper< Fn >, Signature, StackAllocator, Result, arity > :
     public context_exec<
-        Signature, Allocator, context_object< Fn, Signature, Allocator, Result, arity >,
+        Signature, StackAllocator, context_object< Fn, Signature, StackAllocator, Result, arity >,
         Result, arity
     >
 {
@@ -115,10 +115,10 @@ private:
     context_object & operator=( context_object const&);
 
 public:
-    context_object( const reference_wrapper< Fn > fn, Allocator const& alloc,
+    context_object( const reference_wrapper< Fn > fn, StackAllocator const& alloc,
             std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu) :
         context_exec<
-            Signature, Allocator, context_object< Fn, Signature, Allocator, Result, arity >,
+            Signature, StackAllocator, context_object< Fn, Signature, StackAllocator, Result, arity >,
             Result, arity
         >( alloc, size, do_unwind, preserve_fpu),
         fn_( fn)

@@ -50,7 +50,7 @@
 [def __not_a_coro__ ['not-a-coroutine]]
 [def __not_a_gen__ ['not-a-generator]]
 [def __signature__ ['Signature]]
-[def __stack_allocator_concept__ ['StackAllocator concept]]
+[def __stack_allocator_concept__ ['StackStackAllocator concept]]
 [def __stack_allocator__ ['ctx::stack_allocator]]
 [def __stack_helper__ ['stack_helper]]
 [def __stack__ ['stack]]
