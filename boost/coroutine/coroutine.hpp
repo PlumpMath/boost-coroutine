@@ -32,7 +32,7 @@
 namespace boost {
 namespace coro {
 
-template< typename Signature, typename Allocator = std::allocator< int > >
+template< typename Signature >
 class coroutine :
     public detail::coroutine_resume<
         Signature, coroutine< Signature >,
