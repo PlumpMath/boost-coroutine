@@ -189,8 +189,8 @@ current __gen__ and jumps back to the calling routine. __gen_eval__ will return
         int fn( coro_t::self_t & self, int a)
         {
             for ( int i = 0; i < a; ++i)
-                self_yield( i);
-            self.yield_return();
+                self.yield( i);
+            self.yield_break();
             return -1;
         }
 
@@ -293,17 +293,11 @@ fpu registers for perfromance reasons.
         generator();
 
         template< typename Fn >
-        generator( Fn fn,
-                   std::size_t size = ctx::default_stacksize(),
-                   flag_unwind_t do_unwind = stack_unwind,
-                   bool preserve_fpu = true,
+        generator( Fn fn, attributes const& attr = attributes(),
                    StackAllocator alloc = StackAllocator() );
 
         template< typename Fn >
-        generator( Fn && fn,
-                   std::size_t size = ctx::default_stacksize(),
-                   flag_unwind_t do_unwind = stack_unwind,
-                   bool preserve_fpu = true,
+        generator( Fn && fn, attributes const& attr = attributes(),
                    StackAllocator alloc = StackAllocator() );
 
         generator( generator && other);
@@ -327,24 +321,24 @@ fpu registers for perfromance reasons.
 [[Throws:] [Nothing.]]
 ]
 
-[heading `template< typename Fn > generator( Fn fn, std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu, StackAllocator alloc)`]
+[heading `template< typename Fn > generator( Fn fn, attributes const& attr, StackAllocator alloc)`]
 [variablelist
 [[Preconditions:] [`size` > ctx::minimum_stacksize(), `size` < ctx::maximum_stacksize()
 when ! ctx::is_stack_unbound().]]
-[[Effects:] [Creates a generator which will execute `fn`. If `do_unwind` is
-`stack_unwind` the destructor of `*this` unwinds the stack before destructing
-it. If `preserve_fpu` is `true` the floating-point registers are preserved between
-context switches.]]
+[[Effects:] [Creates a generator which will execute `fn`. If the attribute
+`attr` is iconstructed with `stack_unwind` the destructor of `*this` unwinds the
+stack before destructing it. If `preserve_fpu` is `true` the floating-point
+registers are preserved between context switches.]]
 ]
 
-[heading `template< typename Fn > generator( Fn && fn, std::size_t size, flag_unwind_t do_unwind, bool preserve_fpu, StackAllocator alloc)`]
+[heading `template< typename Fn > generator( Fn && fn, attributes const& attr, StackAllocator alloc)`]
 [variablelist
 [[Preconditions:] [`size` > ctx::minimum_stacksize(), `size` < ctx::maximum_stacksize()
 when ! ctx::is_stack_unbound().]]
-[[Effects:] [Creates a generator which will execute `fn`. If `do_unwind` is
-`stack_unwind` the destructor of `*this` unwinds the stack before destructing
-it. If `preserve_fpu` is `true` the floating-point registers are preserved between
-context switches.]]
+[[Effects:] [Creates a generator which will execute `fn`. If the attribute
+`attr` is iconstructed with `stack_unwind` the destructor of `*this` unwinds the
+stack before destructing it. If `preserve_fpu` is `true` the floating-point
+registers are preserved between context switches.]]
 ]
 
 [heading `generator( generator && other)`]

@@ -276,8 +276,7 @@ void test_no_unwind()
     {
         gen_int gen(
             boost::bind( f12, _1, 3, 7),
-            ctx::default_stacksize(),
-            coro::no_stack_unwind);
+            coro::attributes( coro::no_stack_unwind) );
         BOOST_CHECK( gen);
         BOOST_CHECK_EQUAL( ( int) 7, value1);
         int res = gen();

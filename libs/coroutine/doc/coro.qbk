@@ -64,5 +64,6 @@
 [include overview.qbk]
 [include coroutine.qbk]
 [include generator.qbk]
+[include attributes.qbk]
 [include performance.qbk]
 [include acknowledgements.qbk]

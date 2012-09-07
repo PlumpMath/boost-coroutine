@@ -348,8 +348,9 @@ void test_no_unwind()
     {
         coro_int coro(
             boost::bind( f12, _1, _2, _3),
-            ctx::default_stacksize(),
-            coro::no_stack_unwind);
+            coro::attributes(
+                ctx::default_stacksize(),
+                coro::no_stack_unwind) );
         BOOST_CHECK( ! coro.is_complete() );
         BOOST_CHECK_EQUAL( ( int) 0, value1);
         int res = coro( 3, 7);
@@ -404,21 +405,21 @@ boost::unit_test::test_suite * init_unit_test_suite( int, char* [])
     boost::unit_test::test_suite * test =
         BOOST_TEST_SUITE("Boost.coroutine: coroutine test suite");
 
-    test->add( BOOST_TEST_CASE( & test_move) );
-    test->add( BOOST_TEST_CASE( & test_complete) );
-    test->add( BOOST_TEST_CASE( & test_jump) );
-    test->add( BOOST_TEST_CASE( & test_result_int) );
-    test->add( BOOST_TEST_CASE( & test_result_string) );
-    test->add( BOOST_TEST_CASE( & test_arg_int) );
-    test->add( BOOST_TEST_CASE( & test_arg_string) );
-    test->add( BOOST_TEST_CASE( & test_fp) );
-    test->add( BOOST_TEST_CASE( & test_ptr) );
-    test->add( BOOST_TEST_CASE( & test_ref) );
-    test->add( BOOST_TEST_CASE( & test_tuple) );
-    test->add( BOOST_TEST_CASE( & test_unwind) );
-    test->add( BOOST_TEST_CASE( & test_no_unwind) );
-    test->add( BOOST_TEST_CASE( & test_yield_break) );
-    test->add( BOOST_TEST_CASE( & test_exceptions) );
+   test->add( BOOST_TEST_CASE( & test_move) );
+   test->add( BOOST_TEST_CASE( & test_complete) );
+   test->add( BOOST_TEST_CASE( & test_jump) );
+   test->add( BOOST_TEST_CASE( & test_result_int) );
+   test->add( BOOST_TEST_CASE( & test_result_string) );
+   test->add( BOOST_TEST_CASE( & test_arg_int) );
+   test->add( BOOST_TEST_CASE( & test_arg_string) );
+   test->add( BOOST_TEST_CASE( & test_fp) );
+   test->add( BOOST_TEST_CASE( & test_ptr) );
+   test->add( BOOST_TEST_CASE( & test_ref) );
+   test->add( BOOST_TEST_CASE( & test_tuple) );
+   test->add( BOOST_TEST_CASE( & test_unwind) );
+   test->add( BOOST_TEST_CASE( & test_no_unwind) );
+   test->add( BOOST_TEST_CASE( & test_yield_break) );
+   test->add( BOOST_TEST_CASE( & test_exceptions) );
 
     return test;
 }

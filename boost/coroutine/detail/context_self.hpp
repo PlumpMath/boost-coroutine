@@ -24,21 +24,19 @@ namespace boost {
 namespace coro {
 namespace detail {
 
-template< typename Signature, typename StackAllocator, typename Result, int arity >
+template< typename Signature, typename Result, int arity >
 class context_self;
 
-template< typename Signature, typename StackAllocator >
-class context_self< Signature, StackAllocator, void, 0 >
+template< typename Signature >
+class context_self< Signature, void, 0 >
 {
 private:
     typedef detail::context_base<
-        Signature, StackAllocator, void, 0
+        Signature, void, 0
     >                                           base_t;
     typedef base_t                         *    ptr_t; 
 
-    template< typename X, typename Y, typename Z, int >
-    friend class event_object;
-    template< typename X, typename Y, typename Z, typename R, int >
+    template< typename X, typename Y, typename R, int >
     friend class context_exec;
 
     ptr_t  impl_;
@@ -61,19 +59,17 @@ public:
     }
 };
 
-template< typename Signature, typename StackAllocator, int arity >
-class context_self< Signature, StackAllocator, void, arity >
+template< typename Signature, int arity >
+class context_self< Signature, void, arity >
 {
 private:
     typedef typename arg< Signature >::type_t   arg_t;
     typedef detail::context_base<
-        Signature, StackAllocator, void, arity
+        Signature, void, arity
     >                                           base_t;
     typedef base_t                         *    ptr_t; 
 
-    template< typename X, typename Y, typename Z, int >
-    friend class event_object;
-    template< typename X, typename Y, typename Z, typename R, int >
+    template< typename X, typename Y, typename R, int >
     friend class context_exec;
 
     ptr_t  impl_;
@@ -96,19 +92,17 @@ public:
     }
 };
 
-template< typename Signature, typename StackAllocator, typename Result >
-class context_self< Signature, StackAllocator, Result, 0 >
+template< typename Signature, typename Result >
+class context_self< Signature, Result, 0 >
 {
 private:
     typedef Result                              result_t;
     typedef detail::context_base<
-        Signature, StackAllocator, Result, 0
+        Signature, Result, 0
     >                                           base_t;
     typedef base_t                         *    ptr_t; 
 
-    template< typename X, typename Y, typename Z, int >
-    friend class event_object;
-    template< typename X, typename Y, typename Z, typename R, int >
+    template< typename X, typename Y, typename R, int >
     friend class context_exec;
 
     ptr_t  impl_;
@@ -131,20 +125,18 @@ public:
     }
 };
 
-template< typename Signature, typename StackAllocator, typename Result, int arity >
+template< typename Signature, typename Result, int arity >
 class context_self
 {
 private:
     typedef Result                              result_t;
     typedef typename arg< Signature >::type_t   arg_t;
     typedef detail::context_base<
-        Signature, StackAllocator, Result, arity
+        Signature, Result, arity
     >                                           base_t;
     typedef base_t                         *    ptr_t; 
 
-    template< typename X, typename Y, typename Z, int >
-    friend class event_object;
-    template< typename X, typename Y, typename Z, typename R, int >
+    template< typename X, typename Y, typename R, int >
     friend class context_exec;
 
     ptr_t  impl_;

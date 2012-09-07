@@ -20,6 +20,7 @@
 #include <boost/intrusive_ptr.hpp>
 #include <boost/utility.hpp>
 
+#include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/context_base_resume.hpp>
@@ -59,20 +60,20 @@ void trampoline( intptr_t vp)
     ctx::jump_fcontext( & context->callee_, & context->caller_, 0, context->preserve_fpu_);
 }
 
-template< typename Signature, typename StackAllocator, typename Result, int arity >
+template< typename Signature, typename Result, int arity >
 class context_base :
     private noncopyable,
     public context_base_start<
-        Signature, context_base< Signature, StackAllocator, Result, arity >, Result, arity
+        Signature, context_base< Signature, Result, arity >, Result, arity
     >,
     public context_base_resume<
-        Signature, context_base< Signature, StackAllocator, Result, arity >, Result, arity
+        Signature, context_base< Signature, Result, arity >, Result, arity
     >,
     public context_base_suspend<
-        Signature, context_base< Signature, StackAllocator, Result, arity >, Result, arity
+        Signature, context_base< Signature, Result, arity >, Result, arity
     >,
     public context_base_run<
-        Signature, context_base< Signature, StackAllocator, Result, arity >, Result, arity
+        Signature, context_base< Signature, Result, arity >, Result, arity
     >
 {
 public:
@@ -90,49 +91,53 @@ private:
     template< typename X, typename Y, typename Z, int >
     friend struct context_base_suspend;
 
-    std::size_t         use_count_;
-    StackAllocator           alloc_;
-    ctx::fcontext_t     caller_;
-    ctx::fcontext_t     callee_;
-    int                 flags_;
-    exception_ptr       except_;
-    bool                preserve_fpu_;
+    std::size_t             use_count_;
+    ctx::fcontext_t         caller_;
+    ctx::fcontext_t         callee_;
+    int                     flags_;
+    exception_ptr           except_;
+    bool                    preserve_fpu_;
 
-public:
-    context_base( StackAllocator const& alloc, std::size_t size,
-                  flag_unwind_t do_unwind, bool preserve_fpu) :
-        context_base_start<
-            Signature, context_base< Signature, StackAllocator, Result, arity >, Result, arity
-        >(),
-        context_base_resume<
-            Signature, context_base< Signature, StackAllocator, Result, arity >, Result, arity
-        >(),
-        context_base_suspend<
-            Signature, context_base< Signature, StackAllocator, Result, arity >, Result, arity
-        >(),
-        context_base_run<
-            Signature, context_base< Signature, StackAllocator, Result, arity >, Result, arity
-        >(),
-        use_count_( 0), alloc_( alloc), 
-        caller_(),
-        callee_(),
-        flags_( stack_unwind == do_unwind ? flag_force_unwind : flag_dont_force_unwind),
-        except_(),
-        preserve_fpu_( preserve_fpu)
-    {
-        callee_.fc_stack.base = alloc_.allocate( size);
-        callee_.fc_stack.size = size;
-        ctx::make_fcontext( & callee_, trampoline< context_base>);
-    }
-
-    virtual ~context_base() BOOST_NOEXCEPT
+protected:
+    template< typename StackAllocator >
+    void deallocate( StackAllocator & alloc) BOOST_NOEXCEPT
     {
         if ( ! is_complete()
                 && ( is_started() || is_resumed() )
                 && ( unwind_requested() ) )
             unwind_stack();
-        alloc_.deallocate( callee_.fc_stack.base, callee_.fc_stack.size);
+        alloc.deallocate( callee_.fc_stack.base, callee_.fc_stack.size);
     }
+
+public:
+    template< typename StackAllocator >
+    context_base( attributes const& attr, StackAllocator const& alloc) :
+        context_base_start<
+            Signature, context_base< Signature, Result, arity >, Result, arity
+        >(),
+        context_base_resume<
+            Signature, context_base< Signature, Result, arity >, Result, arity
+        >(),
+        context_base_suspend<
+            Signature, context_base< Signature, Result, arity >, Result, arity
+        >(),
+        context_base_run<
+            Signature, context_base< Signature, Result, arity >, Result, arity
+        >(),
+        use_count_( 0),
+        caller_(),
+        callee_(),
+        flags_( stack_unwind == attr.do_unwind ? flag_force_unwind : flag_dont_force_unwind),
+        except_(),
+        preserve_fpu_( attr.preserve_fpu)
+    {
+        callee_.fc_stack.base = alloc.allocate( attr.size);
+        callee_.fc_stack.size = attr.size;
+        ctx::make_fcontext( & callee_, trampoline< context_base>);
+    }
+
+    virtual ~context_base()
+    {}
 
     bool unwind_requested() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_force_unwind); }

@@ -10,6 +10,7 @@
 #include <cstddef>
 
 #include <boost/config.hpp>
+#include <boost/context/stack_utils.hpp>
 
 #include <boost/coroutine/flags.hpp>
 
@@ -26,10 +27,52 @@ struct attributes
     flag_unwind_t   do_unwind;
     bool            preserve_fpu;
 
-    attributes() BOOST_NOTHROW :
-        size(  ctx::default_stacksize() )
-        do_unwind(  stack_unwind)
-        preserve_fpu(  true)
+    attributes() BOOST_NOEXCEPT :
+        size( ctx::default_stacksize() ),
+        do_unwind( stack_unwind),
+        preserve_fpu( true)
+    {}
+
+    explicit attributes( std::size_t size_) BOOST_NOEXCEPT :
+        size( size_),
+        do_unwind( stack_unwind),
+        preserve_fpu( true)
+    {}
+
+    explicit attributes( flag_unwind_t do_unwind_) BOOST_NOEXCEPT :
+        size( ctx::default_stacksize() ),
+        do_unwind( do_unwind_),
+        preserve_fpu( true)
+    {}
+
+    explicit attributes( bool preserve_fpu_) BOOST_NOEXCEPT :
+        size( ctx::default_stacksize() ),
+        do_unwind( stack_unwind),
+        preserve_fpu( preserve_fpu_)
+    {}
+
+    explicit attributes(
+            std::size_t size_,
+            flag_unwind_t do_unwind_) BOOST_NOEXCEPT :
+        size( size_),
+        do_unwind( do_unwind_),
+        preserve_fpu( true)
+    {}
+
+    explicit attributes(
+            std::size_t size_,
+            bool preserve_fpu_) BOOST_NOEXCEPT :
+        size( size_),
+        do_unwind( stack_unwind),
+        preserve_fpu( preserve_fpu_)
+    {}
+
+    explicit attributes(
+            flag_unwind_t do_unwind_,
+            bool preserve_fpu_) BOOST_NOEXCEPT :
+        size( ctx::default_stacksize() ),
+        do_unwind( do_unwind_),
+        preserve_fpu( preserve_fpu_)
     {}
 };
 

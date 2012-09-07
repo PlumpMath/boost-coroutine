@@ -7,6 +7,7 @@
 #ifndef BOOST_CORO_ALL_H
 #define BOOST_CORO_ALL_H
 
+#include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/coroutine.hpp>
 #include <boost/coroutine/exceptions.hpp>
 #include <boost/coroutine/flags.hpp>
