@@ -96,62 +96,59 @@ void f1( gen_void::self_t & s)
 void f2( gen_void::self_t &)
 { ++value1; }
 
-int f3( gen_int::self_t & self)
+void f3( gen_int::self_t & self)
 {
     self.yield( 1);
-    return 2;
+    self.yield( 2);
 }
 
-int f4( gen_int::self_t & self)
+void f4( gen_int::self_t & self)
 {
     int i = 3;
     self.yield( i);
-    return 7;
+    self.yield( 7);
 }
 
-std::string f5( gen_string::self_t & self)
+void f5( gen_string::self_t & self)
 {
-    std::string res("abc");
-    self.yield( res);
-    return "xyz";
+    std::string str1("abc"), str2("xyz");
+    self.yield( str1);
+    self.yield( str2);
 }
 
-double f8( gen_double::self_t & self, double a, double b)
+void f8( gen_double::self_t & self, double a, double b)
 {
     double tmp = a + b;
     self.yield( tmp);
-    return 3.14 + 8.33;
+    self.yield( 3.14 + 8.33);
 }
 
-boost::tuple<int&,int&> f11( gen_tuple::self_t & self, int & a, int & b)
+void f11( gen_tuple::self_t & self, int & a, int & b)
 {
     boost::tuple<int&,int&> tpl( a, b);
     self.yield( tpl);
-    return tpl;
+    self.yield( tpl);
 }
 
-int f12( gen_int::self_t & self, int a, int b)
+void f12( gen_int::self_t & self, int a, int b)
 {
     X x;
     int tmp = a + b;
     self.yield( tmp);
     tmp += a;
     self.yield( tmp);
-    return 3;
+    self.yield( 3);
 }
 
-int f13( gen_int::self_t & self)
+void f13( gen_int::self_t & self)
 {
     self.yield( 3);
-    self.yield_break();
-    return -1;
 }
 
 template< typename E >
-int f14( gen_int::self_t & self, E const& e)
+void f14( gen_int::self_t & self, E const& e)
 {
     throw e;
-    return -1;
 }
 
 void test_move()
@@ -262,9 +259,7 @@ void test_unwind()
         BOOST_CHECK_EQUAL( ( int) 7, value1);
         int res = gen();
         BOOST_CHECK_EQUAL( ( int) 10, res);
-        res = gen();
-        BOOST_CHECK_EQUAL( ( int) 13, res);
-        BOOST_CHECK_EQUAL( ( int) 0, value1);
+        BOOST_CHECK_EQUAL( ( int) 7, value1);
         BOOST_CHECK( gen);
     }
     BOOST_CHECK_EQUAL( ( int) 0, value1);
@@ -280,8 +275,8 @@ void test_no_unwind()
         BOOST_CHECK( gen);
         BOOST_CHECK_EQUAL( ( int) 7, value1);
         int res = gen();
-        BOOST_CHECK_EQUAL( ( int) 7, value1);
         BOOST_CHECK_EQUAL( ( int) 10, res);
+        BOOST_CHECK_EQUAL( ( int) 7, value1);
         BOOST_CHECK( gen);
     }
     BOOST_CHECK_EQUAL( ( int) 7, value1);

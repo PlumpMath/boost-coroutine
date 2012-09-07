@@ -75,14 +75,12 @@ template< typename Result, typename D >
 class generator_resume
 {
 public:
-    typedef Result result_t;
-
-    result_t operator()()
+    Result operator()()
     {
         D * dp = static_cast< D * >( this);
         BOOST_ASSERT( dp->impl_);
 
-        result_t tmp( * result_);
+        Result tmp( * result_);
         fetch_();
         return tmp;
     }
@@ -96,8 +94,8 @@ protected:
         {
             if ( ! dp->impl_->is_complete() )
             {
-                if ( ! dp->impl_->is_started() ) result_ = dp->impl_->start();
-                else result_ = dp->impl_->resume();
+                if ( ! dp->impl_->is_started() ) dp->impl_->start( result_);
+                else dp->impl_->resume( result_);
             }
             else result_ = none;
         }
@@ -112,7 +110,7 @@ protected:
     { result_.swap( other.result_); }
 
 private:
-    optional< result_t >    result_;
+    optional< Result >    result_;
 };
 
 }}}

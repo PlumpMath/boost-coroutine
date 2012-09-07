@@ -19,10 +19,10 @@
 #include <boost/utility/enable_if.hpp>
 
 #include <boost/coroutine/attributes.hpp>
-#include <boost/coroutine/detail/context_base.hpp>
-#include <boost/coroutine/detail/context_object.hpp>
+#include <boost/coroutine/detail/generator_base.hpp>
+#include <boost/coroutine/detail/generator_object.hpp>
 #include <boost/coroutine/detail/generator_resume.hpp>
-#include <boost/coroutine/detail/context_self.hpp>
+#include <boost/coroutine/detail/generator_self.hpp>
 #include <boost/coroutine/flags.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
@@ -39,10 +39,8 @@ class generator :
     >
 {
 private:
-    typedef detail::context_base<
-        Result(), Result, 0
-     >                                      base_t;
-    typedef typename base_t::ptr_t          ptr_t;
+    typedef detail::generator_base< Result >    base_t;
+    typedef typename base_t::ptr_t              ptr_t;
 
     template< typename X, typename Y >
     friend class detail::generator_resume;
@@ -52,9 +50,7 @@ private:
     BOOST_MOVABLE_BUT_NOT_COPYABLE( generator);
 
 public:
-    typedef detail::context_self<
-        Result(), Result, 0
-    >                                       self_t;
+    typedef detail::generator_self< Result >    self_t;
     typedef void ( * unspecified_bool_type)( generator ***);
 
     static void unspecified_bool( generator ***) {}
@@ -74,8 +70,8 @@ public:
             Result, generator< Result >
         >(),
         impl_(
-            new detail::context_object<
-                Fn, ctx::stack_allocator, Result(), Result, 0
+            new detail::generator_object<
+                Fn, ctx::stack_allocator, Result
             >( static_cast< Fn && >( fn), attr, stack_alloc) )
     { this->fetch_(); }
 
@@ -86,8 +82,8 @@ public:
             Result, generator< Result >
         >(),
         impl_(
-            new detail::context_object<
-                Fn, StackAllocator, Result(), Result, 0
+            new detail::generator_object<
+                Fn, StackAllocator, Result
             >( static_cast< Fn && >( fn), attr, stack_alloc) )
     { this->fetch_(); }
 #else
@@ -98,8 +94,8 @@ public:
             Result, generator< Result >
         >(),
         impl_(
-            new detail::context_object<
-                Fn, ctx::stack_allocator, Result(), Result, 0
+            new detail::generator_object<
+                Fn, ctx::stack_allocator, Result
             >( fn, attr, stack_alloc) )
     { this->fetch_(); }
 
@@ -110,8 +106,8 @@ public:
             Result, generator< Result >
         >(),
         impl_(
-            new detail::context_object<
-                Fn, StackAllocator, Result(), Result, 0
+            new detail::generator_object<
+                Fn, StackAllocator, Result
             >( fn, attr, stack_alloc) )
     { this->fetch_(); }
 
@@ -122,8 +118,8 @@ public:
             Result, generator< Result >
         >(),
         impl_(
-            new detail::context_object<
-                Fn, ctx::stack_allocator, Result(), Result, 0
+            new detail::generator_object<
+                Fn, ctx::stack_allocator, Result
             >( fn, attr, stack_alloc) )
     { this->fetch_(); }
 
@@ -134,8 +130,8 @@ public:
             Result, generator< Result >
         >(),
         impl_(
-            new detail::context_object<
-                Fn, StackAllocator, Result(), Result, 0
+            new detail::generator_object<
+                Fn, StackAllocator, Result
             >( fn, attr, stack_alloc) )
     { this->fetch_(); }
 #endif
