@@ -14,9 +14,12 @@
 #include <boost/context/stack_allocator.hpp>
 #include <boost/context/stack_utils.hpp>
 #include <boost/move/move.hpp>
+#include <boost/mpl/assert.hpp>
 #include <boost/type_traits/is_convertible.hpp>
+#include <boost/type_traits/is_same.hpp>
 #include <boost/type_traits/function_traits.hpp>
 #include <boost/utility/enable_if.hpp>
+#include <boost/utility/result_of.hpp>
 
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/generator_base.hpp>
@@ -73,7 +76,14 @@ public:
             new detail::generator_object<
                 Fn, ctx::stack_allocator, Result
             >( static_cast< Fn && >( fn), attr, stack_alloc) )
-    { this->fetch_(); }
+    {
+        BOOST_MPL_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >));
+        this->fetch_();
+    }
 
     template< typename Fn, typename StackAllocator >
     generator( Fn && fn, attributes const& attr = attributes(),
@@ -85,7 +95,14 @@ public:
             new detail::generator_object<
                 Fn, StackAllocator, Result
             >( static_cast< Fn && >( fn), attr, stack_alloc) )
-    { this->fetch_(); }
+    {
+        BOOST_MPL_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >));
+        this->fetch_();
+    }
 #else
     template< typename Fn >
     generator( Fn fn, attributes const& attr = attributes(),
@@ -97,7 +114,14 @@ public:
             new detail::generator_object<
                 Fn, ctx::stack_allocator, Result
             >( fn, attr, stack_alloc) )
-    { this->fetch_(); }
+    {
+        BOOST_MPL_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >));
+        this->fetch_();
+    }
 
     template< typename Fn, typename StackAllocator >
     generator( Fn fn, attributes const& attr = attributes(),
@@ -109,7 +133,14 @@ public:
             new detail::generator_object<
                 Fn, StackAllocator, Result
             >( fn, attr, stack_alloc) )
-    { this->fetch_(); }
+    {
+        BOOST_MPL_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >));
+        this->fetch_();
+    }
 
     template< typename Fn >
     generator( BOOST_RV_REF( Fn) fn, attributes const& attr = attributes(),
@@ -121,7 +152,14 @@ public:
             new detail::generator_object<
                 Fn, ctx::stack_allocator, Result
             >( fn, attr, stack_alloc) )
-    { this->fetch_(); }
+    {
+        BOOST_MPL_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >));
+        this->fetch_();
+    }
 
     template< typename Fn, typename StackAllocator >
     generator( BOOST_RV_REF( Fn) fn, attributes const& attr = attributes(),
@@ -133,7 +171,14 @@ public:
             new detail::generator_object<
                 Fn, StackAllocator, Result
             >( fn, attr, stack_alloc) )
-    { this->fetch_(); }
+    {
+        BOOST_MPL_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >));
+        this->fetch_();
+    }
 #endif
 
     generator( BOOST_RV_REF( generator) other) BOOST_NOEXCEPT :

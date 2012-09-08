@@ -91,7 +91,7 @@ public:
 struct my_exception {};
 
 void f1( gen_void::self_t & s)
-{}
+{ return; }
 
 void f2( gen_void::self_t &)
 { ++value1; }
