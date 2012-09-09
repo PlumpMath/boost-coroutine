@@ -4,15 +4,15 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_CORO_DETAIL_CONTEXT_SELF_H
-#define BOOST_CORO_DETAIL_CONTEXT_SELF_H
+#ifndef BOOST_CORO_DETAIL_COROUTINE_SELF_H
+#define BOOST_CORO_DETAIL_COROUTINE_SELF_H
 
 #include <boost/config.hpp>
 #include <boost/throw_exception.hpp>
 
 #include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
-#include <boost/coroutine/detail/context_base.hpp>
+#include <boost/coroutine/detail/coroutine_base.hpp>
 #include <boost/coroutine/detail/param_type.hpp>
 #include <boost/coroutine/exceptions.hpp>
 
@@ -25,23 +25,23 @@ namespace coro {
 namespace detail {
 
 template< typename Signature, typename Result, int arity >
-class context_self;
+class coroutine_self;
 
 template< typename Signature >
-class context_self< Signature, void, 0 >
+class coroutine_self< Signature, void, 0 >
 {
 private:
-    typedef detail::context_base<
+    typedef detail::coroutine_base<
         Signature, void, 0
     >                                           base_t;
     typedef base_t                         *    ptr_t; 
 
     template< typename X, typename Y, typename R, int >
-    friend class context_exec;
+    friend class coroutine_exec;
 
     ptr_t  impl_;
 
-    context_self( ptr_t impl) BOOST_NOEXCEPT :
+    coroutine_self( ptr_t impl) BOOST_NOEXCEPT :
         impl_( impl)
     { BOOST_ASSERT( impl_); }
 
@@ -60,21 +60,21 @@ public:
 };
 
 template< typename Signature, int arity >
-class context_self< Signature, void, arity >
+class coroutine_self< Signature, void, arity >
 {
 private:
     typedef typename arg< Signature >::type_t   arg_t;
-    typedef detail::context_base<
+    typedef detail::coroutine_base<
         Signature, void, arity
     >                                           base_t;
     typedef base_t                         *    ptr_t; 
 
     template< typename X, typename Y, typename R, int >
-    friend class context_exec;
+    friend class coroutine_exec;
 
     ptr_t  impl_;
 
-    context_self( ptr_t impl) BOOST_NOEXCEPT :
+    coroutine_self( ptr_t impl) BOOST_NOEXCEPT :
         impl_( impl)
     { BOOST_ASSERT( impl_); }
 
@@ -93,21 +93,21 @@ public:
 };
 
 template< typename Signature, typename Result >
-class context_self< Signature, Result, 0 >
+class coroutine_self< Signature, Result, 0 >
 {
 private:
     typedef Result                              result_t;
-    typedef detail::context_base<
+    typedef detail::coroutine_base<
         Signature, Result, 0
     >                                           base_t;
     typedef base_t                         *    ptr_t; 
 
     template< typename X, typename Y, typename R, int >
-    friend class context_exec;
+    friend class coroutine_exec;
 
     ptr_t  impl_;
 
-    context_self( ptr_t impl) BOOST_NOEXCEPT :
+    coroutine_self( ptr_t impl) BOOST_NOEXCEPT :
         impl_( impl)
     { BOOST_ASSERT( impl_); }
 
@@ -126,22 +126,22 @@ public:
 };
 
 template< typename Signature, typename Result, int arity >
-class context_self
+class coroutine_self
 {
 private:
     typedef Result                              result_t;
     typedef typename arg< Signature >::type_t   arg_t;
-    typedef detail::context_base<
+    typedef detail::coroutine_base<
         Signature, Result, arity
     >                                           base_t;
     typedef base_t                         *    ptr_t; 
 
     template< typename X, typename Y, typename R, int >
-    friend class context_exec;
+    friend class coroutine_exec;
 
     ptr_t  impl_;
 
-    context_self( ptr_t impl) BOOST_NOEXCEPT :
+    coroutine_self( ptr_t impl) BOOST_NOEXCEPT :
         impl_( impl)
     { BOOST_ASSERT( impl_); }
 
@@ -165,4 +165,4 @@ public:
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_CORO_DETAIL_CONTEXT_SELF_H
+#endif // BOOST_CORO_DETAIL_COROUTINE_SELF_H

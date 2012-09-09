@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_CORO_DETAIL_CONTEXT_EXEC_H
-#define BOOST_CORO_DETAIL_CONTEXT_EXEC_H
+#ifndef BOOST_CORO_DETAIL_COROUTINE_EXEC_H
+#define BOOST_CORO_DETAIL_COROUTINE_EXEC_H
 
 #include <cstddef>
 
@@ -21,8 +21,8 @@
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
-#include <boost/coroutine/detail/context_base.hpp>
-#include <boost/coroutine/detail/context_self.hpp>
+#include <boost/coroutine/detail/coroutine_base.hpp>
+#include <boost/coroutine/detail/coroutine_self.hpp>
 #include <boost/coroutine/flags.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
@@ -34,31 +34,31 @@ namespace coro {
 namespace detail {
 
 template< typename Signature, typename D, typename Result, int arity >
-class context_exec;
+class coroutine_exec;
 
 template< typename Signature, typename D >
-class context_exec< Signature, D, void, 0 > :
-    public context_base< Signature, void, 0 >
+class coroutine_exec< Signature, D, void, 0 > :
+    public coroutine_base< Signature, void, 0 >
 {
 private:
     void exec_()
     {
         D * dp = static_cast< D * >( this);
 
-        context_self< Signature, void, 0 > self( this);
+        coroutine_self< Signature, void, 0 > self( this);
         dp->fn_( self);
     }
 
 public:
     template< typename StackAllocator >
-    context_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT :
-        context_base< Signature, void, 0 >( attr, alloc)
+    coroutine_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT :
+        coroutine_base< Signature, void, 0 >( attr, alloc)
     {}
 };
 
 template< typename Signature, typename D, typename Result >
-class context_exec< Signature, D, Result, 0 > :
-    public context_base< Signature, Result, 0 >
+class coroutine_exec< Signature, D, Result, 0 > :
+    public coroutine_base< Signature, Result, 0 >
 {
 private:
     typedef Result      result_t;
@@ -67,20 +67,20 @@ private:
     {
         D * dp = static_cast< D * >( this);
 
-        context_self< Signature, Result, 0 > self( this);
+        coroutine_self< Signature, Result, 0 > self( this);
         return dp->fn_( self);
     }
 
 public:
     template< typename StackAllocator >
-    context_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT :
-        context_base< Signature, Result, 0 >( attr, alloc)
+    coroutine_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT :
+        coroutine_base< Signature, Result, 0 >( attr, alloc)
     {}
 };
 
 template< typename Signature, typename D >
-class context_exec< Signature, D, void, 1 > :
-    public context_base< Signature, void, 1 >
+class coroutine_exec< Signature, D, void, 1 > :
+    public coroutine_base< Signature, void, 1 >
 {
 private:
     typedef typename arg< Signature >::type_t   arg_t;
@@ -89,20 +89,20 @@ private:
     {
         D * dp = static_cast< D * >( this);
 
-        context_self< Signature, void, 1 > self( this);
+        coroutine_self< Signature, void, 1 > self( this);
         dp->fn_( self, a);
     }
 
 public:
     template< typename StackAllocator >
-    context_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT :
-        context_base< Signature, void, 1 >( attr, alloc)
+    coroutine_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT :
+        coroutine_base< Signature, void, 1 >( attr, alloc)
     {}
 };
 
 template< typename Signature, typename D, typename Result >
-class context_exec< Signature, D, Result, 1 > :
-    public context_base< Signature, Result, 1 >
+class coroutine_exec< Signature, D, Result, 1 > :
+    public coroutine_base< Signature, Result, 1 >
 {
 private:
     typedef typename arg< Signature >::type_t   arg_t;
@@ -112,14 +112,14 @@ private:
     {
         D * dp = static_cast< D * >( this);
 
-        context_self< Signature, Result, 1 > self( this);
+        coroutine_self< Signature, Result, 1 > self( this);
         return dp->fn_( self, a);
     }
 
 public:
     template< typename StackAllocator >
-    context_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT :
-        context_base< Signature, Result, 1 >( attr, alloc)
+    coroutine_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT :
+        coroutine_base< Signature, Result, 1 >( attr, alloc)
     {}
 };
 
@@ -132,28 +132,28 @@ public:
 #define BOOST_CONTEXT_EXEC_ARGS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_CONTEXT_EXEC_ARG,~)
 #define BOOST_CONTEXT_EXEC(z,n,unused) \
 template< typename Signature, typename D > \
-class context_exec< Signature, D, void, n > : \
-    public context_base< Signature, void, n > \
+class coroutine_exec< Signature, D, void, n > : \
+    public coroutine_base< Signature, void, n > \
 { \
 private:\
     void exec_( BOOST_CONTEXT_EXEC_ARGS(n)) \
     { \
         D * dp = static_cast< D * >( this); \
 \
-        context_self< Signature, void, n > self( this); \
+        coroutine_self< Signature, void, n > self( this); \
         dp->fn_( self, BOOST_CONTEXT_EXEC_VALS(n)); \
     } \
 \
 public: \
     template< typename StackAllocator > \
-    context_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT : \
-        context_base< Signature, void, n >( attr, alloc) \
+    coroutine_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT : \
+        coroutine_base< Signature, void, n >( attr, alloc) \
     {} \
 }; \
 \
 template< typename Signature, typename D, typename Result > \
-class context_exec< Signature, D, Result, n > : \
-    public context_base< Signature, Result, n > \
+class coroutine_exec< Signature, D, Result, n > : \
+    public coroutine_base< Signature, Result, n > \
 { \
 private: \
     typedef Result      result_t; \
@@ -162,14 +162,14 @@ private: \
     { \
         D * dp = static_cast< D * >( this); \
 \
-        context_self< Signature, Result, n > self( this); \
+        coroutine_self< Signature, Result, n > self( this); \
         return dp->fn_( self, BOOST_CONTEXT_EXEC_VALS(n)); \
     } \
 \
 public: \
     template< typename StackAllocator > \
-    context_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT : \
-        context_base< Signature, Result, n >( attr, alloc) \
+    coroutine_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT : \
+        coroutine_base< Signature, Result, n >( attr, alloc) \
     {} \
 };
 BOOST_PP_REPEAT_FROM_TO(2,11,BOOST_CONTEXT_EXEC,~)
@@ -187,4 +187,4 @@ BOOST_PP_REPEAT_FROM_TO(2,11,BOOST_CONTEXT_EXEC,~)
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_CORO_DETAIL_CONTEXT_EXEC_H
+#endif // BOOST_CORO_DETAIL_COROUTINE_EXEC_H

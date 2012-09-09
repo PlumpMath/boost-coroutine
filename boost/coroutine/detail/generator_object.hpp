@@ -26,95 +26,158 @@ namespace boost {
 namespace coro {
 namespace detail {
 
-template< typename Fn, typename StackAllocator, typename Result >
+template< typename Fn, typename StackAllocator, typename Allocator, typename Result >
 class generator_object : public generator_base< Result >
 {
-private:
-    Fn              fn_;
-    StackAllocator  alloc_;
-
-    generator_object( generator_object &);
-    generator_object & operator=( generator_object const&);
-
 public:
+    typedef typename Allocator::template rebind<
+        generator_object<
+            Fn, StackAllocator, Allocator, Result
+        >
+    >::other   allocator_t;
+
 #ifndef BOOST_NO_RVALUE_REFERENCES
-    generator_object( Fn && fn, attributes const& attr, StackAllocator const& alloc) :
-        generator_base< Result >( attr, alloc),
-        fn_( static_cast< Fn && >( fn) ), alloc_( alloc)
+    generator_object( Fn && fn, attributes const& attr,
+                      StackAllocator const& stack_alloc, allocator_t const& alloc) :
+        generator_base< Result >( attr, stack_alloc),
+        fn_( static_cast< Fn && >( fn) ),
+        stack_alloc_( stack_alloc),
+        alloc_( alloc)
     {}
 #else
-    generator_object( Fn fn, attributes const& attr, StackAllocator const& alloc) :
-        generator_base< Result >( attr, alloc),
-        fn_( fn), alloc_( alloc)
+    generator_object( Fn fn, attributes const& attr,
+                      StackAllocator const& stack_alloc, allocator_t const& alloc) :
+        generator_base< Result >( attr, stack_alloc),
+        fn_( fn),
+        stack_alloc_( stack_alloc),
+        alloc_( alloc)
     {}
 
-    generator_object( BOOST_RV_REF( Fn) fn, attributes const& attr, StackAllocator const& alloc) :
-        generator_base< Result >( attr, alloc),
-        fn_( fn), alloc_( alloc)
+    generator_object( BOOST_RV_REF( Fn) fn, attributes const& attr,
+                      StackAllocator const& stack_alloc, allocator_t const& alloc) :
+        generator_base< Result >( attr, stack_alloc),
+        fn_( fn),
+        stack_alloc_( stack_alloc),
+        alloc_( alloc)
     {}
 #endif
 
     ~generator_object()
-    { deallocate( alloc_); }
+    { deallocate_stack( stack_alloc_); }
 
     void exec_()
     {
         generator_self< Result > self( this);
         fn_( self);
     }
-};
 
-template< typename Fn, typename StackAllocator, typename Result >
-class generator_object< reference_wrapper< Fn >, StackAllocator, Result > :
-    public generator_base< Result >
-{
+    void deallocate_object()
+    { destroy( alloc_, this); }
+
 private:
     Fn              fn_;
-    StackAllocator  alloc_;
+    StackAllocator  stack_alloc_;
+    allocator_t     alloc_;
 
     generator_object( generator_object &);
     generator_object & operator=( generator_object const&);
 
+    static void destroy( allocator_t & alloc, generator_object * p)
+    {
+        alloc.destroy( p);
+        alloc.deallocate( p, 1);
+    }
+};
+
+template< typename Fn, typename StackAllocator, typename Allocator, typename Result >
+class generator_object< reference_wrapper< Fn >, StackAllocator, Allocator, Result > :
+    public generator_base< Result >
+{
 public:
-    generator_object( reference_wrapper< Fn > fn, attributes const& attr, StackAllocator const& alloc) :
-        generator_base< Result >( attr, alloc),
-        fn_( fn), alloc_( alloc)
+    typedef typename Allocator::template rebind<
+        generator_object<
+            Fn, StackAllocator, Allocator, Result
+        >
+    >::other   allocator_t;
+
+    generator_object( reference_wrapper< Fn > fn, attributes const& attr,
+                      StackAllocator const& stack_alloc, allocator_t const& alloc) :
+        generator_base< Result >( attr, stack_alloc),
+        fn_( fn),
+        stack_alloc_( stack_alloc),
+        alloc_( alloc)
     {}
 
     ~generator_object()
-    { deallocate( alloc_); }
+    { deallocate_stack( stack_alloc_); }
 
     void exec_()
     {
         generator_self< Result > self( this);
         fn_( self);
     }
-};
 
-template< typename Fn, typename StackAllocator, typename Result >
-class generator_object< const reference_wrapper< Fn >, StackAllocator, Result > :
-    public generator_base< Result >
-{
+    void deallocate_object()
+    { destroy( alloc_, this); }
+
 private:
     Fn              fn_;
-    StackAllocator  alloc_;
+    StackAllocator  stack_alloc_;
+    allocator_t     alloc_;
 
     generator_object( generator_object &);
     generator_object & operator=( generator_object const&);
 
+    static void destroy( allocator_t const& alloc, generator_object * p)
+    {
+        alloc.destroy( p);
+        alloc.deallocate( p, 1);
+    }
+};
+
+template< typename Fn, typename StackAllocator, typename Allocator, typename Result >
+class generator_object< const reference_wrapper< Fn >, StackAllocator, Allocator, Result > :
+    public generator_base< Result >
+{
 public:
-    generator_object( const reference_wrapper< Fn > fn, attributes const& attr, StackAllocator const& alloc) :
-        generator_base< Result >( attr, alloc),
-        fn_( fn), alloc_( alloc)
+    typedef typename Allocator::template rebind<
+        generator_object<
+            Fn, StackAllocator, Allocator, Result
+        >
+    >::other   allocator_t;
+
+    generator_object( const reference_wrapper< Fn > fn, attributes const& attr,
+                      StackAllocator const& stack_alloc, allocator_t const& alloc) :
+        generator_base< Result >( attr, stack_alloc),
+        fn_( fn),
+        stack_alloc_( stack_alloc),
+        alloc_( alloc)
     {}
 
     ~generator_object()
-    { deallocate( alloc_); }
+    { deallocate_stack( stack_alloc_); }
 
     void exec_()
     {
         generator_self< Result > self( this);
         fn_( self);
+    }
+
+    void deallocate_object()
+    { destroy( alloc_, this); }
+
+private:
+    Fn              fn_;
+    StackAllocator  stack_alloc_;
+    allocator_t     alloc_;
+
+    generator_object( generator_object &);
+    generator_object & operator=( generator_object const&);
+
+    static void destroy( allocator_t const& alloc, generator_object * p)
+    {
+        alloc.destroy( p);
+        alloc.deallocate( p, 1);
     }
 };
 

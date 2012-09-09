@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_CORO_DETAIL_CONTEXT_BASE_H
-#define BOOST_CORO_DETAIL_CONTEXT_BASE_H
+#ifndef BOOST_CORO_DETAIL_COROUTINE_BASE_H
+#define BOOST_CORO_DETAIL_COROUTINE_BASE_H
 
 #include <algorithm>
 #include <cstddef>
@@ -23,10 +23,10 @@
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
-#include <boost/coroutine/detail/context_base_resume.hpp>
-#include <boost/coroutine/detail/context_base_run.hpp>
-#include <boost/coroutine/detail/context_base_start.hpp>
-#include <boost/coroutine/detail/context_base_suspend.hpp>
+#include <boost/coroutine/detail/coroutine_base_resume.hpp>
+#include <boost/coroutine/detail/coroutine_base_run.hpp>
+#include <boost/coroutine/detail/coroutine_base_start.hpp>
+#include <boost/coroutine/detail/coroutine_base_suspend.hpp>
 #include <boost/coroutine/detail/flags.hpp>
 #include <boost/coroutine/exceptions.hpp>
 #include <boost/coroutine/flags.hpp>
@@ -61,35 +61,35 @@ void trampoline( intptr_t vp)
 }
 
 template< typename Signature, typename Result, int arity >
-class context_base :
+class coroutine_base :
     private noncopyable,
-    public context_base_start<
-        Signature, context_base< Signature, Result, arity >, Result, arity
+    public coroutine_base_start<
+        Signature, coroutine_base< Signature, Result, arity >, Result, arity
     >,
-    public context_base_resume<
-        Signature, context_base< Signature, Result, arity >, Result, arity
+    public coroutine_base_resume<
+        Signature, coroutine_base< Signature, Result, arity >, Result, arity
     >,
-    public context_base_suspend<
-        Signature, context_base< Signature, Result, arity >, Result, arity
+    public coroutine_base_suspend<
+        Signature, coroutine_base< Signature, Result, arity >, Result, arity
     >,
-    public context_base_run<
-        Signature, context_base< Signature, Result, arity >, Result, arity
+    public coroutine_base_run<
+        Signature, coroutine_base< Signature, Result, arity >, Result, arity
     >
 {
 public:
-    typedef intrusive_ptr< context_base >   ptr_t;
+    typedef intrusive_ptr< coroutine_base >   ptr_t;
 
 private:
     template< typename T >
     friend void trampoline( intptr_t);
     template< typename X, typename Y, typename Z, int >
-    friend struct context_base_resume;
+    friend struct coroutine_base_resume;
     template< typename X, typename Y, typename Z, int >
-    friend struct context_base_run;
+    friend struct coroutine_base_run;
     template< typename X, typename Y, typename Z, int >
-    friend struct context_base_start;
+    friend struct coroutine_base_start;
     template< typename X, typename Y, typename Z, int >
-    friend struct context_base_suspend;
+    friend struct coroutine_base_suspend;
 
     std::size_t             use_count_;
     ctx::fcontext_t         caller_;
@@ -100,7 +100,7 @@ private:
 
 protected:
     template< typename StackAllocator >
-    void deallocate( StackAllocator & alloc) BOOST_NOEXCEPT
+    void deallocate_stack( StackAllocator & alloc) BOOST_NOEXCEPT
     {
         if ( ! is_complete()
                 && ( is_started() || is_resumed() )
@@ -109,20 +109,22 @@ protected:
         alloc.deallocate( callee_.fc_stack.base, callee_.fc_stack.size);
     }
 
+    virtual void deallocate_object() = 0;
+
 public:
     template< typename StackAllocator >
-    context_base( attributes const& attr, StackAllocator const& alloc) :
-        context_base_start<
-            Signature, context_base< Signature, Result, arity >, Result, arity
+    coroutine_base( attributes const& attr, StackAllocator const& alloc) :
+        coroutine_base_start<
+            Signature, coroutine_base< Signature, Result, arity >, Result, arity
         >(),
-        context_base_resume<
-            Signature, context_base< Signature, Result, arity >, Result, arity
+        coroutine_base_resume<
+            Signature, coroutine_base< Signature, Result, arity >, Result, arity
         >(),
-        context_base_suspend<
-            Signature, context_base< Signature, Result, arity >, Result, arity
+        coroutine_base_suspend<
+            Signature, coroutine_base< Signature, Result, arity >, Result, arity
         >(),
-        context_base_run<
-            Signature, context_base< Signature, Result, arity >, Result, arity
+        coroutine_base_run<
+            Signature, coroutine_base< Signature, Result, arity >, Result, arity
         >(),
         use_count_( 0),
         caller_(),
@@ -133,10 +135,10 @@ public:
     {
         callee_.fc_stack.base = alloc.allocate( attr.size);
         callee_.fc_stack.size = attr.size;
-        ctx::make_fcontext( & callee_, trampoline< context_base>);
+        ctx::make_fcontext( & callee_, trampoline< coroutine_base>);
     }
 
-    virtual ~context_base()
+    virtual ~coroutine_base()
     {}
 
     bool unwind_requested() const BOOST_NOEXCEPT
@@ -207,11 +209,11 @@ public:
         return ret;
     }
 
-    friend inline void intrusive_ptr_add_ref( context_base * p) BOOST_NOEXCEPT
+    friend inline void intrusive_ptr_add_ref( coroutine_base * p) BOOST_NOEXCEPT
     { ++p->use_count_; }
 
-    friend inline void intrusive_ptr_release( context_base * p) BOOST_NOEXCEPT
-    { if ( --p->use_count_ == 0) delete p; }
+    friend inline void intrusive_ptr_release( coroutine_base * p) BOOST_NOEXCEPT
+    { if ( --p->use_count_ == 0) p->deallocate_object(); }
 };
 
 }}}
@@ -220,4 +222,4 @@ public:
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_CORO_DETAIL_CONTEXT_BASE_H
+#endif // BOOST_CORO_DETAIL_COROUTINE_BASE_H

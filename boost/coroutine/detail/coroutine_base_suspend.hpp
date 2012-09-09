@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_CORO_DETAIL_CONTEXT_BASE_SUSPEND_H
-#define BOOST_CORO_DETAIL_CONTEXT_BASE_SUSPEND_H
+#ifndef BOOST_CORO_DETAIL_COROUTINE_BASE_SUSPEND_H
+#define BOOST_CORO_DETAIL_COROUTINE_BASE_SUSPEND_H
 
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
@@ -26,10 +26,10 @@ namespace coro {
 namespace detail {
 
 template< typename Signature, typename D, typename Result, int arity >
-struct context_base_suspend;
+struct coroutine_base_suspend;
 
 template< typename Signature, typename D >
-struct context_base_suspend< Signature, D, void, 0 >
+struct coroutine_base_suspend< Signature, D, void, 0 >
 {
     void suspend()
     {
@@ -40,7 +40,7 @@ struct context_base_suspend< Signature, D, void, 0 >
 };
 
 template< typename Signature, typename D, int arity >
-struct context_base_suspend< Signature, D, void, arity >
+struct coroutine_base_suspend< Signature, D, void, arity >
 {
     typedef typename arg< Signature >::type_t   arg_t;
 
@@ -54,7 +54,7 @@ struct context_base_suspend< Signature, D, void, arity >
 };
 
 template< typename Signature, typename D, typename Result >
-struct context_base_suspend< Signature, D, Result, 0 >
+struct coroutine_base_suspend< Signature, D, Result, 0 >
 {
     typedef Result  result_t;
 
@@ -67,7 +67,7 @@ struct context_base_suspend< Signature, D, Result, 0 >
 };
 
 template< typename Signature, typename D, typename Result, int arity >
-struct context_base_suspend
+struct coroutine_base_suspend
 {
     typedef Result  result_t;
     typedef typename arg< Signature >::type_t   arg_t;
@@ -87,4 +87,4 @@ struct context_base_suspend
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_CORO_DETAIL_CONTEXT_BASE_SUSPEND_H
+#endif // BOOST_CORO_DETAIL_COROUTINE_BASE_SUSPEND_H

@@ -34,7 +34,7 @@ private:
     typedef detail::generator_base< void >     base_t;
     typedef base_t                         *   ptr_t; 
 
-    template< typename X, typename Y, typename R >
+    template< typename X, typename Y, typename Z, typename R >
     friend class generator_object;
 
     ptr_t  impl_;
@@ -58,7 +58,7 @@ private:
     typedef detail::generator_base< Result >    base_t;
     typedef base_t                          *   ptr_t; 
 
-    template< typename X, typename Y, typename R >
+    template< typename X, typename Y, typename Z, typename R >
     friend class generator_object;
 
     ptr_t  impl_;

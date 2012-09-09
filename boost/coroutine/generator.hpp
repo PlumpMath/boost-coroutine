@@ -8,6 +8,7 @@
 #define BOOST_CORO_GENERATOR_H
 
 #include <cstddef>
+#include <memory>
 
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
@@ -68,115 +69,271 @@ public:
 #ifndef BOOST_NO_RVALUE_REFERENCES
     template< typename Fn >
     generator( Fn && fn, attributes const& attr = attributes(),
-               ctx::stack_allocator const& stack_alloc = ctx::stack_allocator() ) :
+               ctx::stack_allocator const& stack_alloc = ctx::stack_allocator(),
+               std::allocator< generator > const& alloc = std::allocator< generator >() ) :
         detail::generator_resume<
             Result, generator< Result >
         >(),
-        impl_(
-            new detail::generator_object<
-                Fn, ctx::stack_allocator, Result
-            >( static_cast< Fn && >( fn), attr, stack_alloc) )
+        impl_()
     {
         BOOST_MPL_ASSERT((
             is_same<
                 void,
                 typename result_of< Fn() >::type
             >));
+
+        typedef detail::generator_object<
+                Fn,
+                ctx::stack_allocator,
+                std::allocator< generator >,
+                Result
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( static_cast< Fn && >( fn), attr, stack_alloc, a) );
+
         this->fetch_();
     }
 
     template< typename Fn, typename StackAllocator >
-    generator( Fn && fn, attributes const& attr = attributes(),
-               StackAllocator const& stack_alloc = StackAllocator() ) :
+    generator( Fn && fn, attributes const& attr,
+               StackAllocator const& stack_alloc,
+               std::allocator< generator > const& alloc = std::allocator< generator >() ) :
         detail::generator_resume<
             Result, generator< Result >
         >(),
-        impl_(
-            new detail::generator_object<
-                Fn, StackAllocator, Result
-            >( static_cast< Fn && >( fn), attr, stack_alloc) )
+        impl_()
     {
         BOOST_MPL_ASSERT((
             is_same<
                 void,
                 typename result_of< Fn() >::type
             >));
+
+        typedef detail::generator_object<
+                Fn,
+                StackAllocator,
+                std::allocator< generator >,
+                Result
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( static_cast< Fn && >( fn), attr, stack_alloc, a) );
+
+        this->fetch_();
+    }
+
+    template< typename Fn, typename StackAllocator, typename Allocator >
+    generator( Fn && fn, attributes const& attr,
+               StackAllocator const& stack_alloc,
+               Allocator const& alloc) :
+        detail::generator_resume<
+            Result, generator< Result >
+        >(),
+        impl_()
+    {
+        BOOST_MPL_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >));
+
+        typedef detail::generator_object<
+                Fn,
+                StackAllocator,
+                Allocator,
+                Result
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( static_cast< Fn && >( fn), attr, stack_alloc, a) );
+
         this->fetch_();
     }
 #else
     template< typename Fn >
     generator( Fn fn, attributes const& attr = attributes(),
-            ctx::stack_allocator const& stack_alloc = ctx::stack_allocator() ) :
+               ctx::stack_allocator const& stack_alloc = ctx::stack_allocator(),
+               std::allocator< generator > const& alloc = std::allocator< generator >() ) :
         detail::generator_resume<
             Result, generator< Result >
         >(),
-        impl_(
-            new detail::generator_object<
-                Fn, ctx::stack_allocator, Result
-            >( fn, attr, stack_alloc) )
+        impl_()
     {
         BOOST_MPL_ASSERT((
             is_same<
                 void,
                 typename result_of< Fn() >::type
             >));
+
+        typedef detail::generator_object<
+                Fn,
+                ctx::stack_allocator,
+                std::allocator< generator >,
+                Result
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
+
         this->fetch_();
     }
 
     template< typename Fn, typename StackAllocator >
-    generator( Fn fn, attributes const& attr = attributes(),
-            StackAllocator const& stack_alloc = StackAllocator() ) :
+    generator( Fn fn, attributes const& attr,
+               StackAllocator const& stack_alloc,
+               std::allocator< generator > const& alloc = std::allocator< generator >() ) :
         detail::generator_resume<
             Result, generator< Result >
         >(),
-        impl_(
-            new detail::generator_object<
-                Fn, StackAllocator, Result
-            >( fn, attr, stack_alloc) )
+        impl_()
     {
         BOOST_MPL_ASSERT((
             is_same<
                 void,
                 typename result_of< Fn() >::type
             >));
+
+        typedef detail::generator_object<
+                Fn,
+                StackAllocator,
+                std::allocator< generator >,
+                Result
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
+
+        this->fetch_();
+    }
+
+    template< typename Fn, typename StackAllocator, typename Allocator >
+    generator( Fn fn, attributes const& attr,
+               StackAllocator const& stack_alloc,
+               Allocator const& alloc) :
+        detail::generator_resume<
+            Result, generator< Result >
+        >(),
+        impl_()
+    {
+        BOOST_MPL_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >));
+
+        typedef detail::generator_object<
+                Fn,
+                StackAllocator,
+                Allocator,
+                Result
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
+
         this->fetch_();
     }
 
     template< typename Fn >
     generator( BOOST_RV_REF( Fn) fn, attributes const& attr = attributes(),
-            ctx::stack_allocator const& stack_alloc = ctx::stack_allocator() ) :
+            ctx::stack_allocator const& stack_alloc = ctx::stack_allocator(),
+            std::allocator< generator > const& alloc = std::allocator< generator >() ) :
         detail::generator_resume<
             Result, generator< Result >
         >(),
-        impl_(
-            new detail::generator_object<
-                Fn, ctx::stack_allocator, Result
-            >( fn, attr, stack_alloc) )
+        impl_()
     {
         BOOST_MPL_ASSERT((
             is_same<
                 void,
                 typename result_of< Fn() >::type
             >));
+
+        typedef detail::generator_object<
+                Fn,
+                ctx::stack_allocator,
+                std::allocator< generator >,
+                Result
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
+
         this->fetch_();
     }
 
     template< typename Fn, typename StackAllocator >
-    generator( BOOST_RV_REF( Fn) fn, attributes const& attr = attributes(),
-            StackAllocator const& stack_alloc = StackAllocator() ) :
+    generator( BOOST_RV_REF( Fn) fn, attributes const& attr,
+            StackAllocator const& stack_alloc,
+            std::allocator< generator > const& alloc = std::allocator< generator >() ) :
         detail::generator_resume<
             Result, generator< Result >
         >(),
-        impl_(
-            new detail::generator_object<
-                Fn, StackAllocator, Result
-            >( fn, attr, stack_alloc) )
+        impl_()
     {
         BOOST_MPL_ASSERT((
             is_same<
                 void,
                 typename result_of< Fn() >::type
             >));
+
+        typedef detail::generator_object<
+                Fn,
+                StackAllocator,
+                std::allocator< generator >,
+                Result
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
+
+        this->fetch_();
+    }
+
+    template< typename Fn, typename StackAllocator, typename Allocator >
+    generator( BOOST_RV_REF( Fn) fn, attributes const& attr,
+            StackAllocator const& stack_alloc,
+            Allocator const& alloc) :
+        detail::generator_resume<
+            Result, generator< Result >
+        >(),
+        impl_()
+    {
+        BOOST_MPL_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >));
+
+        typedef detail::generator_object<
+                Fn,
+                StackAllocator,
+                Allocator,
+                Result
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
+
         this->fetch_();
     }
 #endif

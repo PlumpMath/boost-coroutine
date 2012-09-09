@@ -275,10 +275,7 @@ fpu registers for perfromance reasons.
 
     #include <boost/coroutine/generator.hpp>
 
-    template<
-        typename Result,
-        typename StackAllocator = ctx::stack_allocator
-    >
+    template< typename Result >
     class generator
     {
     public:
@@ -292,13 +289,23 @@ fpu registers for perfromance reasons.
 
         generator();
 
-        template< typename Fn >
+        template<
+            typename Fn,
+            typename StackAllocator = ctx::stack_allocator,
+            typename Allocator =std::alocator< generator >
+        >
         generator( Fn fn, attributes const& attr = attributes(),
-                   StackAllocator alloc = StackAllocator() );
+                   StackAllocator stack_alloc = StackAllocator(),
+                   Allocator const& alloc = Allocator() ); 
 
-        template< typename Fn >
+        template<
+            typename Fn,
+            typename StackAllocator = ctx::stack_allocator,
+            typename Allocator =std::alocator< generator >
+        >
         generator( Fn && fn, attributes const& attr = attributes(),
-                   StackAllocator alloc = StackAllocator() );
+                   StackAllocator stack_alloc = StackAllocator(),
+                   Allocator const& alloc = Allocator() ); 
 
         generator( generator && other);
 
@@ -321,24 +328,28 @@ fpu registers for perfromance reasons.
 [[Throws:] [Nothing.]]
 ]
 
-[heading `template< typename Fn > generator( Fn fn, attributes const& attr, StackAllocator alloc)`]
+[heading `template< typename Fn, typename StackAllocator, typename Allocator >
+          generator( Fn fn, attributes const& attr, StackAllocator const& stack_alloc, Allocator const& alloc)`]
 [variablelist
 [[Preconditions:] [`size` > ctx::minimum_stacksize(), `size` < ctx::maximum_stacksize()
 when ! ctx::is_stack_unbound().]]
 [[Effects:] [Creates a generator which will execute `fn`. If the attribute
 `attr` is iconstructed with `stack_unwind` the destructor of `*this` unwinds the
 stack before destructing it. If `preserve_fpu` is `true` the floating-point
-registers are preserved between context switches.]]
+registers are preserved between context switches. For allocating/deallocating
+the stack `stack_alloc` is used. For allocating internal data Allocator is used.]]
 ]
 
-[heading `template< typename Fn > generator( Fn && fn, attributes const& attr, StackAllocator alloc)`]
+[heading `template< typename Fn, typename StackAllocator, typename Allocator >
+          generator( Fn && fn, attributes const& attr, StackAllocator const& stack_alloc, Allocator const& alloc)`]
 [variablelist
 [[Preconditions:] [`size` > ctx::minimum_stacksize(), `size` < ctx::maximum_stacksize()
 when ! ctx::is_stack_unbound().]]
 [[Effects:] [Creates a generator which will execute `fn`. If the attribute
 `attr` is iconstructed with `stack_unwind` the destructor of `*this` unwinds the
 stack before destructing it. If `preserve_fpu` is `true` the floating-point
-registers are preserved between context switches.]]
+registers are preserved between context switches. For allocating/deallocating
+the stack `stack_alloc` is used. For allocating internal data Allocator is used.]]
 ]
 
 [heading `generator( generator && other)`]

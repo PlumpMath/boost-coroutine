@@ -399,9 +399,8 @@ fpu registers for performance reasons.
     class coroutine;
 
     template<
-        typename  R,
-        typename  ArgTypes...,
-        typename  StackAllocator
+        typename R,
+        typename ArgTypes...
     >
     class coroutine< R ( ArgTypes...)>
     {
@@ -416,13 +415,23 @@ fpu registers for performance reasons.
 
         coroutine();
 
-        template< typename Fn >
+        template<
+            typename Fn,
+            typename StackAllocator = ctx::stack_allocator,
+            typename Allocator =std::alocator< generator >
+        >
         coroutine( Fn fn, attributes const& attr = attributes(),
-                   StackAllocator alloc = StackAllocator() );
+                   StackAllocator const& stack_alloc = StackAllocator(),
+                   Allocator const& alloc = Allocator() );
 
-        template< typename Fn >
+        template<
+            typename Fn,
+            typename StackAllocator = ctx::stack_allocator,
+            typename Allocator =std::alocator< generator >
+        >
         coroutine( Fn && fn, attributes const& attr = attributes(),
-                   StackAllocator alloc = StackAllocator() );
+                   StackAllocator stack_alloc = StackAllocator(),
+                   Allocator const& alloc = Allocator() );
 
         coroutine( coroutine && other);
 
@@ -447,24 +456,28 @@ fpu registers for performance reasons.
 [[Throws:] [Nothing.]]
 ]
 
-[heading `template< typename Fn > coroutine( Fn fn, attributes const& attr, StackAllocator alloc)`]
+[heading `template< typename Fn, typename StackAllocator, typename Allocator >
+          coroutine( Fn fn, attributes const& attr, StackAllocator const& stack_alloc, Allocator const& alloc)`]
 [variablelist
 [[Preconditions:] [`size` > ctx::minimum_stacksize(), `size` < ctx::maximum_stacksize()
 when ! ctx::is_stack_unbound().]]
 [[Effects:] [Creates a coroutine which will execute `fn`. If the attribute
 `attr` is constructed with `stack_unwind` the destructor of `*this` unwinds the
 stack before destructing it. If `preserve_fpu` is `true` the floating-point
-registers are preserved between context switches.]]
+registers are preserved between context switches. For allocating/deallocating
+the stack `stack_alloc` is used. For allocating internal data Allocator is used.]]
 ]
 
-[heading `template< typename Fn > coroutine( Fn && fn, attributes const& attr, StackAllocator alloc)`]
+[heading `template< typename Fn, typename StackAllocator, typename Allocator >
+          coroutine( Fn && fn, attributes const& attr, StackAllocator const& stack_alloc, Allocator const& alloc)`]
 [variablelist
 [[Preconditions:] [`size` > ctx::minimum_stacksize(), `size` < ctx::maximum_stacksize()
 when ! ctx::is_stack_unbound().]]
 [[Effects:] [Creates a coroutine which will execute `fn`. If the attribute
 `attr` is constructed with `stack_unwind` the destructor of `*this` unwinds the
 stack before destructing it. If `preserve_fpu` is `true` the floating-point
-registers are preserved between context switches.]]
+registers are preserved between context switches. For allocating/deallocating
+the stack `stack_alloc` is used. For allocating internal data Allocator is used.]]
 ]
 
 [heading `coroutine( coroutine && other)`]

@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_CORO_DETAIL_CONTEXT_BASE_RUN_H
-#define BOOST_CORO_DETAIL_CONTEXT_BASE_RUN_H
+#ifndef BOOST_CORO_DETAIL_COROUTINE_BASE_RUN_H
+#define BOOST_CORO_DETAIL_COROUTINE_BASE_RUN_H
 
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
@@ -31,10 +31,10 @@ namespace coro {
 namespace detail {
 
 template< typename Signature, typename D, typename Result, int arity >
-struct context_base_run;
+struct coroutine_base_run;
 
 template< typename Signature, typename D >
-struct context_base_run< Signature, D, void, 0 >
+struct coroutine_base_run< Signature, D, void, 0 >
 {
     void run_()
     {
@@ -47,13 +47,13 @@ struct context_base_run< Signature, D, void, 0 >
 };
 
 template< typename Signature, typename D, typename Result >
-struct context_base_run< Signature, D, Result, 0 >
+struct coroutine_base_run< Signature, D, Result, 0 >
 {
     typedef Result          result_t;
 
     optional< result_t >    result_;
 
-    context_base_run() BOOST_NOEXCEPT :
+    coroutine_base_run() BOOST_NOEXCEPT :
         result_()
     {}
 
@@ -68,13 +68,13 @@ struct context_base_run< Signature, D, Result, 0 >
 };
 
 template< typename Signature, typename D >
-struct context_base_run< Signature, D, void, 1 >
+struct coroutine_base_run< Signature, D, void, 1 >
 {
     typedef typename arg< Signature >::type_t   arg_t; \
 
     optional< arg_t >   args_;
 
-    context_base_run() BOOST_NOEXCEPT :
+    coroutine_base_run() BOOST_NOEXCEPT :
         args_()
     {}
 
@@ -89,7 +89,7 @@ struct context_base_run< Signature, D, void, 1 >
 };
 
 template< typename Signature, typename D, typename Result >
-struct context_base_run< Signature, D, Result, 1 >
+struct coroutine_base_run< Signature, D, Result, 1 >
 {
     typedef typename arg< Signature >::type_t   arg_t;
     typedef Result                              result_t;
@@ -97,7 +97,7 @@ struct context_base_run< Signature, D, Result, 1 >
     optional< arg_t >       args_;
     optional< result_t >    result_;
 
-    context_base_run() BOOST_NOEXCEPT :
+    coroutine_base_run() BOOST_NOEXCEPT :
         args_(), result_()
     {}
 
@@ -120,13 +120,13 @@ struct context_base_run< Signature, D, Result, 1 >
 #define BOOST_CONTEXT_BASE_RUN_ARGS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_CONTEXT_BASE_RUN_ARG,~)
 #define BOOST_CONTEXT_BASE_RUN(z,n,unused) \
 template< typename Signature, typename D > \
-struct context_base_run< Signature, D, void, n > \
+struct coroutine_base_run< Signature, D, void, n > \
 { \
     typedef typename arg< Signature >::type_t   arg_t; \
 \
     optional< arg_t >       args_; \
 \
-    context_base_run() BOOST_NOEXCEPT : \
+    coroutine_base_run() BOOST_NOEXCEPT : \
         args_() \
     {} \
 \
@@ -141,7 +141,7 @@ struct context_base_run< Signature, D, void, n > \
 }; \
 \
 template< typename Signature, typename D, typename Result > \
-struct context_base_run< Signature, D, Result, n > \
+struct coroutine_base_run< Signature, D, Result, n > \
 { \
     typedef Result                              result_t; \
     typedef typename arg< Signature >::type_t   arg_t; \
@@ -149,7 +149,7 @@ struct context_base_run< Signature, D, Result, n > \
     optional< arg_t >       args_; \
     optional< result_t >    result_; \
 \
-    context_base_run() BOOST_NOEXCEPT : \
+    coroutine_base_run() BOOST_NOEXCEPT : \
         args_(), result_() \
     {} \
 \
@@ -177,4 +177,4 @@ BOOST_PP_REPEAT_FROM_TO(2,11,BOOST_CONTEXT_BASE_RUN,~)
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_CORO_DETAIL_CONTEXT_BASE_RUN_H
+#endif // BOOST_CORO_DETAIL_COROUTINE_BASE_RUN_H

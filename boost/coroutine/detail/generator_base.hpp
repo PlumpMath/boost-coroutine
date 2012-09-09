@@ -90,7 +90,7 @@ private:
 
 protected:
     template< typename StackAllocator >
-    void deallocate( StackAllocator & alloc) BOOST_NOEXCEPT
+    void deallocate_stack( StackAllocator & alloc) BOOST_NOEXCEPT
     {
         printf("XXX: deallocate() called\n");
         if ( ! is_complete() ) printf("XXX: ! is_complete()\n");
@@ -104,6 +104,7 @@ protected:
     }
 
     virtual void exec_() = 0;
+    virtual void deallocate_object() = 0;
 
 public:
     template< typename StackAllocator >
@@ -195,7 +196,7 @@ public:
     { ++p->use_count_; }
 
     friend inline void intrusive_ptr_release( generator_base * p) BOOST_NOEXCEPT
-    { if ( --p->use_count_ == 0) delete p; }
+    { if ( --p->use_count_ == 0) p->deallocate_object(); }
 };
 
 }}}

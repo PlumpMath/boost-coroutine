@@ -17,7 +17,7 @@
 #include <boost/type_traits/function_traits.hpp>
 
 #include <boost/coroutine/detail/config.hpp>
-#include <boost/coroutine/detail/context_base.hpp>
+#include <boost/coroutine/detail/coroutine_base.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX

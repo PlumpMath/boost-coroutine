@@ -39,9 +39,7 @@ cycle_t test_cycles( cycle_t ov, bool preserve_fpu)
 {
     coro_t c(
         boost::bind( fn, _1),
-        ctx::default_stacksize(),
-        coro::stack_unwind,
-        preserve_fpu);
+        coro::attributes( preserve_fpu) );
 
     // cache warum-up
 BOOST_PP_REPEAT_FROM_TO( 0, BOOST_PP_LIMIT_MAG, CALL_COROUTINE, ~)
@@ -64,9 +62,7 @@ zeit_t test_zeit( zeit_t ov, bool preserve_fpu)
 {
     coro_t c(
         boost::bind( fn, _1),
-        ctx::default_stacksize(),
-        coro::stack_unwind,
-        preserve_fpu);
+        coro::attributes( preserve_fpu) );
 
     // cache warum-up
 BOOST_PP_REPEAT_FROM_TO( 0, BOOST_PP_LIMIT_MAG, CALL_COROUTINE, ~)
