@@ -19,12 +19,13 @@
 ]
 
 
+[def __boost_asio__ [*Boost.Asio]]
 [def __boost_build__ [*Boost.Build]]
 [def __boost_context__ [*Boost.Context]]
 [def __boost_coroutine__ [*Boost.Coroutine]]
 [def __boost_exception__ [*Boost.Exception]]
 [def __boost_move__ [*Boost.Move]]
-[def __boost_version__ [*Boost-1.50.0]]
+[def __boost_version__ [*Boost-1.51.0]]
 
 [def __coro__ ['coroutine]]
 [def __coro_fn__ ['coroutine-function]]
@@ -47,6 +48,7 @@
 [def __gen_yield__ ['generator<>::self_t::yield()]]
 [def __gen_yield_break__ ['generator<>::self_t::yield_break()]]
 [def __gen_eval__ ['generator<>::operator unspecified_bool_type()]]
+[def __io_svc__ ['io_service]]
 [def __not_a_coro__ ['not-a-coroutine]]
 [def __not_a_gen__ ['not-a-generator]]
 [def __signature__ ['Signature]]

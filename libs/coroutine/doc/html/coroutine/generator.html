@@ -1,0 +1,348 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Generator</title>
+<link rel="stylesheet" href="../../../../../doc/src/boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../index.html" title="Coroutine">
+<link rel="up" href="../index.html" title="Coroutine">
+<link rel="prev" href="coroutine/example.html" title="Example: input iterator">
+<link rel="next" href="generator/generator.html" title="Class generator">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%"><tr>
+<td valign="top"><img alt="Boost C++ Libraries" width="277" height="86" src="../../../../../boost.png"></td>
+<td align="center"><a href="../../../../../index.html">Home</a></td>
+<td align="center"><a href="../../../../../libs/libraries.htm">Libraries</a></td>
+<td align="center"><a href="http://www.boost.org/users/people.html">People</a></td>
+<td align="center"><a href="http://www.boost.org/users/faq.html">FAQ</a></td>
+<td align="center"><a href="../../../../../more/index.htm">More</a></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="coroutine/example.html"><img src="../../../../../doc/src/images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../../../../../doc/src/images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../../../../../doc/src/images/home.png" alt="Home"></a><a accesskey="n" href="generator/generator.html"><img src="../../../../../doc/src/images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="coroutine.generator"></a><a class="link" href="generator.html" title="Generator">Generator</a>
+</h2></div></div></div>
+<div class="toc"><dl><dt><span class="section"><a href="generator/generator.html">Class <code class="computeroutput"><span class="identifier">generator</span></code></a></span></dt></dl></div>
+<p>
+      A <span class="emphasis"><em>generator</em></span> is a simple coroutine controling the iteration
+      behaviour of a loop. It generates a sequence of values, but instead of returning
+      them at once, a <span class="emphasis"><em>generator</em></span> behaves like an iterator yielding
+      a values one at the time if it is called.
+    </p>
+<p>
+      Each instance of <span class="emphasis"><em>generator</em></span> represents a context (CPU registers
+      and stack space) of execution or <span class="emphasis"><em>not-a-generator</em></span>. Objects
+      of type <span class="emphasis"><em>generator</em></span> are moveable but not copyable and can
+      be returned by a function.
+    </p>
+<pre class="programlisting"><span class="identifier">boost</span><span class="special">::</span><span class="identifier">coro</span><span class="special">::</span><span class="identifier">generator</span><span class="special">&lt;</span> <span class="keyword">int</span> <span class="special">&gt;</span> <span class="identifier">f</span><span class="special">();</span>
+
+<span class="keyword">void</span> <span class="identifier">f</span><span class="special">()</span>
+<span class="special">{</span>
+    <span class="identifier">boost</span><span class="special">::</span><span class="identifier">coro</span><span class="special">::</span><span class="identifier">generator</span><span class="special">&lt;</span> <span class="keyword">int</span> <span class="special">&gt;</span> <span class="identifier">c</span><span class="special">(</span> <span class="identifier">f</span><span class="special">()</span> <span class="special">);</span>
+    <span class="identifier">c</span><span class="special">();</span>
+<span class="special">}</span>
+</pre>
+<div class="warning"><table border="0" summary="Warning">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="../../../../../doc/src/images/warning.png"></td>
+<th align="left">Warning</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+        If <span class="emphasis"><em>generator</em></span> is used in a multithreaded application,
+        it can migrated between threads, but must not reference <span class="emphasis"><em>thread-local
+        storage</em></span>.
+      </p></td></tr>
+</table></div>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../../../../../doc/src/images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+        <span class="bold"><strong>Boost.Move</strong></span> is used to emulate rvalue references.
+      </p></td></tr>
+</table></div>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../../../../../doc/src/images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+        If <span class="emphasis"><em>fiber-local storage</em></span> is used on Windows, the user
+        is responsible for calling <span class="emphasis"><em>::FlsAlloc()</em></span>, <span class="emphasis"><em>::FlsFree()</em></span>.
+      </p></td></tr>
+</table></div>
+<a name="coroutine.generator.executing_a_generator"></a><h4>
+<a name="idp6375248"></a>
+      <a class="link" href="generator.html#coroutine.generator.executing_a_generator">Executing a generator</a>
+    </h4>
+<p>
+      A new <span class="emphasis"><em>generator</em></span> is created from a callable object (known
+      as the <span class="emphasis"><em>generator-function</em></span>). The stack size, stack unwinding
+      and floating-point preserving behavior are determined by additional arguments.
+    </p>
+<p>
+      The <span class="emphasis"><em>generator</em></span> constructor uses the <span class="emphasis"><em>StackStackAllocator
+      concept</em></span> from <span class="bold"><strong>Boost.Context</strong></span> to allocate
+      an associated stack, and the destructor uses the same <span class="emphasis"><em>StackStackAllocator
+      concept</em></span> to deallocate the stack. The default <span class="emphasis"><em>StackStackAllocator
+      concept</em></span> is <span class="emphasis"><em>ctx::stack_allocator</em></span>, but a custom
+      stack-allocator can be passed to the constructor (see documentation of <span class="bold"><strong>Boost.Context</strong></span>).
+    </p>
+<p>
+      The first argument of <span class="emphasis"><em>generator-function</em></span> must be of type
+      <span class="emphasis"><em>generator&lt;&gt;::self_t</em></span>, used for yielding the active
+      generator.
+    </p>
+<pre class="programlisting"><span class="keyword">typedef</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">coro</span><span class="special">::</span><span class="identifier">generator</span><span class="special">&lt;</span> <span class="keyword">int</span> <span class="special">&gt;</span> <span class="identifier">gen_t</span><span class="special">;</span>
+
+<span class="keyword">void</span> <span class="identifier">f</span><span class="special">(</span> <span class="identifier">gen_t</span><span class="special">::</span><span class="identifier">self_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">)</span>
+<span class="special">{</span>
+    <span class="special">...</span>
+    <span class="identifier">self</span><span class="special">.</span><span class="identifier">yield</span><span class="special">(</span> <span class="number">11</span><span class="special">);</span>
+    <span class="special">...</span>
+<span class="special">}</span>
+
+<span class="identifier">gen_t</span> <span class="identifier">g</span><span class="special">(</span> <span class="identifier">f</span><span class="special">);</span>
+<span class="keyword">int</span> <span class="identifier">y</span> <span class="special">=</span> <span class="identifier">g</span><span class="special">();</span>
+</pre>
+<p>
+      <span class="emphasis"><em>generator-function</em></span> must return <code class="computeroutput"><span class="keyword">void</span></code>
+      and accept one parameter of type <code class="computeroutput"><span class="emphasis"><em>generator&lt;&gt;::self_t</em></span></code>.
+      Use <code class="computeroutput"><span class="identifier">boost</span><span class="special">::</span><span class="identifier">bind</span><span class="special">()</span></code> if
+      it is required to passed additional parameters to <span class="emphasis"><em>generator-function</em></span>
+      (bound by <code class="computeroutput"><span class="identifier">boost</span><span class="special">::</span><span class="identifier">bind</span><span class="special">()</span></code>).
+      If a reference is required, use boost::ref.
+    </p>
+<p>
+      Usally a <span class="emphasis"><em>generator</em></span> is called inside loops. The <span class="emphasis"><em>generator-function</em></span>
+      executed until <span class="emphasis"><em>generator&lt;&gt;::self_t::yield()</em></span> is called.
+      The value passed to <span class="emphasis"><em>generator&lt;&gt;::self_t::yield()</em></span>
+      is used as the generated value. The next time the same <span class="emphasis"><em>generator</em></span>
+      is called in a subsequent iteration, the execution of the <span class="emphasis"><em>generator-function</em></span>
+      is resumed after <span class="emphasis"><em>generator&lt;&gt;::self_t::yield()</em></span>, until
+      <span class="emphasis"><em>generator&lt;&gt;::self_t::yield()</em></span> is called again. <span class="emphasis"><em>generator-function</em></span>
+      can be terminated by <span class="emphasis"><em>generator&lt;&gt;::self_t::yield_break()</em></span>,
+      at which time the loop enclosing the <span class="emphasis"><em>generator</em></span> is terminated.
+    </p>
+<pre class="programlisting"><span class="keyword">typedef</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">coro</span><span class="special">::</span><span class="identifier">generator</span><span class="special">&lt;</span> <span class="keyword">int</span> <span class="special">&gt;</span>    <span class="identifier">gen_t</span><span class="special">;</span>
+
+<span class="keyword">void</span> <span class="identifier">power</span><span class="special">(</span> <span class="identifier">gen_t</span><span class="special">::</span><span class="identifier">self_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">number</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">exponent</span><span class="special">)</span>
+<span class="special">{</span>
+    <span class="keyword">int</span> <span class="identifier">counter</span> <span class="special">=</span> <span class="number">0</span><span class="special">,</span> <span class="identifier">result</span> <span class="special">=</span> <span class="number">1</span><span class="special">;</span>
+    <span class="keyword">while</span> <span class="special">(</span> <span class="identifier">counter</span><span class="special">++</span> <span class="special">&lt;</span> <span class="identifier">exponent</span><span class="special">)</span>
+    <span class="special">{</span>
+        <span class="identifier">result</span> <span class="special">=</span> <span class="identifier">result</span> <span class="special">*</span> <span class="identifier">number</span><span class="special">;</span>
+        <span class="identifier">self</span><span class="special">.</span><span class="identifier">yield</span><span class="special">(</span> <span class="identifier">result</span><span class="special">);</span>
+    <span class="special">}</span>
+<span class="special">}</span>
+
+<span class="keyword">int</span> <span class="identifier">main</span><span class="special">()</span>
+<span class="special">{</span>
+    <span class="special">{</span>
+        <span class="identifier">gen_t</span> <span class="identifier">pw</span><span class="special">(</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">bind</span><span class="special">(</span> <span class="identifier">power</span><span class="special">,</span> <span class="identifier">_1</span><span class="special">,</span> <span class="number">2</span><span class="special">,</span> <span class="number">8</span><span class="special">)</span> <span class="special">);</span>
+        <span class="keyword">while</span> <span class="special">(</span> <span class="identifier">pw</span><span class="special">)</span>
+            <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">pw</span><span class="special">()</span> <span class="special">&lt;&lt;</span>  <span class="string">" "</span><span class="special">;</span>
+    <span class="special">}</span>
+
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"\nDone"</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+
+    <span class="keyword">return</span> <span class="identifier">EXIT_SUCCESS</span><span class="special">;</span>
+<span class="special">}</span>
+
+<span class="identifier">output</span><span class="special">:</span>
+    <span class="number">2</span> <span class="number">4</span> <span class="number">8</span> <span class="number">16</span> <span class="number">32</span> <span class="number">64</span> <span class="number">128</span> <span class="number">256</span>
+    <span class="identifier">Done</span>
+</pre>
+<p>
+      <span class="emphasis"><em>generator-function</em></span> is invoked the first time inside the
+      constructor of <span class="emphasis"><em>generator</em></span> (pre-fetching an retur nvalue).
+      <span class="emphasis"><em>generator&lt;&gt;::operator()()</em></span> can be called as long
+      as <span class="emphasis"><em>generator</em></span> remains valid (has an value to return), e.g.
+      <span class="emphasis"><em>generator&lt;&gt;::operator unspecified_bool_type()</em></span> returns
+      <code class="computeroutput"><span class="keyword">true</span></code>.
+    </p>
+<pre class="programlisting"><span class="keyword">typedef</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">coro</span><span class="special">::</span><span class="identifier">generator</span><span class="special">&lt;</span> <span class="keyword">int</span> <span class="special">&gt;</span> <span class="identifier">gen_t</span><span class="special">;</span>
+
+<span class="keyword">void</span> <span class="identifier">fn</span><span class="special">(</span> <span class="identifier">gen_t</span><span class="special">::</span><span class="identifier">self_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">j</span><span class="special">)</span>
+<span class="special">{</span>
+    <span class="keyword">for</span><span class="special">(</span> <span class="keyword">int</span> <span class="identifier">i</span> <span class="special">=</span> <span class="number">0</span><span class="special">;</span> <span class="identifier">i</span> <span class="special">&lt;</span> <span class="identifier">j</span><span class="special">;</span> <span class="special">++</span><span class="identifier">i</span><span class="special">)</span>
+    <span class="special">{</span>
+        <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"fn(): local variable i == "</span> <span class="special">&lt;&lt;</span> <span class="identifier">i</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+
+        <span class="comment">// save current generator
+</span>        <span class="comment">// value of local variable is preserved
+</span>        <span class="comment">// transfer execution control back to main()
+</span>        <span class="identifier">self</span><span class="special">.</span><span class="identifier">yield</span><span class="special">(</span> <span class="identifier">i</span><span class="special">);</span>
+
+        <span class="comment">// generator&lt;&gt;::operator()() was called
+</span>        <span class="comment">// execution control transfered back from main()    
+</span>    <span class="special">}</span>
+<span class="special">}</span>
+
+<span class="keyword">int</span> <span class="identifier">main</span><span class="special">(</span> <span class="keyword">int</span> <span class="identifier">argc</span><span class="special">,</span> <span class="keyword">char</span> <span class="special">*</span> <span class="identifier">argv</span><span class="special">[])</span>
+<span class="special">{</span>
+    <span class="identifier">gen_t</span> <span class="identifier">g</span><span class="special">(</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">bind</span><span class="special">(</span> <span class="identifier">fn</span><span class="special">,</span> <span class="identifier">_1</span><span class="special">,</span> <span class="number">7</span><span class="special">)</span> <span class="special">);</span>
+
+    <span class="keyword">while</span> <span class="special">(</span> <span class="identifier">g</span><span class="special">)</span>
+    <span class="special">{</span>
+        <span class="comment">// execution control is transfered to g
+</span>        <span class="keyword">int</span> <span class="identifier">x</span> <span class="special">=</span> <span class="identifier">g</span><span class="special">();</span>
+        <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"main(): generated == "</span> <span class="special">&lt;&lt;</span> <span class="identifier">x</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+
+        <span class="comment">// yield() was called within fn()
+</span>    <span class="special">}</span>
+
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Done"</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+
+    <span class="keyword">return</span> <span class="identifier">EXIT_SUCCESS</span><span class="special">;</span>
+<span class="special">}</span>
+
+<span class="identifier">output</span><span class="special">:</span>
+    <span class="identifier">fn</span><span class="special">():</span> <span class="identifier">local</span> <span class="identifier">variable</span> <span class="identifier">i</span> <span class="special">==</span> <span class="number">0</span>
+    <span class="identifier">main</span><span class="special">():</span> <span class="identifier">generated</span> <span class="special">==</span> <span class="number">0</span>
+    <span class="identifier">fn</span><span class="special">():</span> <span class="identifier">local</span> <span class="identifier">variable</span> <span class="identifier">i</span> <span class="special">==</span> <span class="number">1</span>
+    <span class="identifier">main</span><span class="special">():</span> <span class="identifier">generated</span> <span class="special">==</span> <span class="number">1</span>
+    <span class="identifier">fn</span><span class="special">():</span> <span class="identifier">local</span> <span class="identifier">variable</span> <span class="identifier">i</span> <span class="special">==</span> <span class="number">2</span>
+    <span class="identifier">main</span><span class="special">():</span> <span class="identifier">generated</span> <span class="special">==</span> <span class="number">2</span>
+    <span class="identifier">fn</span><span class="special">():</span> <span class="identifier">local</span> <span class="identifier">variable</span> <span class="identifier">i</span> <span class="special">==</span> <span class="number">3</span>
+    <span class="identifier">main</span><span class="special">():</span> <span class="identifier">generated</span> <span class="special">==</span> <span class="number">3</span>
+    <span class="identifier">fn</span><span class="special">():</span> <span class="identifier">local</span> <span class="identifier">variable</span> <span class="identifier">i</span> <span class="special">==</span> <span class="number">4</span>
+    <span class="identifier">main</span><span class="special">():</span> <span class="identifier">generated</span> <span class="special">==</span> <span class="number">4</span>
+    <span class="identifier">fn</span><span class="special">():</span> <span class="identifier">local</span> <span class="identifier">variable</span> <span class="identifier">i</span> <span class="special">==</span> <span class="number">5</span>
+    <span class="identifier">main</span><span class="special">():</span> <span class="identifier">generated</span> <span class="special">==</span> <span class="number">5</span>
+    <span class="identifier">fn</span><span class="special">():</span> <span class="identifier">local</span> <span class="identifier">variable</span> <span class="identifier">i</span> <span class="special">==</span> <span class="number">6</span>
+    <span class="identifier">main</span><span class="special">():</span> <span class="identifier">generated</span> <span class="special">==</span> <span class="number">6</span>
+    <span class="identifier">Done</span>
+</pre>
+<div class="warning"><table border="0" summary="Warning">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="../../../../../doc/src/images/warning.png"></td>
+<th align="left">Warning</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+        Calling <span class="emphasis"><em>generator&lt;&gt;::operator()()</em></span> from inside
+        the same generator results in undefined behaviour.
+      </p></td></tr>
+</table></div>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../../../../../doc/src/images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+        In contrast to threads, which are preemtive, <span class="emphasis"><em>generator</em></span>
+        switches are cooperative (programmer controls when switch will happen). The
+        kernel is not involved in the generator switches.
+      </p></td></tr>
+</table></div>
+<a name="coroutine.generator.exceptions_in__emphasis_generator_function__emphasis_"></a><h4>
+<a name="idp6643136"></a>
+      <a class="link" href="generator.html#coroutine.generator.exceptions_in__emphasis_generator_function__emphasis_">Exceptions
+      in <span class="emphasis"><em>generator-function</em></span></a>
+    </h4>
+<p>
+      An excepton thrown inside <span class="emphasis"><em>generator-function</em></span> (transfered
+      via exception-pointer - see <span class="bold"><strong>Boost.Exception</strong></span>
+      for details and requirements) will be re-thrown by <span class="emphasis"><em>generator&lt;&gt;::operator()()</em></span>.
+    </p>
+<div class="important"><table border="0" summary="Important">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Important]" src="../../../../../doc/src/images/important.png"></td>
+<th align="left">Important</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+        Code executed by generator must not prevent the propagation of the <span class="emphasis"><em>forced_unwind</em></span>
+        exception. Absorbing that exception will cause stack unwinding to fail. Thus,
+        any code that catches all exceptions must rethrow the pending exception.
+      </p></td></tr>
+</table></div>
+<pre class="programlisting"><span class="keyword">try</span>
+<span class="special">{</span>
+    <span class="comment">// code that might throw
+</span><span class="special">}</span>
+<span class="keyword">catch</span><span class="special">(</span> <span class="identifier">forced_unwind</span><span class="special">)</span>
+<span class="special">{</span>
+    <span class="keyword">throw</span><span class="special">;</span>
+<span class="special">}</span>
+<span class="keyword">catch</span><span class="special">(...)</span>
+<span class="special">{</span>
+    <span class="comment">// possibly not rethrow pending exception
+</span><span class="special">}</span>
+</pre>
+<a name="coroutine.generator.stack_unwinding"></a><h4>
+<a name="idp6660800"></a>
+      <a class="link" href="generator.html#coroutine.generator.stack_unwinding">Stack unwinding</a>
+    </h4>
+<p>
+      Sometimes it is necessary to unwind the stack of an unfinished generator to
+      destroy local stack variables so they can release allocated resources (RAII
+      pattern). The third argument of the generator constructor, <code class="computeroutput"><span class="identifier">do_unwind</span></code>,
+      indicates whether the destructor should unwind the stack (unwind stack as default).
+    </p>
+<p>
+      Stack unwinding assumes the following preconditions:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          The generator is not <span class="emphasis"><em>not-a-generator</em></span>
+        </li>
+<li class="listitem">
+          The generator is not complete
+        </li>
+<li class="listitem">
+          The generator is not running
+        </li>
+<li class="listitem">
+          The generator owns a stack
+        </li>
+</ul></div>
+<p>
+      After unwinding, a <span class="emphasis"><em>generator</em></span> is complete.
+    </p>
+<div class="important"><table border="0" summary="Important">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Important]" src="../../../../../doc/src/images/important.png"></td>
+<th align="left">Important</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+        You must not swallow <span class="emphasis"><em>forced_unwind</em></span> exceptions!
+      </p></td></tr>
+</table></div>
+<a name="coroutine.generator.fpu_preserving"></a><h4>
+<a name="idp6671696"></a>
+      <a class="link" href="generator.html#coroutine.generator.fpu_preserving">FPU preserving</a>
+    </h4>
+<p>
+      Some applications do not use floating-point registers and can disable preserving
+      fpu registers for perfromance reasons.
+    </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../../../../../doc/src/images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+        According to the ABIs the FPU registers are preserved by default.
+      </p></td></tr>
+</table></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2009 Oliver Kowalke<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="coroutine/example.html"><img src="../../../../../doc/src/images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../../../../../doc/src/images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../../../../../doc/src/images/home.png" alt="Home"></a><a accesskey="n" href="generator/generator.html"><img src="../../../../../doc/src/images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

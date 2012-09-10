@@ -11,21 +11,21 @@ Each instance of __coro__ represents a context (CPU registers and stack
 space) of execution or __not_a_coro__. Objects of type __coro__ are
 moveable but not copyable and can be returned by a function.
 
-        boost::coro::coroutine< void() > make_coroutine();
+        boost::coro::coroutine< void() > f();
 
         void f()
         {
-            boost::coro::coroutine< void() > c( make_coroutine() );
+            boost::coro::coroutine< void() > c( f() );
             c();
         }
-
-[note __boost_move__ is used to emulate rvalue references.]
 
 [warning If __coro__ is used in a multithreaded application, it can
 migrate between threads, but must not reference __tls__.]
 
 [warning If __fls__ is used on Windows, the user is responsible for calling 
 __fls_alloc__, __fls_free__.]
+
+[note __boost_move__ is used to emulate rvalue references.]
 
 
 [heading Executing a coroutine]
@@ -94,8 +94,7 @@ original routine.
 
             std::cout << "main() starts coroutine c" << std::endl;
 
-            // yield was called so we returned
-            while ( ! ctx.is_complete() )
+            while ( ! c.is_complete() )
             {
                 std::cout << "main() calls coroutine c" << std::endl;
                 // execution control is transfered to c
@@ -127,12 +126,12 @@ original routine.
             main() calls coroutine c
             Done
 
-[note In contrast to threads, which are preemtive, __coro__ switches are
-cooperative (programmer controls when a switch will happen). The kernel is not
-involved in the coroutine switches.]
-
 [warning Calling __coro_op__ from inside the same coroutine results in
 undefined behaviour.]
+
+[note In contrast to threads, which are preemptive, __coro__ switches are
+cooperative (programmer controls when a switch will happen). The kernel is not
+involved in the coroutine switches.]
 
 
 [heading Transfer of data]
@@ -140,11 +139,12 @@ undefined behaviour.]
 The first template argument of __coro__, __signature__, defines the signature of
 the __coro_fn__ and its return type.
 
-[note __coro_self__ is not part of __signature__ and is allways expected to be the first
+[note __coro_self__ is not part of __signature__ and is always expected to be the first
 argument of __coro_fn__.]
 
 __coro_op__  accepts arguments as defined in __signature__ and has the same return
-type. The arguments passed to __coro_op__, in one coroutine, is returned by __coro_yield__
+type. The arguments passed to __coro_op__, in one coroutine, is returned
+(as a boost::tuple) by __coro_yield__
 in the other coroutine or, if it is the first call to __coro_op__ (__coro__ was not
 started), the __coro_fn__ will be entered and the arguments are passed to __coro_fn__
 on entry.
@@ -283,6 +283,8 @@ resumed with __coro_op__).]
 
 An exception thrown inside __coro_fn__ (transfered via exception-pointer - see
 __boost_exception__ for details and requirements) will be re-thrown by __coro_op__.
+If the thrown exception does not follow the guidlines from __boost_exception__
+an exception of type  `unknown_exception` will be re-thrown.
 
 [important Code executed by coroutine must not prevent the propagation of the
 __forced_unwind__ exception.  Absorbing that exception will cause stack
@@ -557,5 +559,7 @@ __terminated_ex__.]]
 ]
 
 [endsect]
+
+[include example.qbk]
 
 [endsect]

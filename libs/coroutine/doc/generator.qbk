@@ -7,8 +7,8 @@
 
 [section:generator Generator]
 
-A __gen__ is a simple coroutine that can be used to control the iteration
-behaviour of a loop. It generates a sequence of values, but instead of
+A __gen__ is a simple coroutine controling the iteration behaviour of a loop.
+It generates a sequence of values, but instead of
 returning them at once, a __gen__ behaves like an iterator yielding a values one
 at the time if it is called.
 
@@ -16,21 +16,21 @@ Each instance of __gen__ represents a context (CPU registers and stack space) of
 execution or __not_a_gen__. Objects of type __gen__ are moveable but not copyable
 and can be returned by a function.
 
-        boost::coro::generator< int > make_generator();
+        boost::coro::generator< int > f();
 
         void f()
         {
-            boost::coro::generator< int > c( make_generator() );
+            boost::coro::generator< int > c( f() );
             c();
         }
+
+[warning If __gen__ is used in a multithreaded application, it can
+migrated between threads, but must not reference __tls__.]
 
 [note __boost_move__ is used to emulate rvalue references.]
 
 [note If __fls__ is used on Windows, the user is responsible for calling 
 __fls_alloc__, __fls_free__.]
-
-[warning If __gen__ is used in a multithreaded application, it can
-migrated between threads, but must not reference __tls__.]
 
 
 [heading Executing a generator]
@@ -50,18 +50,20 @@ the active generator.
 
         typedef boost::coro::generator< int > gen_t;
 
-        void f( gen_t::self_t & self, int i)
+        void f( gen_t::self_t & self)
         {
             ...
-            self.yield();
+            self.yield( 11);
             ...
         }
 
-        gen_t g( boost::bind( f, _1, 7) );
+        gen_t g( f);
         int y = g();
 
-The __gen_fn__, as well as its arguments, if any, are copied into the
-generator's state.  If a reference is required, use boost::ref.
+__gen_fn__ must return `void` and accept one parameter of type `__gen_self__`.
+Use `boost::bind()` if it is required to passed additional parameters to
+__gen_fn__ (bound by `boost::bind()`). If a reference is required,
+use boost::ref.
 
 Usally a __gen__ is called inside loops. The __gen_fn__ executed until
 __gen_yield__ is called. The value passed to __gen_yield__ is used as the
@@ -74,7 +76,7 @@ enclosing the __gen__ is terminated.
 
         typedef boost::coro::generator< int >    gen_t;
 
-        int power( gen_t::self_t & self, int number, int exponent)
+        void power( gen_t::self_t & self, int number, int exponent)
         {
             int counter = 0, result = 1;
             while ( counter++ < exponent)
@@ -82,16 +84,14 @@ enclosing the __gen__ is terminated.
                 result = result * number;
                 self.yield( result);
             }
-            self.yield_break();
         }
 
         int main()
         {
             {
                 gen_t pw( boost::bind( power, _1, 2, 8) );
-                while ( pw) {
+                while ( pw)
                     std::cout << pw() <<  " ";
-                }
             }
 
             std::cout << "\nDone" << std::endl;
@@ -104,20 +104,14 @@ enclosing the __gen__ is terminated.
             Done
 
 
-[note The maximum number of arguments of __gen_fn__ is 10.]
-
-__gen_fn__ is invoked the first time inside the constructor of __gen__.
-__gen_op__ can be called as long as __gen__ remains valid, e.g. __gen_eval__
-returns `true`.
-If __gen_fn__ can not return valid values anymore __gen_yield_break__ should be
-called. This function returns the execution control back to the caller and sets
-the __gen__ to be complete (`is_complete()` returns `true`). In this case
-__gen_op__ does not throw an exception like __coro__. Of curse the __gen_fn__
-can be exited with a `return` expression.
+__gen_fn__ is invoked the first time inside the constructor of __gen__
+(pre-fetching an retur nvalue).
+__gen_op__ can be called as long as __gen__ remains valid (has an value to
+return), e.g. __gen_eval__ returns `true`.
 
         typedef boost::coro::generator< int > gen_t;
 
-        int fn( gen_t::self_t & self, int j)
+        void fn( gen_t::self_t & self, int j)
         {
             for( int i = 0; i < j; ++i)
             {
@@ -131,14 +125,12 @@ can be exited with a `return` expression.
                 // generator<>::operator()() was called
                 // execution control transfered back from main()    
             }
-            self.yield_break();
         }
 
         int main( int argc, char * argv[])
         {
             gen_t g( boost::bind( fn, _1, 7) );
 
-            // yield was called so we returned
             while ( g)
             {
                 // execution control is transfered to g
@@ -147,7 +139,6 @@ can be exited with a `return` expression.
 
                 // yield() was called within fn()
             }
-            // yield_break() was called within fn()
 
             std::cout << "Done" << std::endl;
 
@@ -171,54 +162,13 @@ can be exited with a `return` expression.
             main(): generated == 6
             Done
 
+[warning Calling __gen_op__ from inside the same generator results in
+undefined behaviour.]
+
 [note In contrast to threads, which are preemtive, __gen__ switches are
 cooperative (programmer controls when switch will happen). The kernel is not
 involved in the generator switches.]
 
-[warning Calling __gen_op__ from inside the same generator results in
-undefined behaviour.]
-
-[heading Exit a __gen_fn__]
-
-__gen_yield_break__ does not take arguments and returns nothing, it leaves the
-current __gen__ and jumps back to the calling routine. __gen_eval__ will return
-`false`.
-
-        typedef boost::coro::generator< int(int) > gen_t;
-
-        int fn( coro_t::self_t & self, int a)
-        {
-            for ( int i = 0; i < a; ++i)
-                self.yield( i);
-            self.yield_break();
-            return -1;
-        }
-
-        int main( int argc, char * argv[])
-        {
-            gen_t g( boost::bind( fn, _1, _2) );
-
-            std::cout << "main(): call generator g" << std::endl;
-            while ( g)
-            {
-                int res = g();
-                std::cout << "main(): == " << res << std::endl;
-            }
-
-            std::cout << "Done" << std::endl;
-
-            return EXIT_SUCCESS;
-        }
-
-        output:
-            main(): call generator g
-            main(): == 0
-            main(): == 1
-            main(): == 2
-            Done
-
-[important After calling __gen_yield_break__ the __gen__ is complete (can not
-resumed with __gen_op__).]
 
 [heading Exceptions in __gen_fn__]
 
@@ -275,7 +225,7 @@ fpu registers for perfromance reasons.
 
     #include <boost/coroutine/generator.hpp>
 
-    template< typename Result >
+    template< typename R >
     class generator
     {
     public:
@@ -283,8 +233,6 @@ fpu registers for perfromance reasons.
         {
         public:
             void yield( R);
-
-            void yield_break();
         };
 
         generator();
@@ -317,7 +265,7 @@ fpu registers for perfromance reasons.
 
         void swap( generator & other);
 
-        Result operator()();
+        R operator()();
     };
 
     void swap( generator & l, generator & r);
@@ -387,28 +335,18 @@ of `other`.]]
 [[Throws:] [Nothing.]]
 ]
 
-[heading `Result operator()()`]
+[heading `R operator()()`]
 [variablelist
-[[Preconditions:] [`*this` is not a __not_a_gen__, `! is_complete()`.]]
+[[Preconditions:] [`! is_complete()`.]]
 [[Effects:] [The return value is the argument passed to __gen_yield__.]] 
 [[Throws:] [Re-throws exceptions exceptions thrown inside __gen_fn__.]]
 ]
 
-[heading `void self_t::yield( Result)`]
+[heading `void self_t::yield( R)`]
 [variablelist
 [[Effects:] [Gives execution control back to calling context by returning
-a value of type Result. The return type of this function is a __tuple__
-containing the arguments passed to __gen_op__.]]
+a value of type R.]] 
 [[Throws:] [Nothing.]]
-]
-
-[heading `void self_t::yield_break()`]
-[variablelist
-[[Effects:] [Gives execution control back to calling context and sets the 
-__gen__ to be complete. __gen_op__ in the other generator throws exception
-__terminated_ex__.]]
-[[Postconditions:] [`*this` is complete, which is `operator unspecified-bool-type()` returns
-`false`.]]
 ]
 
 [heading Non-member function `swap()`]
