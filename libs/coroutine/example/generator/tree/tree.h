@@ -105,14 +105,10 @@ public:
     { self_.yield( l); }
 };
 
-leaf & enumerate_leafs( gen_t::self_t & self, node::ptr_t root)
+void enumerate_leafs( gen_t::self_t & self, node::ptr_t root)
 {
     tree_visitor v( self);
     root->accept( v);
-    self.yield_break();
-    // dummy code; never reached
-    leaf * dummy = 0;
-    return * dummy;
 }
 
 # if defined(BOOST_MSVC)

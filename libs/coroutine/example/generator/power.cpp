@@ -12,7 +12,7 @@
 
 typedef boost::coro::generator< int >    gen_t;
 
-int power( gen_t::self_t & self, int number, int exponent)
+void power( gen_t::self_t & self, int number, int exponent)
 {
     int counter = 0;
     int result = 1;
@@ -21,16 +21,14 @@ int power( gen_t::self_t & self, int number, int exponent)
             result = result * number;
             self.yield( result);
     }
-    self.yield_break();
-    return -1;
 }
 
 int main()
 {
     {
-        gen_t pw( boost::bind( power, _1, 2, 8) );
-        while ( pw) {
-            std::cout << pw() <<  " ";
+        gen_t gen( boost::bind( power, _1, 2, 8) );
+        while ( boost::optional< int > val = gen() ) {
+            std::cout << * val <<  " ";
         }
     }
 

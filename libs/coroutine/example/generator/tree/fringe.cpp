@@ -16,9 +16,11 @@
 
 bool match_trees( gen_t & te1, gen_t & te2)
 {
-    if ( ! te1 && ! te2) return true;
-    if ( ! te1 || ! te2) return false;
-    if ( te1().value == te2().value) return match_trees( te1, te2);
+    boost::optional< leaf & > l1 = te1();
+    boost::optional< leaf & > l2 = te2();
+    if ( ! l1 && ! l2) return true;
+    if ( ! l1 || ! l2) return false;
+    if ( l1->value == l2->value) return match_trees( te1, te2);
     else return false;
 }
 

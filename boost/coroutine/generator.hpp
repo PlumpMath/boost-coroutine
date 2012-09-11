@@ -93,8 +93,6 @@ public:
         impl_ = ptr_t(
             // placement new
             ::new( a.allocate( 1) ) object_t( static_cast< Fn && >( fn), attr, stack_alloc, a) );
-
-        this->fetch_();
     }
 
     template< typename Fn, typename StackAllocator >
@@ -123,8 +121,6 @@ public:
         impl_ = ptr_t(
             // placement new
             ::new( a.allocate( 1) ) object_t( static_cast< Fn && >( fn), attr, stack_alloc, a) );
-
-        this->fetch_();
     }
 
     template< typename Fn, typename StackAllocator, typename Allocator >
@@ -153,8 +149,6 @@ public:
         impl_ = ptr_t(
             // placement new
             ::new( a.allocate( 1) ) object_t( static_cast< Fn && >( fn), attr, stack_alloc, a) );
-
-        this->fetch_();
     }
 #else
     template< typename Fn >
@@ -183,8 +177,6 @@ public:
         impl_ = ptr_t(
             // placement new
             ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
-
-        this->fetch_();
     }
 
     template< typename Fn, typename StackAllocator >
@@ -213,8 +205,6 @@ public:
         impl_ = ptr_t(
             // placement new
             ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
-
-        this->fetch_();
     }
 
     template< typename Fn, typename StackAllocator, typename Allocator >
@@ -243,8 +233,6 @@ public:
         impl_ = ptr_t(
             // placement new
             ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
-
-        this->fetch_();
     }
 
     template< typename Fn >
@@ -273,8 +261,6 @@ public:
         impl_ = ptr_t(
             // placement new
             ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
-
-        this->fetch_();
     }
 
     template< typename Fn, typename StackAllocator >
@@ -303,8 +289,6 @@ public:
         impl_ = ptr_t(
             // placement new
             ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
-
-        this->fetch_();
     }
 
     template< typename Fn, typename StackAllocator, typename Allocator >
@@ -333,8 +317,6 @@ public:
         impl_ = ptr_t(
             // placement new
             ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
-
-        this->fetch_();
     }
 #endif
 
@@ -354,16 +336,13 @@ public:
     }
 
     operator unspecified_bool_type() const BOOST_NOEXCEPT
-    { return impl_ && this->has_value_() ? unspecified_bool : 0; }
+    { return impl_ ? unspecified_bool : 0; }
 
     bool operator!() const BOOST_NOEXCEPT
-    { return ! impl_ || ! this->has_value_(); }
+    { return ! impl_; }
 
     void swap( generator & other) BOOST_NOEXCEPT
-    {
-        impl_.swap( other.impl_);
-        this->swap_( other);
-    }
+    { impl_.swap( other.impl_); }
 };
 
 template< typename Result >

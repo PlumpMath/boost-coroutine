@@ -30,8 +30,8 @@ int main( int argc, char * argv[])
         gen_t gen(
             boost::bind(
                 enumerate_leafs, _1, root) );
-        while ( gen) {
-            std::cout << gen().value <<  " ";
+        while ( boost::optional< leaf & > val = gen() ) {
+            std::cout << val->value <<  " ";
         }
     }
 

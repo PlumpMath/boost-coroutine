@@ -24,93 +24,28 @@ namespace coro {
 namespace detail {
 
 template< typename Result, typename D >
-class generator_resume;
-
-template< typename D >
-class generator_resume< void, D >
-{
-public:
-    generator_resume() BOOST_NOEXCEPT :
-        nxt_( false)
-    {}
-
-    void operator()()
-    {
-        D * dp = static_cast< D * >( this);
-        BOOST_ASSERT( dp->impl_);
-
-        fetch_();
-    }
-
-protected:
-    void fetch_()
-    {
-        D * dp = static_cast< D * >( this);
-        BOOST_ASSERT( dp->impl_);
-        try
-        {
-            if ( ! dp->impl_->is_complete() )
-            {
-                if ( ! dp->impl_->is_started() ) dp->impl_->start();
-                else dp->impl_->resume();
-                nxt_ = true;
-            }
-            else nxt_ = false;
-        }
-        catch ( coroutine_terminated const&)
-        { nxt_ = false; }
-    }
-
-    bool has_value_() const
-    { return nxt_; }
-
-    void swap_( generator_resume & other)
-    { std::swap( nxt_, other.nxt_); }
-
-private:
-    bool nxt_;
-};
-
-template< typename Result, typename D >
 class generator_resume
 {
 public:
-    Result operator()()
+    boost::optional< Result > operator()()
     {
         D * dp = static_cast< D * >( this);
         BOOST_ASSERT( dp->impl_);
 
-        Result tmp( * result_);
-        fetch_();
-        return tmp;
-    }
-
-protected:
-    void fetch_()
-    {
-        D * dp = static_cast< D * >( this);
-        BOOST_ASSERT( dp->impl_);
+        optional< Result >  result;
         try
         {
             if ( ! dp->impl_->is_complete() )
             {
-                if ( ! dp->impl_->is_started() ) dp->impl_->start( result_);
-                else dp->impl_->resume( result_);
+                if ( ! dp->impl_->is_started() ) dp->impl_->start( result);
+                else dp->impl_->resume( result);
             }
-            else result_ = none;
+            else result = none;
         }
         catch ( coroutine_terminated const&)
-        { result_ = none; }
+        { result = none; }
+        return result;
     }
-
-    bool has_value_() const BOOST_NOEXCEPT
-    { return result_; }
-
-    void swap_( generator_resume & other) BOOST_NOEXCEPT
-    { result_.swap( other.result_); }
-
-private:
-    optional< Result >    result_;
 };
 
 }}}

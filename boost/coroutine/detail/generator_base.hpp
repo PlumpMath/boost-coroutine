@@ -7,8 +7,6 @@
 #ifndef BOOST_CORO_DETAIL_GENERATOR_BASE_H
 #define BOOST_CORO_DETAIL_GENERATOR_BASE_H
 
-#include <cstdio>
-
 #include <algorithm>
 #include <cstddef>
 #include <cstdlib>
@@ -92,10 +90,6 @@ protected:
     template< typename StackAllocator >
     void deallocate_stack( StackAllocator & alloc) BOOST_NOEXCEPT
     {
-        printf("XXX: deallocate() called\n");
-        if ( ! is_complete() ) printf("XXX: ! is_complete()\n");
-        if ( is_started() || is_resumed() ) printf("XXX: is_started() && is_resumed()\n");
-        if ( unwind_requested() ) printf("XXX: unwind_requested()\n");
         if ( ! is_complete()
                 && ( is_started() || is_resumed() )
                 && ( unwind_requested() ) )

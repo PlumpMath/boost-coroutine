@@ -25,7 +25,6 @@ namespace ctx = boost::ctx;
 int value1 = 0;
 std::string value2 = "";
 
-typedef coro::generator< void > gen_void;
 typedef coro::generator< int > gen_int;
 typedef coro::generator< std::string > gen_string;
 typedef coro::generator< double > gen_double;
@@ -90,10 +89,10 @@ public:
 
 struct my_exception {};
 
-void f1( gen_void::self_t & s)
-{ return; }
+void f1( gen_int::self_t & s)
+{}
 
-void f2( gen_void::self_t &)
+void f2( gen_int::self_t &)
 { ++value1; }
 
 void f3( gen_int::self_t & self)
@@ -140,11 +139,6 @@ void f12( gen_int::self_t & self, int a, int b)
     self.yield( 3);
 }
 
-void f13( gen_int::self_t & self)
-{
-    self.yield( 3);
-}
-
 template< typename E >
 void f14( gen_int::self_t & self, E const& e)
 {
@@ -154,8 +148,8 @@ void f14( gen_int::self_t & self, E const& e)
 void test_move()
 {
     {
-        gen_void gen1;
-        gen_void gen2( boost::bind( f1, _1) );
+        gen_int gen1;
+        gen_int gen2( boost::bind( f1, _1) );
         BOOST_CHECK( ! gen1);
         BOOST_CHECK( gen2);
         gen1 = boost::move( gen2);
@@ -178,10 +172,8 @@ void test_complete()
 {
     value1 = 0;
 
-    gen_void gen( boost::bind( f2, _1) );
-    BOOST_CHECK( gen);
+    gen_int gen( boost::bind( f2, _1) );
     gen();
-    BOOST_CHECK( ! gen);
     BOOST_CHECK_EQUAL( ( int)1, value1);
 }
 
@@ -190,64 +182,59 @@ void test_jump()
     value1 = 0;
 
     gen_int gen( boost::bind( f3, _1) );
-    BOOST_CHECK( gen);
-    int res = gen();
-    BOOST_CHECK( gen);
-    BOOST_CHECK_EQUAL( ( int)1, res);
+    boost::optional< int > res = gen();
+    BOOST_CHECK_EQUAL( ( int)1, * res);
     res = gen();
-    BOOST_CHECK( ! gen);
-    BOOST_CHECK_EQUAL( ( int)2, res);
+    BOOST_CHECK_EQUAL( ( int)2, * res);
+    res = gen();
+    BOOST_CHECK( ! res);
 }
 
 void test_result_int()
 {
     gen_int gen( boost::bind( f4, _1) );
-    BOOST_CHECK( gen);
-    int result = gen();
-    BOOST_CHECK( gen);
-    BOOST_CHECK_EQUAL( 3, result);
-    result = gen();
-    BOOST_CHECK( ! gen);
-    BOOST_CHECK_EQUAL( 7, result);
+    boost::optional< int > res = gen();
+    BOOST_CHECK_EQUAL( 3, * res);
+    res = gen();
+    BOOST_CHECK_EQUAL( 7, * res);
+    res = gen();
+    BOOST_CHECK( ! res);
 }
 
 void test_result_string()
 {
     gen_string gen( boost::bind( f5, _1) );
-    BOOST_CHECK( gen);
-    std::string result = gen();
-    BOOST_CHECK( gen);
-    BOOST_CHECK_EQUAL( std::string("abc"), result);
-    result = gen();
-    BOOST_CHECK( ! gen);
-    BOOST_CHECK_EQUAL( std::string("xyz"), result);
+    boost::optional< std::string > res= gen();
+    BOOST_CHECK_EQUAL( std::string("abc"), * res);
+    res= gen();
+    BOOST_CHECK_EQUAL( std::string("xyz"), * res);
+    res = gen();
+    BOOST_CHECK( ! res);
 }
 
 void test_fp()
 {
     gen_double gen( boost::bind( f8, _1, 7.35, 3.14) );
-    BOOST_CHECK( gen);
-    double res = gen();
-    BOOST_CHECK( gen);
-    BOOST_CHECK_EQUAL( ( double) 10.49, res);
+    boost::optional< double > res = gen();
+    BOOST_CHECK_EQUAL( ( double) 10.49, * res);
     res = gen();
-    BOOST_CHECK( ! gen);
-    BOOST_CHECK_EQUAL( ( double) 11.47, res);
+    BOOST_CHECK_EQUAL( ( double) 11.47, * res);
+    res = gen();
+    BOOST_CHECK( ! res);
 }
 
 void test_tuple()
 {
     int a = 3, b = 7;
     gen_tuple gen( boost::bind( f11, _1, boost::ref( a), boost::ref( b) ) );
-    BOOST_CHECK( gen);
-    boost::tuple<int&,int&> res = gen();
-    BOOST_CHECK( gen);
-    BOOST_CHECK_EQUAL( & a, & res.get< 0 >() );
-    BOOST_CHECK_EQUAL( & b, & res.get< 1 >() );
+    boost::optional< boost::tuple<int&,int&> > res = gen();
+    BOOST_CHECK_EQUAL( & a, & res->get< 0 >() );
+    BOOST_CHECK_EQUAL( & b, & res->get< 1 >() );
     res = gen();
-    BOOST_CHECK( ! gen);
-    BOOST_CHECK_EQUAL( & a, & res.get< 0 >() );
-    BOOST_CHECK_EQUAL( & b, & res.get< 1 >() );
+    BOOST_CHECK_EQUAL( & a, & res->get< 0 >() );
+    BOOST_CHECK_EQUAL( & b, & res->get< 1 >() );
+    res = gen();
+    BOOST_CHECK( ! res);
 }
 
 void test_unwind()
@@ -255,12 +242,9 @@ void test_unwind()
     value1 = 0;
     {
         gen_int gen( boost::bind( f12, _1, 3, 7) );
-        BOOST_CHECK( gen);
+        boost::optional< int > res = gen();
+        BOOST_CHECK_EQUAL( ( int) 10, * res);
         BOOST_CHECK_EQUAL( ( int) 7, value1);
-        int res = gen();
-        BOOST_CHECK_EQUAL( ( int) 10, res);
-        BOOST_CHECK_EQUAL( ( int) 7, value1);
-        BOOST_CHECK( gen);
     }
     BOOST_CHECK_EQUAL( ( int) 0, value1);
 }
@@ -272,23 +256,11 @@ void test_no_unwind()
         gen_int gen(
             boost::bind( f12, _1, 3, 7),
             coro::attributes( coro::no_stack_unwind) );
-        BOOST_CHECK( gen);
+        boost::optional< int > res = gen();
+        BOOST_CHECK_EQUAL( ( int) 10, * res);
         BOOST_CHECK_EQUAL( ( int) 7, value1);
-        int res = gen();
-        BOOST_CHECK_EQUAL( ( int) 10, res);
-        BOOST_CHECK_EQUAL( ( int) 7, value1);
-        BOOST_CHECK( gen);
     }
     BOOST_CHECK_EQUAL( ( int) 7, value1);
-}
-
-void test_yield_break()
-{
-    gen_int gen( boost::bind( f13, _1) );
-    BOOST_CHECK( gen);
-    int res = gen();
-    BOOST_CHECK_EQUAL( ( int) 3, res);
-    BOOST_CHECK( ! gen);
 }
 
 void test_exceptions()
@@ -298,7 +270,6 @@ void test_exceptions()
     try
     {
         gen_int gen( boost::bind( f14< std::runtime_error >, _1, ex) );
-        BOOST_CHECK( gen);
         gen();
         BOOST_CHECK( false);
     }
@@ -325,7 +296,6 @@ boost::unit_test::test_suite * init_unit_test_suite( int, char* [])
     test->add( BOOST_TEST_CASE( & test_tuple) );
     test->add( BOOST_TEST_CASE( & test_unwind) );
     test->add( BOOST_TEST_CASE( & test_no_unwind) );
-    test->add( BOOST_TEST_CASE( & test_yield_break) );
     test->add( BOOST_TEST_CASE( & test_exceptions) );
 
     return test;
