@@ -15,11 +15,9 @@
 #include <boost/context/stack_allocator.hpp>
 #include <boost/context/stack_utils.hpp>
 #include <boost/move/move.hpp>
-#include <boost/mpl/assert.hpp>
-#include <boost/type_traits/is_convertible.hpp>
+#include <boost/static_assert.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/type_traits/function_traits.hpp>
-#include <boost/utility/enable_if.hpp>
 #include <boost/utility/result_of.hpp>
 
 #include <boost/coroutine/attributes.hpp>
@@ -76,11 +74,12 @@ public:
         >(),
         impl_()
     {
-        BOOST_MPL_ASSERT((
+        BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
+        BOOST_STATIC_ASSERT((
             is_same<
                 void,
                 typename result_of< Fn() >::type
-            >));
+            >::value));
 
         typedef detail::generator_object<
                 Fn,
@@ -104,11 +103,12 @@ public:
         >(),
         impl_()
     {
-        BOOST_MPL_ASSERT((
+        BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
+        BOOST_STATIC_ASSERT((
             is_same<
                 void,
                 typename result_of< Fn() >::type
-            >));
+            >::value));
 
         typedef detail::generator_object<
                 Fn,
@@ -132,11 +132,12 @@ public:
         >(),
         impl_()
     {
-        BOOST_MPL_ASSERT((
+        BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
+        BOOST_STATIC_ASSERT((
             is_same<
                 void,
                 typename result_of< Fn() >::type
-            >));
+            >::value));
 
         typedef detail::generator_object<
                 Fn,
@@ -160,11 +161,12 @@ public:
         >(),
         impl_()
     {
-        BOOST_MPL_ASSERT((
+        BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
+        BOOST_STATIC_ASSERT((
             is_same<
                 void,
                 typename result_of< Fn() >::type
-            >));
+            >::value));
 
         typedef detail::generator_object<
                 Fn,
@@ -188,11 +190,12 @@ public:
         >(),
         impl_()
     {
-        BOOST_MPL_ASSERT((
+        BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
+        BOOST_STATIC_ASSERT((
             is_same<
                 void,
                 typename result_of< Fn() >::type
-            >));
+            >::value));
 
         typedef detail::generator_object<
                 Fn,
@@ -216,11 +219,12 @@ public:
         >(),
         impl_()
     {
-        BOOST_MPL_ASSERT((
+        BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
+        BOOST_STATIC_ASSERT((
             is_same<
                 void,
                 typename result_of< Fn() >::type
-            >));
+            >::value));
 
         typedef detail::generator_object<
                 Fn,
@@ -244,11 +248,12 @@ public:
         >(),
         impl_()
     {
-        BOOST_MPL_ASSERT((
+        BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
+        BOOST_STATIC_ASSERT((
             is_same<
                 void,
                 typename result_of< Fn() >::type
-            >));
+            >::value));
 
         typedef detail::generator_object<
                 Fn,
@@ -272,11 +277,12 @@ public:
         >(),
         impl_()
     {
-        BOOST_MPL_ASSERT((
+        BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
+        BOOST_STATIC_ASSERT((
             is_same<
                 void,
                 typename result_of< Fn() >::type
-            >));
+            >::value));
 
         typedef detail::generator_object<
                 Fn,
@@ -300,11 +306,12 @@ public:
         >(),
         impl_()
     {
-        BOOST_MPL_ASSERT((
+        BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
+        BOOST_STATIC_ASSERT((
             is_same<
                 void,
                 typename result_of< Fn() >::type
-            >));
+            >::value));
 
         typedef detail::generator_object<
                 Fn,
