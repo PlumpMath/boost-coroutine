@@ -23,7 +23,6 @@
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/generator_base.hpp>
 #include <boost/coroutine/detail/generator_object.hpp>
-#include <boost/coroutine/detail/generator_resume.hpp>
 #include <boost/coroutine/detail/generator_self.hpp>
 #include <boost/coroutine/flags.hpp>
 
@@ -35,17 +34,11 @@ namespace boost {
 namespace coro {
 
 template< typename Result >
-class generator :
-    public detail::generator_resume<
-        Result, generator< Result >
-    >
+class generator
 {
 private:
     typedef detail::generator_base< Result >    base_t;
     typedef typename base_t::ptr_t              ptr_t;
-
-    template< typename X, typename Y >
-    friend class detail::generator_resume;
 
     ptr_t  impl_;
 
@@ -58,9 +51,6 @@ public:
     static void unspecified_bool( generator ***) {}
 
     generator() BOOST_NOEXCEPT :
-        detail::generator_resume<
-            Result, generator< Result >
-        >(),
         impl_()
     {}
 
@@ -69,9 +59,6 @@ public:
     generator( Fn && fn, attributes const& attr = attributes(),
                ctx::stack_allocator const& stack_alloc = ctx::stack_allocator(),
                std::allocator< generator > const& alloc = std::allocator< generator >() ) :
-        detail::generator_resume<
-            Result, generator< Result >
-        >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
@@ -98,9 +85,6 @@ public:
     generator( Fn && fn, attributes const& attr,
                StackAllocator const& stack_alloc,
                std::allocator< generator > const& alloc = std::allocator< generator >() ) :
-        detail::generator_resume<
-            Result, generator< Result >
-        >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
@@ -127,9 +111,6 @@ public:
     generator( Fn && fn, attributes const& attr,
                StackAllocator const& stack_alloc,
                Allocator const& alloc) :
-        detail::generator_resume<
-            Result, generator< Result >
-        >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
@@ -156,9 +137,6 @@ public:
     generator( Fn fn, attributes const& attr = attributes(),
                ctx::stack_allocator const& stack_alloc = ctx::stack_allocator(),
                std::allocator< generator > const& alloc = std::allocator< generator >() ) :
-        detail::generator_resume<
-            Result, generator< Result >
-        >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
@@ -185,9 +163,6 @@ public:
     generator( Fn fn, attributes const& attr,
                StackAllocator const& stack_alloc,
                std::allocator< generator > const& alloc = std::allocator< generator >() ) :
-        detail::generator_resume<
-            Result, generator< Result >
-        >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
@@ -214,9 +189,6 @@ public:
     generator( Fn fn, attributes const& attr,
                StackAllocator const& stack_alloc,
                Allocator const& alloc) :
-        detail::generator_resume<
-            Result, generator< Result >
-        >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
@@ -243,9 +215,6 @@ public:
     generator( BOOST_RV_REF( Fn) fn, attributes const& attr = attributes(),
             ctx::stack_allocator const& stack_alloc = ctx::stack_allocator(),
             std::allocator< generator > const& alloc = std::allocator< generator >() ) :
-        detail::generator_resume<
-            Result, generator< Result >
-        >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
@@ -272,9 +241,6 @@ public:
     generator( BOOST_RV_REF( Fn) fn, attributes const& attr,
             StackAllocator const& stack_alloc,
             std::allocator< generator > const& alloc = std::allocator< generator >() ) :
-        detail::generator_resume<
-            Result, generator< Result >
-        >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
@@ -301,9 +267,6 @@ public:
     generator( BOOST_RV_REF( Fn) fn, attributes const& attr,
             StackAllocator const& stack_alloc,
             Allocator const& alloc) :
-        detail::generator_resume<
-            Result, generator< Result >
-        >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((! is_same< void, Result >::value));
@@ -328,9 +291,6 @@ public:
 #endif
 
     generator( BOOST_RV_REF( generator) other) BOOST_NOEXCEPT :
-        detail::generator_resume<
-            Result, generator< Result >
-        >(),
         impl_()
     { swap( other); }
 
@@ -350,6 +310,23 @@ public:
 
     void swap( generator & other) BOOST_NOEXCEPT
     { impl_.swap( other.impl_); }
+
+    boost::optional< Result > operator()()
+    {
+        optional< Result >  result;
+        try
+        {
+            if ( ! impl_->is_complete() )
+            {
+                if ( ! impl_->is_started() ) impl_->start( result);
+                else impl_->resume( result);
+            }
+            else result = none;
+        }
+        catch ( coroutine_terminated const&)
+        { result = none; }
+        return result;
+    }
 };
 
 template< typename Result >

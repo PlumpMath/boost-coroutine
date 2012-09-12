@@ -58,10 +58,11 @@ struct coroutine_base_suspend< Signature, D, Result, 0 >
 {
     typedef Result  result_t;
 
-    void suspend( typename param_type< result_t >::type param)
+    void suspend( typename param_type< result_t >::type param_)
     {
         D * dp = static_cast< D * >( this);
 
+        typename param_type< result_t >::type param( param_);
         dp->native_suspend( ( intptr_t) & param);
     }
 };
@@ -72,10 +73,11 @@ struct coroutine_base_suspend
     typedef Result  result_t;
     typedef typename arg< Signature >::type_t   arg_t;
 
-    arg_t suspend( typename param_type< result_t >::type param)
+    arg_t suspend( typename param_type< result_t >::type param_)
     {
         D * dp = static_cast< D * >( this);
 
+        typename param_type< result_t >::type param( param_);
         intptr_t ret = dp->native_suspend( ( intptr_t) & param);
         return * ( typename remove_reference< arg_t >::type *) ret;
     }

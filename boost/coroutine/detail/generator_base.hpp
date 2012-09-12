@@ -23,10 +23,8 @@
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
-#include <boost/coroutine/detail/generator_base_resume.hpp>
-#include <boost/coroutine/detail/generator_base_start.hpp>
-#include <boost/coroutine/detail/generator_base_suspend.hpp>
 #include <boost/coroutine/detail/flags.hpp>
+#include <boost/coroutine/detail/param_type.hpp>
 #include <boost/coroutine/exceptions.hpp>
 #include <boost/coroutine/flags.hpp>
 
@@ -60,11 +58,7 @@ void trampoline_( intptr_t vp)
 }
 
 template< typename Result >
-class generator_base :
-    private noncopyable,
-    public generator_base_start< generator_base< Result >, Result >,
-    public generator_base_resume< generator_base< Result >, Result >,
-    public generator_base_suspend< generator_base< Result >, Result >
+class generator_base : private noncopyable
 {
 public:
     typedef intrusive_ptr< generator_base >   ptr_t;
@@ -72,12 +66,6 @@ public:
 private:
     template< typename T >
     friend void trampoline_( intptr_t);
-    template< typename D, typename R >
-    friend struct generator_base_start;
-    template< typename D, typename R >
-    friend struct generator_base_resume;
-    template< typename D, typename R >
-    friend struct generator_base_suspend;
 
     std::size_t             use_count_;
     ctx::fcontext_t         caller_;
@@ -144,7 +132,7 @@ public:
         BOOST_ASSERT( is_complete() );
     }
 
-    intptr_t native_start()
+    void start( optional< Result > & result)
     {
         BOOST_ASSERT( ! is_complete() );
         BOOST_ASSERT( ! is_started() );
@@ -154,12 +142,17 @@ public:
         flags_ |= flag_running;
         intptr_t ret = ctx::jump_fcontext( & caller_, & callee_, ( intptr_t) this, preserve_fpu_);
         flags_ &= ~flag_running;
+
         if ( 0 != ( flags_ & flag_has_exception) )
             rethrow_exception( except_);
-        return ret; 
+
+        if ( 0 != ret)
+            result = * ( typename remove_reference< Result >::type *) ret;
+        else
+            result = none;
     }
 
-    intptr_t native_resume( intptr_t param)
+    void resume( optional< Result > & result)
     {
         BOOST_ASSERT( is_started() );
         BOOST_ASSERT( ! is_complete() );
@@ -167,23 +160,28 @@ public:
 
         flags_ |= flag_resumed;
         flags_ |= flag_running;
-        intptr_t ret = ctx::jump_fcontext( & caller_, & callee_, param, preserve_fpu_);
+        intptr_t ret = ctx::jump_fcontext( & caller_, & callee_, 0, preserve_fpu_);
         flags_ &= ~flag_running;
+
         if ( 0 != ( flags_ & flag_has_exception) )
             rethrow_exception( except_);
-        return ret; 
+
+        if ( 0 != ret)
+            result = * ( typename remove_reference< Result >::type *) ret;
+        else
+            result = none;
     }
 
-    intptr_t native_suspend( intptr_t param)
+    void suspend( typename param_type< Result >::type param_)
     {
         BOOST_ASSERT( ! is_complete() );
         BOOST_ASSERT( is_running() );
 
+        typename param_type< Result >::type param( param_);
         flags_ &= ~flag_running;
-        intptr_t ret = ctx::jump_fcontext( & callee_, & caller_, param, preserve_fpu_);
+        ctx::jump_fcontext( & callee_, & caller_, ( intptr_t) & param, preserve_fpu_);
         if ( 0 != ( flags_ & flag_unwind_stack) )
             throw forced_unwind();
-        return ret;
     }
 
     friend inline void intrusive_ptr_add_ref( generator_base * p) BOOST_NOEXCEPT

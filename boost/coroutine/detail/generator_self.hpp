@@ -25,33 +25,6 @@ namespace coro {
 namespace detail {
 
 template< typename Result >
-class generator_self;
-
-template<>
-class generator_self< void >
-{
-private:
-    typedef detail::generator_base< void >     base_t;
-    typedef base_t                         *   ptr_t; 
-
-    template< typename X, typename Y, typename Z, typename R >
-    friend class generator_object;
-
-    ptr_t  impl_;
-
-    generator_self( ptr_t impl) BOOST_NOEXCEPT :
-        impl_( impl)
-    { BOOST_ASSERT( impl_); }
-
-public:
-    void yield()
-    {
-        BOOST_ASSERT( impl_);
-        impl_->suspend();
-    }
-};
-
-template< typename Result >
 class generator_self
 {
 private:
