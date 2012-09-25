@@ -184,10 +184,14 @@ void test_move()
         coro_void_void coro1;
         coro_void_void coro2( boost::bind( f1, _1) );
         BOOST_CHECK( ! coro1);
+        BOOST_CHECK( coro1.empty() );
         BOOST_CHECK( coro2);
+        BOOST_CHECK( ! coro2.empty() );
         coro1 = boost::move( coro2);
         BOOST_CHECK( coro1);
+        BOOST_CHECK( ! coro1.empty() );
         BOOST_CHECK( ! coro2);
+        BOOST_CHECK( coro2.empty() );
     }
 
     {

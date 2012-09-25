@@ -51,6 +51,11 @@ private:
     template< typename X, typename Y, typename Z, int >
     friend struct detail::coroutine_resume;
 
+    struct dummy
+    { void nonnull() {} };
+
+    typedef void ( dummy::*safe_bool)();
+
     ptr_t  impl_;
 
     BOOST_MOVABLE_BUT_NOT_COPYABLE( coroutine);
@@ -61,9 +66,6 @@ public:
         typename function_traits< Signature >::result_type,
         function_traits< Signature >::arity
     >                                                           self_t;
-    typedef void ( * unspecified_bool_type)( coroutine ***);
-
-    static void unspecified_bool( coroutine ***) {}
 
     coroutine() BOOST_NOEXCEPT :
         detail::coroutine_resume<
@@ -312,24 +314,26 @@ public:
 
     coroutine & operator=( BOOST_RV_REF( coroutine) other) BOOST_NOEXCEPT
     {
-        if ( this == & other) return * this;
         coroutine tmp( boost::move( other) );
         swap( tmp);
         return * this;
     }
 
-    operator unspecified_bool_type() const BOOST_NOEXCEPT
-    { return impl_ ? unspecified_bool : 0; }
+    bool empty() const
+    { return ! impl_; }
+
+    operator safe_bool() const BOOST_NOEXCEPT
+    { return empty() ? 0 : & dummy::nonnull; }
 
     bool operator!() const BOOST_NOEXCEPT
-    { return ! impl_; }
+    { return empty(); }
 
     void swap( coroutine & other) BOOST_NOEXCEPT
     { impl_.swap( other.impl_); }
 
     bool is_complete() const BOOST_NOEXCEPT
     {
-        BOOST_ASSERT( impl_);
+        BOOST_ASSERT( ! empty() );
         return impl_->is_complete();
     }
 };
