@@ -25,27 +25,27 @@ struct attributes
 {
     std::size_t     size;
     flag_unwind_t   do_unwind;
-    bool            preserve_fpu;
+    flag_fpu_t      preserve_fpu;
 
     attributes() BOOST_NOEXCEPT :
         size( ctx::default_stacksize() ),
         do_unwind( stack_unwind),
-        preserve_fpu( true)
+        preserve_fpu( fpu_preserved)
     {}
 
     explicit attributes( std::size_t size_) BOOST_NOEXCEPT :
         size( size_),
         do_unwind( stack_unwind),
-        preserve_fpu( true)
+        preserve_fpu( fpu_preserved)
     {}
 
     explicit attributes( flag_unwind_t do_unwind_) BOOST_NOEXCEPT :
         size( ctx::default_stacksize() ),
         do_unwind( do_unwind_),
-        preserve_fpu( true)
+        preserve_fpu( fpu_preserved)
     {}
 
-    explicit attributes( bool preserve_fpu_) BOOST_NOEXCEPT :
+    explicit attributes( flag_fpu_t preserve_fpu_) BOOST_NOEXCEPT :
         size( ctx::default_stacksize() ),
         do_unwind( stack_unwind),
         preserve_fpu( preserve_fpu_)
@@ -56,12 +56,12 @@ struct attributes
             flag_unwind_t do_unwind_) BOOST_NOEXCEPT :
         size( size_),
         do_unwind( do_unwind_),
-        preserve_fpu( true)
+        preserve_fpu( fpu_preserved)
     {}
 
     explicit attributes(
             std::size_t size_,
-            bool preserve_fpu_) BOOST_NOEXCEPT :
+            flag_fpu_t preserve_fpu_) BOOST_NOEXCEPT :
         size( size_),
         do_unwind( stack_unwind),
         preserve_fpu( preserve_fpu_)
@@ -69,7 +69,7 @@ struct attributes
 
     explicit attributes(
             flag_unwind_t do_unwind_,
-            bool preserve_fpu_) BOOST_NOEXCEPT :
+            flag_fpu_t preserve_fpu_) BOOST_NOEXCEPT :
         size( ctx::default_stacksize() ),
         do_unwind( do_unwind_),
         preserve_fpu( preserve_fpu_)
