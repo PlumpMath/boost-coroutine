@@ -24,8 +24,11 @@
 #endif
 
 namespace coro = boost::coro;
+namespace ctx = boost::context;
 
 typedef coro::coroutine< void() >   coro_t;
+
+#define COUNTER BOOST_PP_LIMIT_MAG
 
 #define CALL_COROUTINE(z,n,unused) \
     c();
@@ -34,22 +37,20 @@ void fn( coro_t::self_t & self)
 { while ( true) self.yield(); }
 
 #ifdef BOOST_CONTEXT_CYCLE
-cycle_t test_cycles( cycle_t ov, bool preserve_fpu)
+cycle_t test_cycles( cycle_t ov, coro::flag_fpu_t preserve_fpu)
 {
-    coro_t c(
-        boost::bind( fn, _1),
-        coro::attributes( preserve_fpu) );
+    coro_t c( fn, coro::attributes( preserve_fpu) );
 
     // cache warum-up
-BOOST_PP_REPEAT_FROM_TO( 0, BOOST_PP_LIMIT_MAG, CALL_COROUTINE, ~)
+BOOST_PP_REPEAT_FROM_TO( 0, COUNTER, CALL_COROUTINE, ~)
 
     cycle_t start( cycles() );
-BOOST_PP_REPEAT_FROM_TO( 0, BOOST_PP_LIMIT_MAG, CALL_COROUTINE, ~)
+BOOST_PP_REPEAT_FROM_TO( 0, COUNTER, CALL_COROUTINE, ~)
     cycle_t total( cycles() - start);
 
     // we have two jumps and two measuremt-overheads
     total -= ov; // overhead of measurement
-    total /= BOOST_PP_LIMIT_MAG; // per call
+    total /= COUNTER; // per call
     total /= 2; // 2x jump_to c1->c2 && c2->c1
 
     return total;
@@ -57,11 +58,9 @@ BOOST_PP_REPEAT_FROM_TO( 0, BOOST_PP_LIMIT_MAG, CALL_COROUTINE, ~)
 #endif
 
 #if _POSIX_C_SOURCE >= 199309L
-zeit_t test_zeit( zeit_t ov, bool preserve_fpu)
+zeit_t test_zeit( zeit_t ov, coro::flag_fpu_t preserve_fpu)
 {
-    coro_t c(
-        boost::bind( fn, _1),
-        coro::attributes( preserve_fpu) );
+    coro_t c( fn, coro::attributes( preserve_fpu) );
 
     // cache warum-up
 BOOST_PP_REPEAT_FROM_TO( 0, BOOST_PP_LIMIT_MAG, CALL_COROUTINE, ~)
@@ -83,7 +82,7 @@ int main( int argc, char * argv[])
 {
     try
     {
-        bool preserve_fpu = false;
+        coro::flag_fpu_t preserve_fpu = coro::fpu_not_preserved;
         bind_to_processor( 0);
 
 #ifdef BOOST_CONTEXT_CYCLE
