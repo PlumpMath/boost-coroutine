@@ -76,8 +76,8 @@ struct coroutine_base_resume< Signature, D, void, n > \
     { \
         D * dp = static_cast< D * >( this); \
 \
-        typename arg< Signature >::type_t args(BOOST_CONTEXT_BASE_RESUME_VALS(n)); \
-        dp->native_resume( ( intptr_t) & args); \
+        dp->args_ = typename arg< Signature >::type_t(BOOST_CONTEXT_BASE_RESUME_VALS(n)); \
+        dp->native_resume( ( intptr_t) & dp->args_); \
     } \
 }; \
 \
@@ -90,8 +90,8 @@ struct coroutine_base_resume< Signature, D, Result, n > \
     { \
         D * dp = static_cast< D * >( this); \
 \
-        typename arg< Signature >::type_t args(BOOST_CONTEXT_BASE_RESUME_VALS(n)); \
-        intptr_t ret = dp->native_resume( ( intptr_t) & args); \
+        dp->args_ = typename arg< Signature >::type_t(BOOST_CONTEXT_BASE_RESUME_VALS(n)); \
+        intptr_t ret = dp->native_resume( ( intptr_t) & dp->args_); \
         if ( dp->is_complete() ) return * dp->result_; \
         else return * ( typename remove_reference< result_t >::type *) ret; \
     } \

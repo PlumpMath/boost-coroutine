@@ -25,7 +25,6 @@
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_base_resume.hpp>
 #include <boost/coroutine/detail/coroutine_base_run.hpp>
-#include <boost/coroutine/detail/coroutine_base_start.hpp>
 #include <boost/coroutine/detail/coroutine_base_suspend.hpp>
 #include <boost/coroutine/detail/flags.hpp>
 #include <boost/coroutine/exceptions.hpp>
@@ -47,6 +46,9 @@ void trampoline( intptr_t vp)
     BOOST_ASSERT( vp);
 
     Context * context( reinterpret_cast< Context * >( vp) );
+    context->flags_ |= flag_started;
+    ctx::jump_fcontext( & context->callee_, & context->caller_, 0, 0);
+
     try
     { context->run_(); }
     catch ( forced_unwind const&)
@@ -63,9 +65,6 @@ void trampoline( intptr_t vp)
 template< typename Signature, typename Result, int arity >
 class coroutine_base :
     private noncopyable,
-    public coroutine_base_start<
-        Signature, coroutine_base< Signature, Result, arity >, Result, arity
-    >,
     public coroutine_base_resume<
         Signature, coroutine_base< Signature, Result, arity >, Result, arity
     >,
@@ -86,8 +85,6 @@ private:
     friend struct coroutine_base_resume;
     template< typename X, typename Y, typename Z, int >
     friend struct coroutine_base_run;
-    template< typename X, typename Y, typename Z, int >
-    friend struct coroutine_base_start;
     template< typename X, typename Y, typename Z, int >
     friend struct coroutine_base_suspend;
 
@@ -114,9 +111,6 @@ protected:
 public:
     template< typename StackAllocator >
     coroutine_base( attributes const& attr, StackAllocator const& alloc) :
-        coroutine_base_start<
-            Signature, coroutine_base< Signature, Result, arity >, Result, arity
-        >(),
         coroutine_base_resume<
             Signature, coroutine_base< Signature, Result, arity >, Result, arity
         >(),
@@ -136,6 +130,7 @@ public:
         callee_.fc_stack.base = alloc.allocate( attr.size);
         callee_.fc_stack.size = attr.size;
         ctx::make_fcontext( & callee_, trampoline< coroutine_base>);
+        ctx::jump_fcontext( & caller_, & callee_, ( intptr_t) this, 0);
     }
 
     virtual ~coroutine_base()

@@ -48,8 +48,8 @@ struct coroutine_base_suspend< Signature, D, void, arity >
     {
         D * dp = static_cast< D * >( this);
 
-        intptr_t ret = dp->native_suspend( 0);
-        return * ( typename remove_reference< arg_t >::type *) ret;
+        dp->native_suspend( 0);
+        return dp->args_.get();
     }
 };
 
@@ -78,8 +78,8 @@ struct coroutine_base_suspend
         D * dp = static_cast< D * >( this);
 
         typename param_type< result_t >::type param( param_);
-        intptr_t ret = dp->native_suspend( ( intptr_t) & param);
-        return * ( typename remove_reference< arg_t >::type *) ret;
+        dp->native_suspend( ( intptr_t) & param);
+        return dp->args_.get();
     }
 };
 

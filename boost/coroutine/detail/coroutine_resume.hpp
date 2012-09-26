@@ -37,8 +37,7 @@ struct coroutine_resume< Signature, D, void, 0 >
     {
         D * dp = static_cast< D * >( this);
         BOOST_ASSERT( dp->impl_);
-        if ( ! dp->impl_->is_started() ) dp->impl_->start();
-        else dp->impl_->resume();
+        dp->impl_->resume();
     }
 };
 
@@ -51,8 +50,7 @@ struct coroutine_resume< Signature, D, Result, 0 >
     {
         D * dp = static_cast< D * >( this);
         BOOST_ASSERT( dp->impl_);
-        if ( ! dp->impl_->is_started() ) return dp->impl_->start();
-        else return dp->impl_->resume();
+        return dp->impl_->resume();
     }
 };
 
@@ -71,10 +69,7 @@ struct coroutine_resume< Signature, D, void, n > \
     { \
         D * dp = static_cast< D * >( this); \
         BOOST_ASSERT( dp->impl_); \
-        if ( ! dp->impl_->is_started() ) \
-            dp->impl_->start( BOOST_COROUTINE_RESUME_VALS(n)); \
-        else \
-            dp->impl_->resume( BOOST_COROUTINE_RESUME_VALS(n)); \
+        dp->impl_->resume( BOOST_COROUTINE_RESUME_VALS(n)); \
     } \
 }; \
 \
@@ -87,10 +82,7 @@ struct coroutine_resume< Signature, D, Result, n > \
     { \
         D * dp = static_cast< D * >( this); \
         BOOST_ASSERT( dp->impl_); \
-        if ( ! dp->impl_->is_started() ) \
-            return dp->impl_->start( BOOST_COROUTINE_RESUME_VALS(n)); \
-        else \
-            return dp->impl_->resume( BOOST_COROUTINE_RESUME_VALS(n)); \
+        return dp->impl_->resume( BOOST_COROUTINE_RESUME_VALS(n)); \
     } \
 };
 BOOST_PP_REPEAT_FROM_TO(1,11,BOOST_coroutine_resume,~)
