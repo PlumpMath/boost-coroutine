@@ -74,15 +74,3 @@ exe coroutine/asio/stream/dummy_client
 exe coroutine/asio/stream/dummy_server
     : coroutine/asio/stream/dummy_server.cpp
     ;
-
-exe generator/power
-    : generator/power.cpp
-    ;
-
-exe generator/tree/enumerate
-    : generator/tree/enumerate.cpp
-    ;
-
-exe generator/tree/fringe
-    : generator/tree/fringe.cpp
-    ;

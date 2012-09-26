@@ -22,5 +22,4 @@ project boost/coroutine/test
 
 test-suite "coroutine" :
     [ run test_coroutine.cpp ]
-    [ run test_generator.cpp ]
     ;

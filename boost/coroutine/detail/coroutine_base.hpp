@@ -45,21 +45,21 @@ void trampoline( intptr_t vp)
 {
     BOOST_ASSERT( vp);
 
-    Context * context( reinterpret_cast< Context * >( vp) );
-    context->flags_ |= flag_started;
-    ctx::jump_fcontext( & context->callee_, & context->caller_, 0, 0);
+    Context * ctx( reinterpret_cast< Context * >( vp) );
+    ctx->flags_ |= flag_started;
+    context::jump_fcontext( ctx->callee_, & ctx->caller_, 0, false);
 
     try
-    { context->run_(); }
+    { ctx->run_(); }
     catch ( forced_unwind const&)
     {}
     catch (...)
     {
-        context->flags_ |= flag_has_exception;
-        context->except_ = current_exception();
+        ctx->flags_ |= flag_has_exception;
+        ctx->except_ = current_exception();
     }
-    context->flags_ |= flag_complete;
-    ctx::jump_fcontext( & context->callee_, & context->caller_, 0, context->preserve_fpu_);
+    ctx->flags_ |= flag_complete;
+    context::jump_fcontext( ctx->callee_, & ctx->caller_, 0, fpu_preserved == ctx->preserve_fpu_);
 }
 
 template< typename Signature, typename Result, int arity >
@@ -88,12 +88,12 @@ private:
     template< typename X, typename Y, typename Z, int >
     friend struct coroutine_base_suspend;
 
-    std::size_t             use_count_;
-    ctx::fcontext_t         caller_;
-    ctx::fcontext_t         callee_;
-    int                     flags_;
-    exception_ptr           except_;
-    bool                    preserve_fpu_;
+    std::size_t         use_count_;
+    context::fcontext_t     caller_;
+    context::fcontext_t *   callee_;
+    int                 flags_;
+    exception_ptr       except_;
+    bool                preserve_fpu_;
 
 protected:
     template< typename StackAllocator >
@@ -103,7 +103,7 @@ protected:
                 && ( is_started() || is_resumed() )
                 && ( unwind_requested() ) )
             unwind_stack();
-        alloc.deallocate( callee_.fc_stack.base, callee_.fc_stack.size);
+        alloc.deallocate( callee_->fc_stack.sp, callee_->fc_stack.size);
     }
 
     virtual void deallocate_object() = 0;
@@ -122,16 +122,13 @@ public:
         >(),
         use_count_( 0),
         caller_(),
-        callee_(),
+        callee_(
+            context::make_fcontext(
+                alloc.allocate( attr.size), attr.size, trampoline< coroutine_base>) ),
         flags_( stack_unwind == attr.do_unwind ? flag_force_unwind : flag_dont_force_unwind),
         except_(),
         preserve_fpu_( attr.preserve_fpu)
-    {
-        callee_.fc_stack.base = alloc.allocate( attr.size);
-        callee_.fc_stack.size = attr.size;
-        ctx::make_fcontext( & callee_, trampoline< coroutine_base>);
-        ctx::jump_fcontext( & caller_, & callee_, ( intptr_t) this, 0);
-    }
+    { context::jump_fcontext( & caller_, callee_, ( intptr_t) this, false); }
 
     virtual ~coroutine_base()
     {}
@@ -157,24 +154,9 @@ public:
         BOOST_ASSERT( ! is_running() );
 
         flags_ |= flag_unwind_stack;
-        ctx::jump_fcontext( & caller_, & callee_, 0, preserve_fpu_);
+        context::jump_fcontext( & caller_, callee_, 0, fpu_preserved == preserve_fpu_);
         flags_ &= ~flag_unwind_stack;
         BOOST_ASSERT( is_complete() );
-    }
-
-    intptr_t native_start()
-    {
-        BOOST_ASSERT( ! is_complete() );
-        BOOST_ASSERT( ! is_started() );
-        BOOST_ASSERT( ! is_running() );
-
-        flags_ |= flag_started;
-        flags_ |= flag_running;
-        intptr_t ret = ctx::jump_fcontext( & caller_, & callee_, ( intptr_t) this, preserve_fpu_);
-        flags_ &= ~flag_running;
-        if ( 0 != ( flags_ & flag_has_exception) )
-            rethrow_exception( except_);
-        return ret; 
     }
 
     intptr_t native_resume( intptr_t param)
@@ -185,7 +167,7 @@ public:
 
         flags_ |= flag_resumed;
         flags_ |= flag_running;
-        intptr_t ret = ctx::jump_fcontext( & caller_, & callee_, param, preserve_fpu_);
+        intptr_t ret = context::jump_fcontext( & caller_, callee_, param, fpu_preserved == preserve_fpu_);
         flags_ &= ~flag_running;
         if ( 0 != ( flags_ & flag_has_exception) )
             rethrow_exception( except_);
@@ -198,7 +180,7 @@ public:
         BOOST_ASSERT( is_running() );
 
         flags_ &= ~flag_running;
-        intptr_t ret = ctx::jump_fcontext( & callee_, & caller_, param, preserve_fpu_);
+        intptr_t ret = context::jump_fcontext( callee_, & caller_, param, fpu_preserved == preserve_fpu_);
         if ( 0 != ( flags_ & flag_unwind_stack) )
             throw forced_unwind();
         return ret;

@@ -24,7 +24,6 @@
 #endif
 
 namespace coro = boost::coro;
-namespace ctx = boost::ctx;
 
 typedef coro::coroutine< void() >   coro_t;
 

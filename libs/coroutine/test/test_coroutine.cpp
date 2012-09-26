@@ -20,7 +20,7 @@
 #include <boost/coroutine/all.hpp>
 
 namespace coro = boost::coro;
-namespace ctx = boost::ctx;
+namespace ctx = boost::context;
 
 int value1 = 0;
 std::string value2 = "";
@@ -353,7 +353,7 @@ void test_no_unwind()
         coro_int coro(
             boost::bind( f12, _1, _2, _3),
             coro::attributes(
-                ctx::default_stacksize(),
+                ctx::guarded_stack_allocator::default_stacksize(),
                 coro::no_stack_unwind) );
         BOOST_CHECK( ! coro.is_complete() );
         BOOST_CHECK_EQUAL( ( int) 0, value1);

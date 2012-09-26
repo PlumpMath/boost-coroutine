@@ -11,6 +11,5 @@
 #include <boost/coroutine/coroutine.hpp>
 #include <boost/coroutine/exceptions.hpp>
 #include <boost/coroutine/flags.hpp>
-#include <boost/coroutine/generator.hpp>
 
 #endif // BOOST_CORO_ALL_H

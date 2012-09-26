@@ -12,8 +12,7 @@
 
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
-#include <boost/context/stack_allocator.hpp>
-#include <boost/context/stack_utils.hpp>
+#include <boost/context/guarded_stack_allocator.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/move/move.hpp>
 #include <boost/type_traits/function_traits.hpp>
@@ -79,7 +78,7 @@ public:
 #ifndef BOOST_NO_RVALUE_REFERENCES
     template< typename Fn >
     coroutine( Fn && fn, attributes const& attr = attributes(),
-               ctx::stack_allocator const& stack_alloc = ctx::stack_allocator(),
+               context::guarded_stack_allocator const& stack_alloc = context::guarded_stack_allocator(),
                std::allocator< coroutine > const& alloc = std::allocator< coroutine >() ) :
         detail::coroutine_resume<
             Signature, coroutine< Signature >,
@@ -90,7 +89,7 @@ public:
     {
         typedef detail::coroutine_object<
                 Fn,
-                ctx::stack_allocator,
+                context::guarded_stack_allocator,
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,
@@ -154,7 +153,7 @@ public:
 #else
     template< typename Fn >
     coroutine( Fn fn, attributes const& attr = attributes(),
-               ctx::stack_allocator const& stack_alloc = ctx::stack_allocator(),
+               context::guarded_stack_allocator const& stack_alloc = context::guarded_stack_allocator(),
                std::allocator< coroutine > const& alloc = std::allocator< coroutine >() ) :
         detail::coroutine_resume<
             Signature, coroutine< Signature >,
@@ -165,7 +164,7 @@ public:
     {
         typedef detail::coroutine_object<
                 Fn,
-                ctx::stack_allocator,
+                context::guarded_stack_allocator,
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,
@@ -229,7 +228,7 @@ public:
 
     template< typename Fn >
     coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr = attributes(),
-               ctx::stack_allocator const& stack_alloc = ctx::stack_allocator(),
+               context::guarded_stack_allocator const& stack_alloc = context::guarded_stack_allocator(),
                std::allocator< coroutine > const& alloc = std::allocator< coroutine >() ) :
         detail::coroutine_resume<
             Signature, coroutine< Signature >,
@@ -240,7 +239,7 @@ public:
     {
         typedef detail::coroutine_object<
                 Fn,
-                ctx::stack_allocator,
+                context::guarded_stack_allocator,
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,

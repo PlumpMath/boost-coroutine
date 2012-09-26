@@ -62,8 +62,7 @@ struct coroutine_base_suspend< Signature, D, Result, 0 >
     {
         D * dp = static_cast< D * >( this);
 
-        typename param_type< result_t >::type param( param_);
-        dp->result_ = param;
+        dp->result_ = typename param_type< result_t >::type( param_);
         dp->native_suspend( 0);
     }
 };
@@ -78,8 +77,7 @@ struct coroutine_base_suspend
     {
         D * dp = static_cast< D * >( this);
 
-        typename param_type< result_t >::type param( param_);
-        dp->result_ = param;
+        dp->result_ = typename param_type< result_t >::type( param_);
         dp->native_suspend( 0);
         return dp->args_.get();
     }
