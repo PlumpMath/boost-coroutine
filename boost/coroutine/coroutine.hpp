@@ -15,7 +15,10 @@
 #include <boost/context/guarded_stack_allocator.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/move/move.hpp>
+#include <boost/static_assert.hpp>
 #include <boost/type_traits/function_traits.hpp>
+#include <boost/type_traits/is_same.hpp>
+#include <boost/utility/result_of.hpp>
 
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/coroutine_base.hpp>
@@ -87,6 +90,12 @@ public:
         >(),
         impl_()
     {
+        BOOST_STATIC_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >::value));
+
         typedef detail::coroutine_object<
                 Fn,
                 context::guarded_stack_allocator,
@@ -112,6 +121,12 @@ public:
         >(),
         impl_()
     {
+        BOOST_STATIC_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >::value));
+
         typedef detail::coroutine_object<
                 Fn,
                 StackAllocator,
@@ -137,6 +152,12 @@ public:
         >(),
         impl_()
     {
+        BOOST_STATIC_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >::value));
+
         typedef detail::coroutine_object<
                 Fn,
                 StackAllocator,
@@ -162,6 +183,12 @@ public:
         >(),
         impl_()
     {
+        BOOST_STATIC_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >::value));
+
         typedef detail::coroutine_object<
                 Fn,
                 context::guarded_stack_allocator,
@@ -187,6 +214,12 @@ public:
         >(),
         impl_()
     {
+        BOOST_STATIC_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >::value));
+
         typedef detail::coroutine_object<
                 Fn,
                 StackAllocator,
@@ -212,6 +245,12 @@ public:
         >(),
         impl_()
     {
+        BOOST_STATIC_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >::value));
+
         typedef detail::coroutine_object<
                 Fn,
                 StackAllocator,
@@ -237,6 +276,12 @@ public:
         >(),
         impl_()
     {
+        BOOST_STATIC_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >::value));
+
         typedef detail::coroutine_object<
                 Fn,
                 context::guarded_stack_allocator,
@@ -262,6 +307,12 @@ public:
         >(),
         impl_()
     {
+        BOOST_STATIC_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >::value));
+
         typedef detail::coroutine_object<
                 Fn,
                 StackAllocator,
@@ -287,6 +338,12 @@ public:
         >(),
         impl_()
     {
+        BOOST_STATIC_ASSERT((
+            is_same<
+                void,
+                typename result_of< Fn() >::type
+            >::value));
+
         typedef detail::coroutine_object<
                 Fn,
                 StackAllocator,
@@ -322,19 +379,13 @@ public:
     { return ! impl_; }
 
     operator safe_bool() const BOOST_NOEXCEPT
-    { return empty() ? 0 : & dummy::nonnull; }
+    { return ( empty() || impl_->is_complete() ) ? 0 : & dummy::nonnull; }
 
     bool operator!() const BOOST_NOEXCEPT
-    { return empty(); }
+    { return empty() || impl_->is_complete(); }
 
     void swap( coroutine & other) BOOST_NOEXCEPT
     { impl_.swap( other.impl_); }
-
-    bool is_complete() const BOOST_NOEXCEPT
-    {
-        BOOST_ASSERT( ! empty() );
-        return impl_->is_complete();
-    }
 };
 
 template< typename Signature >

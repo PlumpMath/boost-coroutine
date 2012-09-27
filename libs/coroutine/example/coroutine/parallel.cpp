@@ -17,7 +17,7 @@ void first( coroutine_t::self_t & self)
     std::cout << "started first! ";
     for ( int i = 0; i < 10; ++i)
     {
-        self.yield();
+        self();
         std::cout << "a" << i;
     }
 }
@@ -27,7 +27,7 @@ void second( coroutine_t::self_t & self)
     std::cout << "started second! ";
     for ( int i = 0; i < 10; ++i)
     {
-        self.yield();
+        self();
         std::cout << "b" << i;
     }
 }
@@ -37,7 +37,7 @@ int main( int argc, char * argv[])
     {
         coroutine_t c1( boost::bind( first, _1) );
         coroutine_t c2( boost::bind( second, _1) );
-        while ( ! c1.is_complete() && ! c2.is_complete() ) {
+        while ( c1 && c2) {
             c1();
             std::cout << " ";
             c2();

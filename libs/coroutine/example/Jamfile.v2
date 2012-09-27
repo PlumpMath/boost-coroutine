@@ -55,10 +55,6 @@ exe coroutine/parallel
     : coroutine/parallel.cpp
     ;
 
-exe coroutine/yield_break
-    : coroutine/yield_break.cpp
-    ;
-
 exe coroutine/asio/simple/echo_client
     : coroutine/asio/simple/echo_client.cpp
     ;

@@ -23,7 +23,6 @@
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
-#include <boost/coroutine/detail/coroutine_base_resume.hpp>
 #include <boost/coroutine/detail/coroutine_base_run.hpp>
 #include <boost/coroutine/detail/coroutine_base_suspend.hpp>
 #include <boost/coroutine/detail/flags.hpp>
@@ -65,9 +64,6 @@ void trampoline( intptr_t vp)
 template< typename Signature, typename Result, int arity >
 class coroutine_base :
     private noncopyable,
-    public coroutine_base_resume<
-        Signature, coroutine_base< Signature, Result, arity >, Result, arity
-    >,
     public coroutine_base_suspend<
         Signature, coroutine_base< Signature, Result, arity >, Result, arity
     >,
@@ -81,8 +77,6 @@ public:
 private:
     template< typename T >
     friend void trampoline( intptr_t);
-    template< typename X, typename Y, typename Z, int >
-    friend struct coroutine_base_resume;
     template< typename X, typename Y, typename Z, int >
     friend struct coroutine_base_run;
     template< typename X, typename Y, typename Z, int >
@@ -111,9 +105,6 @@ protected:
 public:
     template< typename StackAllocator >
     coroutine_base( attributes const& attr, StackAllocator const& alloc) :
-        coroutine_base_resume<
-            Signature, coroutine_base< Signature, Result, arity >, Result, arity
-        >(),
         coroutine_base_suspend<
             Signature, coroutine_base< Signature, Result, arity >, Result, arity
         >(),

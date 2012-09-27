@@ -46,16 +46,11 @@ private:
     { BOOST_ASSERT( impl_); }
 
 public:
-    void yield()
+    coroutine_self & operator()()
     {
         BOOST_ASSERT( impl_);
         impl_->suspend();
-    }
-
-    void yield_break()
-    {
-        BOOST_ASSERT( impl_);
-        BOOST_THROW_EXCEPTION( coroutine_terminated() );
+        return * this;
     }
 };
 
@@ -79,16 +74,18 @@ private:
     { BOOST_ASSERT( impl_); }
 
 public:
-    arg_t yield()
+    coroutine_self & operator()()
     {
         BOOST_ASSERT( impl_);
-        return impl_->suspend();
+        impl_->suspend();
+        return * this;
     }
 
-    void yield_break()
+    arg_t get()
     {
         BOOST_ASSERT( impl_);
-        BOOST_THROW_EXCEPTION( coroutine_terminated() );
+        BOOST_ASSERT( impl_->args_);
+        return impl_->args_.get();
     }
 };
 
@@ -96,7 +93,6 @@ template< typename Signature, typename Result >
 class coroutine_self< Signature, Result, 0 >
 {
 private:
-    typedef Result                              result_t;
     typedef detail::coroutine_base<
         Signature, Result, 0
     >                                           base_t;
@@ -112,16 +108,11 @@ private:
     { BOOST_ASSERT( impl_); }
 
 public:
-    void yield( typename param_type< result_t >::type param)
+    coroutine_self & operator()( typename param_type< Result >::type param)
     {
         BOOST_ASSERT( impl_);
         impl_->suspend( param);
-    }
-
-    void yield_break()
-    {
-        BOOST_ASSERT( impl_);
-        BOOST_THROW_EXCEPTION( coroutine_terminated() );
+        return * this;
     }
 };
 
@@ -129,7 +120,6 @@ template< typename Signature, typename Result, int arity >
 class coroutine_self
 {
 private:
-    typedef Result                              result_t;
     typedef typename arg< Signature >::type_t   arg_t;
     typedef detail::coroutine_base<
         Signature, Result, arity
@@ -146,16 +136,18 @@ private:
     { BOOST_ASSERT( impl_); }
 
 public:
-    arg_t yield( typename param_type< result_t >::type param)
+    coroutine_self & operator()( typename param_type< Result >::type param)
     {
         BOOST_ASSERT( impl_);
-        return impl_->suspend( param);
+        impl_->suspend( param);
+        return * this;
     }
 
-    void yield_break()
+    arg_t get()
     {
         BOOST_ASSERT( impl_);
-        BOOST_THROW_EXCEPTION( coroutine_terminated() );
+        BOOST_ASSERT( impl_->args_);
+        return impl_->args_.get();
     }
 };
 

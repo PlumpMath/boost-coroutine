@@ -36,39 +36,17 @@ namespace detail {
 template< typename Signature, typename D, typename Result, int arity >
 class coroutine_exec;
 
-template< typename Signature, typename D >
-class coroutine_exec< Signature, D, void, 0 > :
-    public coroutine_base< Signature, void, 0 >
+template< typename Signature, typename D, typename Result >
+class coroutine_exec< Signature, D, Result, 0 > :
+    public coroutine_base< Signature, Result, 0 >
 {
 private:
     void exec_()
     {
         D * dp = static_cast< D * >( this);
 
-        coroutine_self< Signature, void, 0 > self( this);
-        dp->fn_( self);
-    }
-
-public:
-    template< typename StackAllocator >
-    coroutine_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT :
-        coroutine_base< Signature, void, 0 >( attr, alloc)
-    {}
-};
-
-template< typename Signature, typename D, typename Result >
-class coroutine_exec< Signature, D, Result, 0 > :
-    public coroutine_base< Signature, Result, 0 >
-{
-private:
-    typedef Result      result_t;
-
-    result_t exec_()
-    {
-        D * dp = static_cast< D * >( this);
-
         coroutine_self< Signature, Result, 0 > self( this);
-        return dp->fn_( self);
+        dp->fn_( self);
     }
 
 public:
@@ -78,9 +56,9 @@ public:
     {}
 };
 
-template< typename Signature, typename D >
-class coroutine_exec< Signature, D, void, 1 > :
-    public coroutine_base< Signature, void, 1 >
+template< typename Signature, typename D, typename Result >
+class coroutine_exec< Signature, D, Result, 1 > :
+    public coroutine_base< Signature, Result, 1 >
 {
 private:
     typedef typename arg< Signature >::type_t   arg_t;
@@ -89,31 +67,8 @@ private:
     {
         D * dp = static_cast< D * >( this);
 
-        coroutine_self< Signature, void, 1 > self( this);
-        dp->fn_( self, a);
-    }
-
-public:
-    template< typename StackAllocator >
-    coroutine_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT :
-        coroutine_base< Signature, void, 1 >( attr, alloc)
-    {}
-};
-
-template< typename Signature, typename D, typename Result >
-class coroutine_exec< Signature, D, Result, 1 > :
-    public coroutine_base< Signature, Result, 1 >
-{
-private:
-    typedef typename arg< Signature >::type_t   arg_t;
-    typedef Result                              result_t;
-
-    result_t exec_( arg_t a)
-    {
-        D * dp = static_cast< D * >( this);
-
         coroutine_self< Signature, Result, 1 > self( this);
-        return dp->fn_( self, a);
+        dp->fn_( self, a);
     }
 
 public:
@@ -131,39 +86,18 @@ public:
 #define BOOST_CONTEXT_EXEC_ARG(z,n,unused) BOOST_CONTEXT_EXEC_COMMA(n) BOOST_CONTEXT_EXEC_ARG_TYPE(n) BOOST_PP_CAT(a,n)
 #define BOOST_CONTEXT_EXEC_ARGS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_CONTEXT_EXEC_ARG,~)
 #define BOOST_CONTEXT_EXEC(z,n,unused) \
-template< typename Signature, typename D > \
-class coroutine_exec< Signature, D, void, n > : \
-    public coroutine_base< Signature, void, n > \
-{ \
-private:\
-    void exec_( BOOST_CONTEXT_EXEC_ARGS(n)) \
-    { \
-        D * dp = static_cast< D * >( this); \
-\
-        coroutine_self< Signature, void, n > self( this); \
-        dp->fn_( self, BOOST_CONTEXT_EXEC_VALS(n)); \
-    } \
-\
-public: \
-    template< typename StackAllocator > \
-    coroutine_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT : \
-        coroutine_base< Signature, void, n >( attr, alloc) \
-    {} \
-}; \
-\
 template< typename Signature, typename D, typename Result > \
 class coroutine_exec< Signature, D, Result, n > : \
     public coroutine_base< Signature, Result, n > \
 { \
 private: \
-    typedef Result      result_t; \
 \
-    result_t exec_( BOOST_CONTEXT_EXEC_ARGS(n)) \
+    void exec_( BOOST_CONTEXT_EXEC_ARGS(n)) \
     { \
         D * dp = static_cast< D * >( this); \
 \
         coroutine_self< Signature, Result, n > self( this); \
-        return dp->fn_( self, BOOST_CONTEXT_EXEC_VALS(n)); \
+        dp->fn_( self, BOOST_CONTEXT_EXEC_VALS(n)); \
     } \
 \
 public: \

@@ -48,7 +48,7 @@ private:
         s_.async_read_some(
                 boost::asio::buffer( buffer_ + pb_size, bf_size - pb_size),
                 boost::bind( & coro_t::operator(), & coro_, _1, _2) );
-        tuple_t tpl = self_.yield();
+        tuple_t tpl = self_().get();
         boost::system::error_code ec = tpl.get< 0 >();
         std::size_t n = tpl.get< 1 >();
         if ( ec)

@@ -15,7 +15,7 @@ typedef boost::coro::coroutine < void() >        coro_void_t;
 void echo( coro_void_t::self_t & self, int i)
 {
     std::cout << i; 
-    self.yield();
+    self();
 }
 
 void runit( coro_void_t::self_t & self)
@@ -24,9 +24,9 @@ void runit( coro_void_t::self_t & self)
     for ( int i = 0; i < 10; ++i)
     {
         coro_void_t c( boost::bind( echo, _1, i) );
-        while ( ! c.is_complete() )
+        while ( c)
             c();
-        self.yield();
+        self();
     }
 }
 
@@ -34,7 +34,7 @@ int main( int argc, char * argv[])
 {
     {
         coro_void_t c( boost::bind( runit, _1) );
-        while ( ! c.is_complete() ) {
+        while ( c) {
             std::cout << "-";
             c();
         }

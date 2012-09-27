@@ -33,24 +33,32 @@ struct coroutine_resume;
 template< typename Signature, typename D >
 struct coroutine_resume< Signature, D, void, 0 >
 {
-    void operator()()
+    D & operator()()
     {
         D * dp = static_cast< D * >( this);
         BOOST_ASSERT( dp->impl_);
-        dp->impl_->resume();
+        dp->impl_->native_resume( 0);
+        return * dp;
     }
 };
 
 template< typename Signature, typename D, typename Result >
 struct coroutine_resume< Signature, D, Result, 0 >
 {
-    typedef Result  result_t;
-
-    result_t operator()()
+    D & operator()()
     {
         D * dp = static_cast< D * >( this);
         BOOST_ASSERT( dp->impl_);
-        return dp->impl_->resume();
+        dp->impl_->native_resume( 0);
+        return * dp;
+    }
+
+    Result get()
+    {
+        D * dp = static_cast< D * >( this);
+        BOOST_ASSERT( dp->impl_);
+        BOOST_ASSERT( dp->impl_->result_);
+        return * dp->impl_->result_;
     }
 };
 
@@ -65,24 +73,34 @@ struct coroutine_resume< Signature, D, Result, 0 >
 template< typename Signature, typename D > \
 struct coroutine_resume< Signature, D, void, n > \
 { \
-    void operator()( BOOST_COROUTINE_RESUME_ARGS(n)) \
+    D & operator()( BOOST_COROUTINE_RESUME_ARGS(n)) \
     { \
         D * dp = static_cast< D * >( this); \
         BOOST_ASSERT( dp->impl_); \
-        dp->impl_->resume( BOOST_COROUTINE_RESUME_VALS(n)); \
+        dp->impl_->args_ = typename arg< Signature >::type_t(BOOST_COROUTINE_RESUME_VALS(n)); \
+        dp->impl_->native_resume( 0); \
+        return * dp; \
     } \
 }; \
 \
 template< typename Signature, typename D, typename Result > \
 struct coroutine_resume< Signature, D, Result, n > \
 { \
-    typedef Result  result_t; \
-\
-    result_t operator()( BOOST_COROUTINE_RESUME_ARGS(n)) \
+    D & operator()( BOOST_COROUTINE_RESUME_ARGS(n)) \
     { \
         D * dp = static_cast< D * >( this); \
         BOOST_ASSERT( dp->impl_); \
-        return dp->impl_->resume( BOOST_COROUTINE_RESUME_VALS(n)); \
+        dp->impl_->args_ = typename arg< Signature >::type_t(BOOST_COROUTINE_RESUME_VALS(n)); \
+        dp->impl_->native_resume( 0); \
+        return * dp; \
+    } \
+\
+    Result get() \
+    { \
+        D * dp = static_cast< D * >( this); \
+        BOOST_ASSERT( dp->impl_); \
+        BOOST_ASSERT( dp->impl_->result_); \
+        return * dp->impl_->result_; \
     } \
 };
 BOOST_PP_REPEAT_FROM_TO(1,11,BOOST_coroutine_resume,~)
