@@ -34,7 +34,7 @@ private:
     typedef detail::coroutine_base<
         Signature, void, 0
     >                                           base_t;
-    typedef base_t                         *    ptr_t; 
+    typedef base_t                         *    ptr_t;
 
     template< typename X, typename Y, typename R, int >
     friend class coroutine_exec;
@@ -62,7 +62,7 @@ private:
     typedef detail::coroutine_base<
         Signature, void, arity
     >                                           base_t;
-    typedef base_t                         *    ptr_t; 
+    typedef base_t                         *    ptr_t;
 
     template< typename X, typename Y, typename R, int >
     friend class coroutine_exec;
@@ -96,7 +96,7 @@ private:
     typedef detail::coroutine_base<
         Signature, Result, 0
     >                                           base_t;
-    typedef base_t                         *    ptr_t; 
+    typedef base_t                         *    ptr_t;
 
     template< typename X, typename Y, typename R, int >
     friend class coroutine_exec;
@@ -124,7 +124,7 @@ private:
     typedef detail::coroutine_base<
         Signature, Result, arity
     >                                           base_t;
-    typedef base_t                         *    ptr_t; 
+    typedef base_t                         *    ptr_t;
 
     template< typename X, typename Y, typename R, int >
     friend class coroutine_exec;

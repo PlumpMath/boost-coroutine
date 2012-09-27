@@ -32,20 +32,14 @@ template< typename Signature, typename D >
 struct coroutine_base_suspend< Signature, D, void, 0 >
 {
     void suspend()
-    {
-        D * dp = static_cast< D * >( this);
-        dp->native_suspend( 0);
-    }
+    { static_cast< D * >( this)->native_suspend( 0); }
 };
 
 template< typename Signature, typename D, int arity >
 struct coroutine_base_suspend< Signature, D, void, arity >
 {
     void suspend()
-    {
-        D * dp = static_cast< D * >( this);
-        dp->native_suspend( 0);
-    }
+    { static_cast< D * >( this)->native_suspend( 0); }
 };
 
 template< typename Signature, typename D, typename Result >
@@ -53,9 +47,8 @@ struct coroutine_base_suspend< Signature, D, Result, 0 >
 {
     void suspend( typename param_type< Result >::type param_)
     {
-        D * dp = static_cast< D * >( this);
-        dp->result_ = typename param_type< Result >::type( param_);
-        dp->native_suspend( 0);
+        static_cast< D * >( this)->result_ = typename param_type< Result >::type( param_);
+        static_cast< D * >( this)->native_suspend( 0);
     }
 };
 
@@ -64,9 +57,8 @@ struct coroutine_base_suspend
 {
     void suspend( typename param_type< Result >::type param_)
     {
-        D * dp = static_cast< D * >( this);
-        dp->result_ = typename param_type< Result >::type( param_);
-        dp->native_suspend( 0);
+        static_cast< D * >( this)->result_ = typename param_type< Result >::type( param_);
+        static_cast< D * >( this)->native_suspend( 0);
     }
 };
 

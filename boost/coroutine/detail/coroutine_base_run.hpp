@@ -37,11 +37,7 @@ template< typename Signature, typename D >
 struct coroutine_base_run< Signature, D, void, 0 >
 {
     void run_()
-    {
-        D * dp = static_cast< D * >( this);
-
-        dp->exec_();
-    }
+    { static_cast< D * >( this)->exec_(); }
 
     virtual void exec_() = 0;
 };
@@ -58,11 +54,7 @@ struct coroutine_base_run< Signature, D, Result, 0 >
     {}
 
     void run_()
-    {
-        D * dp = static_cast< D * >( this);
-
-        dp->exec_();
-    }
+    { static_cast< D * >( this)->exec_(); }
 
     virtual void exec_() = 0;
 };
@@ -79,11 +71,7 @@ struct coroutine_base_run< Signature, D, void, 1 >
     {}
 
     void run_()
-    {
-        D * dp = static_cast< D * >( this);
-
-        dp->exec_( * args_);
-    }
+    { static_cast< D * >( this)->exec_( * args_); }
 
     virtual void exec_( arg_t) = 0;
 };
@@ -102,11 +90,7 @@ struct coroutine_base_run< Signature, D, Result, 1 >
     {}
 
     void run_()
-    {
-        D * dp = static_cast< D * >( this);
-
-        dp->exec_( * args_);
-    }
+    { static_cast< D * >( this)->exec_( * args_); }
 
     virtual void exec_( arg_t) = 0;
 };
@@ -131,11 +115,7 @@ struct coroutine_base_run< Signature, D, void, n > \
     {} \
 \
     void run_() \
-    { \
-        D * dp = static_cast< D * >( this); \
-\
-        dp->exec_(BOOST_CONTEXT_BASE_RUN_VALS(n)); \
-    } \
+    { static_cast< D * >( this)->exec_(BOOST_CONTEXT_BASE_RUN_VALS(n)); } \
 \
     virtual void exec_(BOOST_CONTEXT_BASE_RUN_ARGS(n)) = 0; \
 }; \
@@ -154,11 +134,7 @@ struct coroutine_base_run< Signature, D, Result, n > \
     {} \
 \
     void run_() \
-    { \
-        D * dp = static_cast< D * >( this); \
-\
-        dp->exec_(BOOST_CONTEXT_BASE_RUN_VALS(n)); \
-    } \
+    { static_cast< D * >( this)->exec_(BOOST_CONTEXT_BASE_RUN_VALS(n)); } \
 \
     virtual void exec_(BOOST_CONTEXT_BASE_RUN_ARGS(n)) = 0; \
 };
