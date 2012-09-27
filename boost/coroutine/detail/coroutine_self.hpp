@@ -81,7 +81,7 @@ public:
         return * this;
     }
 
-    arg_t get()
+    arg_t get() const
     {
         BOOST_ASSERT( impl_);
         BOOST_ASSERT( impl_->args_);
@@ -143,7 +143,7 @@ public:
         return * this;
     }
 
-    arg_t get()
+    arg_t get() const
     {
         BOOST_ASSERT( impl_);
         BOOST_ASSERT( impl_->args_);

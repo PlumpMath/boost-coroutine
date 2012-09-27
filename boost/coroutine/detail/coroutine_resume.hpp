@@ -53,9 +53,9 @@ struct coroutine_resume< Signature, D, Result, 0 >
         return * dp;
     }
 
-    Result get()
+    Result get() const
     {
-        D * dp = static_cast< D * >( this);
+        D const * dp = static_cast< D const * >( this);
         BOOST_ASSERT( dp->impl_);
         BOOST_ASSERT( dp->impl_->result_);
         return * dp->impl_->result_;
@@ -95,9 +95,9 @@ struct coroutine_resume< Signature, D, Result, n > \
         return * dp; \
     } \
 \
-    Result get() \
+    Result get() const \
     { \
-        D * dp = static_cast< D * >( this); \
+        D const * dp = static_cast< D const * >( this); \
         BOOST_ASSERT( dp->impl_); \
         BOOST_ASSERT( dp->impl_->result_); \
         return * dp->impl_->result_; \
