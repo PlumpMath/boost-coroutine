@@ -19,14 +19,10 @@ namespace detail {
 
 enum flag_t
 {
-    flag_started                = 1 << 1,
-    flag_resumed                = 1 << 2,
-    flag_running                = 1 << 3,
-    flag_complete               = 1 << 4,
-    flag_unwind_stack           = 1 << 5,
-    flag_force_unwind           = 1 << 6,
-    flag_dont_force_unwind      = 1 << 7,
-    flag_has_exception          = 1 << 8
+    flag_complete               = 1 << 1,
+    flag_unwind_stack           = 1 << 2,
+    flag_force_unwind           = 1 << 3,
+    flag_dont_force_unwind      = 1 << 4
 };
 
 }}}

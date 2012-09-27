@@ -45,7 +45,6 @@ void trampoline( intptr_t vp)
     BOOST_ASSERT( vp);
 
     Context * ctx( reinterpret_cast< Context * >( vp) );
-    ctx->flags_ |= flag_started;
     context::jump_fcontext( ctx->callee_, & ctx->caller_, 0, false);
 
     try
@@ -53,10 +52,7 @@ void trampoline( intptr_t vp)
     catch ( forced_unwind const&)
     {}
     catch (...)
-    {
-        ctx->flags_ |= flag_has_exception;
-        ctx->except_ = current_exception();
-    }
+    { ctx->except_ = current_exception(); }
     ctx->flags_ |= flag_complete;
     context::jump_fcontext( ctx->callee_, & ctx->caller_, 0, fpu_preserved == ctx->preserve_fpu_);
 }
@@ -94,7 +90,6 @@ protected:
     void deallocate_stack( StackAllocator & alloc) BOOST_NOEXCEPT
     {
         if ( ! is_complete()
-                && ( is_started() || is_resumed() )
                 && ( unwind_requested() ) )
             unwind_stack();
         alloc.deallocate( callee_->fc_stack.sp, callee_->fc_stack.size);
@@ -130,19 +125,9 @@ public:
     bool is_complete() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_complete); }
 
-    bool is_started() const BOOST_NOEXCEPT
-    { return 0 != ( flags_ & flag_started); }
-
-    bool is_resumed() const BOOST_NOEXCEPT
-    { return 0 != ( flags_ & flag_resumed); }
-
-    bool is_running() const BOOST_NOEXCEPT
-    { return 0 != ( flags_ & flag_running); }
-
     void unwind_stack() BOOST_NOEXCEPT
     {
         BOOST_ASSERT( ! is_complete() );
-        BOOST_ASSERT( ! is_running() );
 
         flags_ |= flag_unwind_stack;
         context::jump_fcontext( & caller_, callee_, 0, fpu_preserved == preserve_fpu_);
@@ -152,15 +137,10 @@ public:
 
     intptr_t native_resume( intptr_t param)
     {
-        BOOST_ASSERT( is_started() );
         BOOST_ASSERT( ! is_complete() );
-        BOOST_ASSERT( ! is_running() );
 
-        flags_ |= flag_resumed;
-        flags_ |= flag_running;
         intptr_t ret = context::jump_fcontext( & caller_, callee_, param, fpu_preserved == preserve_fpu_);
-        flags_ &= ~flag_running;
-        if ( 0 != ( flags_ & flag_has_exception) )
+        if ( except_)
             rethrow_exception( except_);
         return ret; 
     }
@@ -168,9 +148,7 @@ public:
     intptr_t native_suspend( intptr_t param)
     {
         BOOST_ASSERT( ! is_complete() );
-        BOOST_ASSERT( is_running() );
 
-        flags_ &= ~flag_running;
         intptr_t ret = context::jump_fcontext( callee_, & caller_, param, fpu_preserved == preserve_fpu_);
         if ( 0 != ( flags_ & flag_unwind_stack) )
             throw forced_unwind();
