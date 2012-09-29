@@ -91,12 +91,6 @@ public:
         >(),
         impl_()
     {
-        BOOST_STATIC_ASSERT((
-            is_same<
-                void,
-                typename result_of< Fn() >::type
-            >::value));
-
         typedef detail::coroutine_object<
                 Fn,
                 context::guarded_stack_allocator,
@@ -122,12 +116,6 @@ public:
         >(),
         impl_()
     {
-        BOOST_STATIC_ASSERT((
-            is_same<
-                void,
-                typename result_of< Fn() >::type
-            >::value));
-
         typedef detail::coroutine_object<
                 Fn,
                 StackAllocator,
@@ -153,12 +141,6 @@ public:
         >(),
         impl_()
     {
-        BOOST_STATIC_ASSERT((
-            is_same<
-                void,
-                typename result_of< Fn() >::type
-            >::value));
-
         typedef detail::coroutine_object<
                 Fn,
                 StackAllocator,
@@ -216,12 +198,6 @@ public:
         >(),
         impl_()
     {
-        BOOST_STATIC_ASSERT((
-            is_same<
-                void,
-                typename result_of< Fn() >::type
-            >::value));
-
         typedef detail::coroutine_object<
                 Fn,
                 StackAllocator,
@@ -247,12 +223,6 @@ public:
         >(),
         impl_()
     {
-        BOOST_STATIC_ASSERT((
-            is_same<
-                void,
-                typename result_of< Fn() >::type
-            >::value));
-
         typedef detail::coroutine_object<
                 Fn,
                 StackAllocator,
@@ -278,12 +248,6 @@ public:
         >(),
         impl_()
     {
-        BOOST_STATIC_ASSERT((
-            is_same<
-                void,
-                typename result_of< Fn() >::type
-            >::value));
-
         typedef detail::coroutine_object<
                 Fn,
                 context::guarded_stack_allocator,
@@ -309,12 +273,6 @@ public:
         >(),
         impl_()
     {
-        BOOST_STATIC_ASSERT((
-            is_same<
-                void,
-                typename result_of< Fn() >::type
-            >::value));
-
         typedef detail::coroutine_object<
                 Fn,
                 StackAllocator,
@@ -340,12 +298,6 @@ public:
         >(),
         impl_()
     {
-        BOOST_STATIC_ASSERT((
-            is_same<
-                void,
-                typename result_of< Fn() >::type
-            >::value));
-
         typedef detail::coroutine_object<
                 Fn,
                 StackAllocator,
