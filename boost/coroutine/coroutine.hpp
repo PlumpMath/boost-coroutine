@@ -15,6 +15,7 @@
 #include <boost/context/guarded_stack_allocator.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/move/move.hpp>
+#include <boost/range.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/type_traits/function_traits.hpp>
 #include <boost/type_traits/is_same.hpp>
@@ -183,12 +184,13 @@ public:
         >(),
         impl_()
     {
+#if 0
         BOOST_STATIC_ASSERT((
             is_same<
-                void,
+                typename function_traits< Signature >::result_type,
                 typename result_of< Fn() >::type
             >::value));
-
+#endif
         typedef detail::coroutine_object<
                 Fn,
                 context::guarded_stack_allocator,
@@ -392,7 +394,42 @@ template< typename Signature >
 void swap( coroutine< Signature > & l, coroutine< Signature > & r) BOOST_NOEXCEPT
 { l.swap( r); }
 
-}}
+template< typename Signature >
+inline
+typename coroutine< Signature >::iterator
+range_begin( coroutine< Signature > & c)
+{ return typename coroutine< Signature >::iterator( & c); }
+
+template< typename Signature >
+inline
+typename coroutine< Signature >::const_iterator
+range_begin( coroutine< Signature > const& c)
+{ return typename coroutine< Signature >::const_iterator( & c); }
+
+template< typename Signature >
+inline
+typename coroutine< Signature >::iterator
+range_end( coroutine< Signature > & c)
+{ return typename coroutine< Signature >::iterator(); }
+
+template< typename Signature >
+inline
+typename coroutine< Signature >::const_iterator
+range_end( coroutine< Signature > const& c)
+{ return typename coroutine< Signature >::const_iterator(); }
+
+}
+
+template< typename Signature >
+struct range_mutable_iterator< coro::coroutine< Signature > >
+{ typedef typename coro::coroutine< Signature >::iterator type; };
+
+template< typename Signature >
+struct range_const_iterator< coro::coroutine< Signature > >
+{ typedef typename coro::coroutine< Signature >::const_iterator type; };
+
+
+}
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_SUFFIX

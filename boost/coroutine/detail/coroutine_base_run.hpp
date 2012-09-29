@@ -54,9 +54,9 @@ struct coroutine_base_run< Signature, D, Result, 0 >
     {}
 
     void run_()
-    { static_cast< D * >( this)->exec_(); }
+    { static_cast< D * >( this)->result_ = static_cast< D * >( this)->exec_(); }
 
-    virtual void exec_() = 0;
+    virtual Result exec_() = 0;
 };
 
 template< typename Signature, typename D >
@@ -90,9 +90,9 @@ struct coroutine_base_run< Signature, D, Result, 1 >
     {}
 
     void run_()
-    { static_cast< D * >( this)->exec_( * args_); }
+    { static_cast< D * >( this)->result_ = static_cast< D * >( this)->exec_( * args_); }
 
-    virtual void exec_( arg_t) = 0;
+    virtual Result exec_( arg_t) = 0;
 };
 
 #define BOOST_CONTEXT_BASE_RUN_COMMA(n) BOOST_PP_COMMA_IF(BOOST_PP_SUB(n,1))
@@ -134,9 +134,9 @@ struct coroutine_base_run< Signature, D, Result, n > \
     {} \
 \
     void run_() \
-    { static_cast< D * >( this)->exec_(BOOST_CONTEXT_BASE_RUN_VALS(n)); } \
+    { static_cast< D * >( this)->result_ = static_cast< D * >( this)->exec_(BOOST_CONTEXT_BASE_RUN_VALS(n)); } \
 \
-    virtual void exec_(BOOST_CONTEXT_BASE_RUN_ARGS(n)) = 0; \
+    virtual Result exec_(BOOST_CONTEXT_BASE_RUN_ARGS(n)) = 0; \
 };
 BOOST_PP_REPEAT_FROM_TO(2,11,BOOST_CONTEXT_BASE_RUN,~)
 #undef BOOST_CONTEXT_BASE_RUN

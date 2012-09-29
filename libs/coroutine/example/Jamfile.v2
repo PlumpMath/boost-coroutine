@@ -47,26 +47,30 @@ project boost/coroutine/example
       <link>static
     ;
 
-exe coroutine/echo
-    : coroutine/echo.cpp
+exe power
+    : power.cpp
     ;
 
-exe coroutine/parallel
-    : coroutine/parallel.cpp
+exe echo
+    : echo.cpp
     ;
 
-exe coroutine/asio/simple/echo_client
-    : coroutine/asio/simple/echo_client.cpp
+exe parallel
+    : parallel.cpp
     ;
 
-exe coroutine/asio/simple/echo_server
-    : coroutine/asio/simple/echo_server.cpp
+exe asio/simple/echo_client
+    : asio/simple/echo_client.cpp
     ;
 
-exe coroutine/asio/stream/dummy_client
-    : coroutine/asio/stream/dummy_client.cpp
+exe asio/simple/echo_server
+    : asio/simple/echo_server.cpp
     ;
 
-exe coroutine/asio/stream/dummy_server
-    : coroutine/asio/stream/dummy_server.cpp
+exe asio/stream/dummy_client
+    : asio/stream/dummy_client.cpp
+    ;
+
+exe asio/stream/dummy_server
+    : asio/stream/dummy_server.cpp
     ;
