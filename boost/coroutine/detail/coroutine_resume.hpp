@@ -101,13 +101,6 @@ struct coroutine_resume< Signature, D, Result, 0 >
             return * this;
         }
 
-        iterator operator++( int)
-        {
-            iterator tmp( * this);
-            increment_();
-            return tmp;
-        }
-
         Result & operator*() const
         { return const_cast< optional< Result > & >( val_).get(); }
 
@@ -165,13 +158,6 @@ struct coroutine_resume< Signature, D, Result, 0 >
         {
             increment_();
             return * this;
-        }
-
-        const_iterator operator++( int)
-        {
-            const_iterator tmp( * this);
-            increment_();
-            return tmp;
         }
 
         Result const& operator*() const
@@ -232,9 +218,6 @@ struct coroutine_resume< Signature, D, void, 1 >
         { return * this; }
 
         iterator & operator++()
-        { return * this; }
-
-        iterator & operator++( int)
         { return * this; }
     };
 
