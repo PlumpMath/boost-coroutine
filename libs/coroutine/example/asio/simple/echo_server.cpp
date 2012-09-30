@@ -29,37 +29,34 @@ private:
     boost::asio::ip::tcp::acceptor      acceptor_;
     coro_t                              coro_;
 
-    void do_( coro_t::self_t & self, boost::system::error_code ec, std::size_t n)
+    void do_( coro_t::self_t & self)
     {
        for (;;)
        {
             boost::asio::ip::tcp::socket socket( acceptor_.get_io_service() );
             acceptor_.async_accept( socket, boost::bind( & server::operator(), this->shared_from_this(), _1, 0) );
-            tuple_t tpl = self().get();
 
-            while ( ! tpl.get< 0 >() )
+            while ( ! self.get< 0 >() )
             {
                 boost::array< char, 1024 > buffer;
 
                 socket.async_read_some(
                     boost::asio::buffer( buffer),
                     boost::bind( & server::operator(), this->shared_from_this(), _1, _2) ); 
-                tpl = self().get();
 
-                if ( tpl.get< 0 >() ) break;
+                if ( self.get< 0 >() ) break;
 
                 boost::asio::async_write(
                     socket,
-                    boost::asio::buffer( buffer, tpl.get< 1 >() ),
+                    boost::asio::buffer( buffer, self.get< 1 >() ),
                     boost::bind( & server::operator(), this->shared_from_this(), _1, _2) ); 
-                tpl = self().get();
             }
        }
     }
 
     server( boost::asio::io_service & io_service, short port) :
         acceptor_( io_service, boost::asio::ip::tcp::endpoint( boost::asio::ip::tcp::v4(), port) ),
-        coro_( boost::bind( & server::do_, this, _1, _2, _3) )
+        coro_( boost::bind( & server::do_, this, _1) )
     {}
 
 public:

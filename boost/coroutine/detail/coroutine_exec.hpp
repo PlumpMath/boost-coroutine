@@ -82,7 +82,7 @@ private:
     void exec_( arg_t a)
     {
         coroutine_self< Signature, void, 1 > self( this);
-        static_cast< D * >( this)->fn_( self, a);
+        static_cast< D * >( this)->fn_( self);
     }
 
 public:
@@ -102,7 +102,7 @@ private:
     Result exec_( arg_t a)
     {
         coroutine_self< Signature, Result, 1 > self( this);
-        return static_cast< D * >( this)->fn_( self, a);
+        return static_cast< D * >( this)->fn_( self);
     }
 
 public:
@@ -129,7 +129,7 @@ private: \
     void exec_( BOOST_CONTEXT_EXEC_ARGS(n)) \
     { \
         coroutine_self< Signature, void, n > self( this); \
-        static_cast< D * >( this)->fn_( self, BOOST_CONTEXT_EXEC_VALS(n)); \
+        static_cast< D * >( this)->fn_( self); \
     } \
 \
 public: \
@@ -148,7 +148,7 @@ private: \
     Result exec_( BOOST_CONTEXT_EXEC_ARGS(n)) \
     { \
         coroutine_self< Signature, Result, n > self( this); \
-        return static_cast< D * >( this)->fn_( self, BOOST_CONTEXT_EXEC_VALS(n)); \
+        return static_cast< D * >( this)->fn_( self); \
     } \
 \
 public: \

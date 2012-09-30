@@ -128,37 +128,37 @@ std::string f5( coro_string_void::self_t & self)
     return "xyz";
 }
 
-void f6( coro_void_int::self_t & self, int i)
-{ value1 = i; }
+void f6( coro_void_int::self_t & self)
+{ value1 = self.get< 0 >(); }
 
-void f7( coro_void_string::self_t & self, std::string const& str)
-{ value2 = str; }
+void f7( coro_void_string::self_t & self)
+{ value2 = self.get< 0 >(); }
 
-double f8( coro_double::self_t & self, double a, double b)
+double f8( coro_double::self_t & self)
 {
-    double tmp = a + b;
+    double tmp = self.get< 0 >() + self.get< 1 >();
     self( tmp);
     double x = self.get< 0 >();
     double y = self.get< 1 >();
     return x + y;
 }
 
-int * f9( coro_ptr::self_t & self, int * a)
-{ return a; }
+int * f9( coro_ptr::self_t & self)
+{ return self.get< 0 >(); }
 
-int & f10( coro_ref::self_t & self, int & a)
-{ return a; }
+int & f10( coro_ref::self_t & self)
+{ return self.get< 0 >(); }
 
-boost::tuple<int&,int&> f11( coro_tuple::self_t & self, int & a, int & b)
+boost::tuple<int&,int&> f11( coro_tuple::self_t & self)
 {
-    boost::tuple<int&,int&> tpl( a, b);
+    boost::tuple<int&,int&> tpl( self.get< 0 >(), self.get< 1 >() );
     return tpl;
 }
 
-int f12( coro_int::self_t & self, int a, int b)
+int f12( coro_int::self_t & self)
 {
     X x_;
-    int tmp = a + b;
+    int tmp = self.get< 0 >() + self.get< 1 >();
     self( tmp);
     int x = self.get< 0 >();
     int y = self.get< 1 >();
@@ -179,9 +179,9 @@ int f16( coro_int_void::self_t & self)
     return 5;
 }
 
-void f17( coro_void_int::self_t & self, int i)
+void f17( coro_void_int::self_t & self)
 {
-    int x = i;
+    int x = self.get< 0 >();
     while ( 6 > x)
     {
         vec.push_back( x);
@@ -401,7 +401,7 @@ void test_output_iterator()
 void test_input_iterator()
 {
     int counter = 0;
-    coro_void_int coro( boost::bind( f17, _1, _2) );
+    coro_void_int coro( f17);
     coro_void_int::iterator e( boost::end( coro) );
     for ( coro_void_int::iterator i( boost::begin( coro) );
           i != e; ++i)

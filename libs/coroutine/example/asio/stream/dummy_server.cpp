@@ -48,9 +48,8 @@ private:
         s_.async_read_some(
                 boost::asio::buffer( buffer_ + pb_size, bf_size - pb_size),
                 boost::bind( & coro_t::operator(), & coro_, _1, _2) );
-        tuple_t tpl = self_().get();
-        boost::system::error_code ec = tpl.get< 0 >();
-        std::size_t n = tpl.get< 1 >();
+        boost::system::error_code ec = self_.get< 0 >();
+        std::size_t n = self_.get< 1 >();
         if ( ec)
         {
             setg( 0, 0, 0);
@@ -91,9 +90,9 @@ const std::streamsize inbuf::pb_size = 4;
 class session : private boost::noncopyable
 {
 private:
-    void handle_read_( coro_t::self_t & self, boost::system::error_code const& ec, std::size_t n)
+    void handle_read_( coro_t::self_t & self)
     {
-        if ( ! ec)
+        if ( ! self.get< 0 >() )
         {
             inbuf buf( socket_, coro_, self);
             std::istream s( & buf);
@@ -119,7 +118,7 @@ private:
 
 public:
     session( boost::asio::io_service & io_service) :
-        coro_( boost::bind( & session::handle_read_, this, _1, _2, _3) ),
+        coro_( boost::bind( & session::handle_read_, this, _1) ),
         io_service_( io_service),
         socket_( io_service_)
     { std::cout << "serivce()" << std::endl; }
