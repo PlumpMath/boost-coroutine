@@ -8,7 +8,9 @@
 #define BOOST_CORO_DETAIL_COROUTINE_SELF_H
 
 #include <boost/config.hpp>
-#include <boost/throw_exception.hpp>
+#include <boost/mpl/assert.hpp>
+#include <boost/mpl/equal_to.hpp>
+#include <boost/mpl/int.hpp>
 
 #include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
@@ -54,6 +56,45 @@ public:
     }
 };
 
+template< typename Signature >
+class coroutine_self< Signature, void, 1 >
+{
+private:
+    typedef typename arg< Signature >::type_t   arg_t;
+    typedef detail::coroutine_base<
+        Signature, void, 1
+    >                                           base_t;
+    typedef base_t                         *    ptr_t;
+
+    template< typename X, typename Y, typename R, int >
+    friend class coroutine_exec;
+
+    ptr_t  impl_;
+
+    coroutine_self( ptr_t impl) BOOST_NOEXCEPT :
+        impl_( impl)
+    { BOOST_ASSERT( impl_); }
+
+public:
+    coroutine_self & operator()()
+    {
+        BOOST_ASSERT( impl_);
+        impl_->suspend();
+        return * this;
+    }
+
+    template< int N >
+    arg_t get() const
+    {
+        BOOST_MPL_ASSERT((
+            mpl::equal_to< mpl::int_< N >, mpl::int_< 0 > >
+        ));
+        BOOST_ASSERT( impl_);
+        BOOST_ASSERT( impl_->args_);
+        return impl_->args_.get();
+    }
+};
+
 template< typename Signature, int arity >
 class coroutine_self< Signature, void, arity >
 {
@@ -81,11 +122,12 @@ public:
         return * this;
     }
 
-    arg_t get() const
+    template< int N >
+    typename tuples::element< N, arg_t >::type get() const
     {
         BOOST_ASSERT( impl_);
         BOOST_ASSERT( impl_->args_);
-        return impl_->args_.get();
+        return impl_->args_.get().get< N >();
     }
 };
 
@@ -116,6 +158,45 @@ public:
     }
 };
 
+template< typename Signature, typename Result >
+class coroutine_self< Signature, Result, 1 >
+{
+private:
+    typedef typename arg< Signature >::type_t   arg_t;
+    typedef detail::coroutine_base<
+        Signature, Result, 1
+    >                                           base_t;
+    typedef base_t                         *    ptr_t;
+
+    template< typename X, typename Y, typename R, int >
+    friend class coroutine_exec;
+
+    ptr_t  impl_;
+
+    coroutine_self( ptr_t impl) BOOST_NOEXCEPT :
+        impl_( impl)
+    { BOOST_ASSERT( impl_); }
+
+public:
+    coroutine_self & operator()( typename param_type< Result >::type param)
+    {
+        BOOST_ASSERT( impl_);
+        impl_->suspend( param);
+        return * this;
+    }
+
+    template< int N >
+    arg_t get() const
+    {
+        BOOST_MPL_ASSERT((
+            mpl::equal_to< mpl::int_< N >, mpl::int_< 0 > >
+        ));
+        BOOST_ASSERT( impl_);
+        BOOST_ASSERT( impl_->args_);
+        return impl_->args_.get();
+    }
+};
+
 template< typename Signature, typename Result, int arity >
 class coroutine_self
 {
@@ -143,11 +224,12 @@ public:
         return * this;
     }
 
-    arg_t get() const
+    template< int N >
+    typename tuples::element< N, arg_t >::type get() const
     {
         BOOST_ASSERT( impl_);
         BOOST_ASSERT( impl_->args_);
-        return impl_->args_.get();
+        return impl_->args_.get().get< N >();
     }
 };
 

@@ -137,8 +137,10 @@ void f7( coro_void_string::self_t & self, std::string const& str)
 double f8( coro_double::self_t & self, double a, double b)
 {
     double tmp = a + b;
-    boost::tuple< double, double > ret = self( tmp).get();
-    return ret.get< 0 >() + ret.get< 1 >();
+    self( tmp);
+    double x = self.get< 0 >();
+    double y = self.get< 1 >();
+    return x + y;
 }
 
 int * f9( coro_ptr::self_t & self, int * a)
@@ -155,11 +157,13 @@ boost::tuple<int&,int&> f11( coro_tuple::self_t & self, int & a, int & b)
 
 int f12( coro_int::self_t & self, int a, int b)
 {
-    X x;
+    X x_;
     int tmp = a + b;
-    boost::tuple< int, int > ret = self( tmp).get();
+    self( tmp);
+    int x = self.get< 0 >();
+    int y = self.get< 1 >();
     value1 = 1;
-    return ret.get< 0 >() + ret.get< 1 >();
+    return x + y;
 }
 
 template< typename E >
@@ -181,7 +185,7 @@ void f17( coro_void_int::self_t & self, int i)
     while ( 6 > x)
     {
         vec.push_back( x);
-        x = self().get();
+        x = self().get< 0 >();
     }
 }
 
@@ -320,10 +324,10 @@ void test_tuple()
     coro_tuple coro( f11);
     BOOST_CHECK( coro);
     int a = 3, b = 7;
-    boost::tuple<int&,int&> res = coro( a, b).get();
+    boost::tuple<int&,int&> tpl = coro( a, b).get();
     BOOST_CHECK( ! coro);
-    BOOST_CHECK_EQUAL( & a, & res.get< 0 >() );
-    BOOST_CHECK_EQUAL( & b, & res.get< 1 >() );
+    BOOST_CHECK_EQUAL( & a, & tpl.get< 0 >() );
+    BOOST_CHECK_EQUAL( & b, & tpl.get< 1 >() );
 }
 
 void test_unwind()
