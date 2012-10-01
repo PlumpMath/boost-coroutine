@@ -11,7 +11,6 @@
 
 #include <boost/config.hpp>
 #include <boost/move/move.hpp>
-#include <boost/ref.hpp>
 
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/config.hpp>
@@ -32,7 +31,9 @@ template<
 class coroutine_object :
     public coroutine_exec<
         Signature,
-        coroutine_object< Fn, StackAllocator, Allocator, Signature, Result, arity >,
+        coroutine_object<
+            Fn, StackAllocator, Allocator, Signature, Result, arity
+        >,
         Result,
         arity
     >
@@ -46,10 +47,12 @@ public:
 
 #ifndef BOOST_NO_RVALUE_REFERENCES
     coroutine_object( Fn && fn, attributes const& attr,
-                    StackAllocator const& stack_alloc, allocator_t const& alloc) :
+            StackAllocator const& stack_alloc, allocator_t const& alloc) :
         coroutine_exec<
             Signature,
-            coroutine_object< Fn, StackAllocator, Allocator, Signature, Result, arity >,
+            coroutine_object<
+                Fn, StackAllocator, Allocator, Signature, Result, arity
+            >,
             Result,
             arity
         >( attr, stack_alloc),
@@ -59,10 +62,12 @@ public:
     {}
 #else
     coroutine_object( Fn fn, attributes const& attr,
-                    StackAllocator const& stack_alloc, allocator_t const& alloc) :
+            StackAllocator const& stack_alloc, allocator_t const& alloc) :
         coroutine_exec<
             Signature,
-            coroutine_object< Fn, StackAllocator, Allocator, Signature, Result, arity >,
+            coroutine_object<
+                Fn, StackAllocator, Allocator, Signature, Result, arity
+            >,
             Result,
             arity
         >( attr, stack_alloc),
@@ -72,10 +77,12 @@ public:
     {}
 
     coroutine_object( BOOST_RV_REF( Fn) fn, attributes const& attr,
-                    StackAllocator const& stack_alloc, allocator_t const& alloc) :
+            StackAllocator const& stack_alloc, allocator_t const& alloc) :
         coroutine_exec<
             Signature,
-            coroutine_object< Fn, StackAllocator, Allocator, Signature, Result, arity >,
+            coroutine_object<
+                Fn, StackAllocator, Allocator, Signature, Result, arity
+            >,
             Result,
             arity
         >( attr, stack_alloc),
@@ -113,10 +120,15 @@ template<
     typename Fn, typename StackAllocator, typename Allocator,
     typename Signature, typename Result, int arity
 >
-class coroutine_object< reference_wrapper< Fn >, StackAllocator, Allocator, Signature, Result, arity > :
+class coroutine_object<
+        reference_wrapper< Fn >, StackAllocator,
+        Allocator, Signature, Result, arity
+    > :
     public coroutine_exec<
         Signature,
-        coroutine_object< Fn, StackAllocator, Allocator, Signature, Result, arity >,
+        coroutine_object<
+            Fn, StackAllocator, Allocator, Signature, Result, arity
+        >,
         Result,
         arity
     >
@@ -129,10 +141,12 @@ public:
     >::other   allocator_t;
 
     coroutine_object( reference_wrapper< Fn > fn, attributes const& attr,
-                    StackAllocator const& stack_alloc, allocator_t const& alloc) :
+            StackAllocator const& stack_alloc, allocator_t const& alloc) :
         coroutine_exec<
             Signature,
-            coroutine_object< Fn, StackAllocator, Allocator, Signature, Result, arity >,
+            coroutine_object<
+                Fn, StackAllocator, Allocator, Signature, Result, arity
+            >,
             Result,
             arity
         >( attr, stack_alloc),
@@ -169,10 +183,15 @@ template<
     typename Fn, typename StackAllocator, typename Allocator,
     typename Signature, typename Result, int arity
 >
-class coroutine_object< const reference_wrapper< Fn >, StackAllocator, Allocator, Signature, Result, arity > :
+class coroutine_object<
+        const reference_wrapper< Fn >, StackAllocator,
+        Allocator, Signature, Result, arity
+    > :
     public coroutine_exec<
         Signature,
-        coroutine_object< Fn, StackAllocator, Allocator, Signature, Result, arity >,
+        coroutine_object<
+            Fn, StackAllocator, Allocator, Signature, Result, arity
+        >,
         Result,
         arity
     >
@@ -185,10 +204,12 @@ public:
     >::other   allocator_t;
 
     coroutine_object( const reference_wrapper< Fn > fn, attributes const& attr,
-                    StackAllocator const& stack_alloc, allocator_t const& alloc) :
+            StackAllocator const& stack_alloc, allocator_t const& alloc) :
         coroutine_exec<
             Signature,
-            coroutine_object< Fn, StackAllocator, Allocator, Signature, Result, arity >,
+            coroutine_object<
+                Fn, StackAllocator, Allocator, Signature, Result, arity
+            >,
             Result,
             arity
         >( attr, stack_alloc),

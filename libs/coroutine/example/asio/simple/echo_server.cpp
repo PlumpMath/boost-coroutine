@@ -35,6 +35,7 @@ private:
        {
             boost::asio::ip::tcp::socket socket( acceptor_.get_io_service() );
             acceptor_.async_accept( socket, boost::bind( & server::operator(), this->shared_from_this(), _1, 0) );
+            self.yield();
 
             while ( ! self.get< 0 >() )
             {
@@ -43,6 +44,7 @@ private:
                 socket.async_read_some(
                     boost::asio::buffer( buffer),
                     boost::bind( & server::operator(), this->shared_from_this(), _1, _2) ); 
+                self.yield();
 
                 if ( self.get< 0 >() ) break;
 
@@ -50,6 +52,7 @@ private:
                     socket,
                     boost::asio::buffer( buffer, self.get< 1 >() ),
                     boost::bind( & server::operator(), this->shared_from_this(), _1, _2) ); 
+                self.yield();
             }
        }
     }

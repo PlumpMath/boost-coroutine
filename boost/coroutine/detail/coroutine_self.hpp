@@ -16,7 +16,6 @@
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_base.hpp>
 #include <boost/coroutine/detail/param_type.hpp>
-#include <boost/coroutine/exceptions.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -48,9 +47,10 @@ private:
     { BOOST_ASSERT( impl_); }
 
 public:
-    coroutine_self & operator()()
+    coroutine_self & yield()
     {
         BOOST_ASSERT( impl_);
+
         impl_->suspend();
         return * this;
     }
@@ -76,9 +76,10 @@ private:
     { BOOST_ASSERT( impl_); }
 
 public:
-    coroutine_self & operator()()
+    coroutine_self & yield()
     {
         BOOST_ASSERT( impl_);
+
         impl_->suspend();
         return * this;
     }
@@ -91,6 +92,7 @@ public:
         ));
         BOOST_ASSERT( impl_);
         BOOST_ASSERT( impl_->args_);
+
         return impl_->args_.get();
     }
 };
@@ -115,9 +117,10 @@ private:
     { BOOST_ASSERT( impl_); }
 
 public:
-    coroutine_self & operator()()
+    coroutine_self & yield()
     {
         BOOST_ASSERT( impl_);
+
         impl_->suspend();
         return * this;
     }
@@ -127,6 +130,7 @@ public:
     {
         BOOST_ASSERT( impl_);
         BOOST_ASSERT( impl_->args_);
+
         return impl_->args_.get().get< N >();
     }
 };
@@ -150,7 +154,7 @@ private:
     { BOOST_ASSERT( impl_); }
 
 public:
-    coroutine_self & operator()( typename param_type< Result >::type param)
+    coroutine_self & yield( typename param_type< Result >::type param)
     {
         BOOST_ASSERT( impl_);
         impl_->suspend( param);
@@ -178,9 +182,10 @@ private:
     { BOOST_ASSERT( impl_); }
 
 public:
-    coroutine_self & operator()( typename param_type< Result >::type param)
+    coroutine_self & yield( typename param_type< Result >::type param)
     {
         BOOST_ASSERT( impl_);
+
         impl_->suspend( param);
         return * this;
     }
@@ -193,6 +198,7 @@ public:
         ));
         BOOST_ASSERT( impl_);
         BOOST_ASSERT( impl_->args_);
+
         return impl_->args_.get();
     }
 };
@@ -217,9 +223,10 @@ private:
     { BOOST_ASSERT( impl_); }
 
 public:
-    coroutine_self & operator()( typename param_type< Result >::type param)
+    coroutine_self & yield( typename param_type< Result >::type param)
     {
         BOOST_ASSERT( impl_);
+
         impl_->suspend( param);
         return * this;
     }
@@ -229,6 +236,7 @@ public:
     {
         BOOST_ASSERT( impl_);
         BOOST_ASSERT( impl_->args_);
+
         return impl_->args_.get().get< N >();
     }
 };

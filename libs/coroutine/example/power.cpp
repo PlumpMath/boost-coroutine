@@ -22,7 +22,7 @@ int power( coro_t::self_t & self, int number, int exponent)
     while ( counter++ < exponent - 1)
     {
             result = result * number;
-            self( result);
+            self.yield( result);
     }
     return result * number;
 }

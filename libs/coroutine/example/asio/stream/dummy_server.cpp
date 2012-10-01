@@ -48,6 +48,7 @@ private:
         s_.async_read_some(
                 boost::asio::buffer( buffer_ + pb_size, bf_size - pb_size),
                 boost::bind( & coro_t::operator(), & coro_, _1, _2) );
+        self_.yield();
         boost::system::error_code ec = self_.get< 0 >();
         std::size_t n = self_.get< 1 >();
         if ( ec)

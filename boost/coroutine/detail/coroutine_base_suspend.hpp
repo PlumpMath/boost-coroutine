@@ -7,15 +7,12 @@
 #ifndef BOOST_CORO_DETAIL_COROUTINE_BASE_SUSPEND_H
 #define BOOST_CORO_DETAIL_COROUTINE_BASE_SUSPEND_H
 
-#include <boost/assert.hpp>
 #include <boost/config.hpp>
-#include <boost/type_traits/remove_reference.hpp>
+#include <boost/context/fcontext.hpp>
 
-#include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/flags.hpp>
 #include <boost/coroutine/detail/param_type.hpp>
-#include <boost/coroutine/exceptions.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -25,40 +22,41 @@ namespace boost {
 namespace coro {
 namespace detail {
 
+struct forced_unwind {};
+
 template< typename Signature, typename D, typename Result, int arity >
 struct coroutine_base_suspend;
-
-template< typename Signature, typename D >
-struct coroutine_base_suspend< Signature, D, void, 0 >
-{
-    void suspend()
-    { static_cast< D * >( this)->native_suspend( 0); }
-};
 
 template< typename Signature, typename D, int arity >
 struct coroutine_base_suspend< Signature, D, void, arity >
 {
     void suspend()
-    { static_cast< D * >( this)->native_suspend( 0); }
-};
-
-template< typename Signature, typename D, typename Result >
-struct coroutine_base_suspend< Signature, D, Result, 0 >
-{
-    void suspend( typename param_type< Result >::type param_)
     {
-        static_cast< D * >( this)->result_ = typename param_type< Result >::type( param_);
-        static_cast< D * >( this)->native_suspend( 0);
+        BOOST_ASSERT( ! static_cast< D * >( this)->is_complete() );
+
+        context::jump_fcontext(
+            static_cast< D * >( this)->callee_,
+            & static_cast< D * >( this)->caller_,
+            0, fpu_preserved == static_cast< D * >( this)->preserve_fpu_);
+        if ( static_cast< D * >( this)->unwind_requested() )
+            throw forced_unwind(); // BOOST_THROW_EXCEPTION?
     }
 };
 
 template< typename Signature, typename D, typename Result, int arity >
 struct coroutine_base_suspend
 {
-    void suspend( typename param_type< Result >::type param_)
+    typedef typename param_type< Result >::type param_t;
+
+    void suspend( param_t param)
     {
-        static_cast< D * >( this)->result_ = typename param_type< Result >::type( param_);
-        static_cast< D * >( this)->native_suspend( 0);
+        static_cast< D * >( this)->result_ = param;
+        context::jump_fcontext(
+            static_cast< D * >( this)->callee_,
+            & static_cast< D * >( this)->caller_,
+            0, fpu_preserved == static_cast< D * >( this)->preserve_fpu_);
+        if ( static_cast< D * >( this)->unwind_requested() )
+            throw forced_unwind(); // BOOST_THROW_EXCEPTION?
     }
 };
 

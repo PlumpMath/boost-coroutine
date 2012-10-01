@@ -111,20 +111,20 @@ void f2( coro_void_void::self_t &)
 void f3( coro_void_void::self_t & self)
 {
     ++value1;
-    self();
+    self.yield();
     ++value1;
 }
 
 int f4( coro_int_void::self_t & self)
 {
-    self( 3);
+    self.yield( 3);
     return 7;
 }
 
 std::string f5( coro_string_void::self_t & self)
 {
     std::string res("abc");
-    self( res);
+    self.yield( res);
     return "xyz";
 }
 
@@ -137,7 +137,7 @@ void f7( coro_void_string::self_t & self)
 double f8( coro_double::self_t & self)
 {
     double tmp = self.get< 0 >() + self.get< 1 >();
-    self( tmp);
+    self.yield( tmp);
     double x = self.get< 0 >();
     double y = self.get< 1 >();
     return x + y;
@@ -159,7 +159,7 @@ int f12( coro_int::self_t & self)
 {
     X x_;
     int tmp = self.get< 0 >() + self.get< 1 >();
-    self( tmp);
+    self.yield( tmp);
     int x = self.get< 0 >();
     int y = self.get< 1 >();
     value1 = 1;
@@ -172,10 +172,10 @@ void f14( coro_void_void::self_t & self, E const& e)
 
 int f16( coro_int_void::self_t & self)
 {
-    self( 1);
-    self( 2);
-    self( 3);
-    self( 4);
+    self.yield( 1);
+    self.yield( 2);
+    self.yield( 3);
+    self.yield( 4);
     return 5;
 }
 
@@ -185,7 +185,7 @@ void f17( coro_void_int::self_t & self)
     while ( 6 > x)
     {
         vec.push_back( x);
-        x = self().get< 0 >();
+        x = self.yield().get< 0 >();
     }
 }
 

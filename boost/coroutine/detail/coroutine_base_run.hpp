@@ -7,7 +7,6 @@
 #ifndef BOOST_CORO_DETAIL_COROUTINE_BASE_RUN_H
 #define BOOST_CORO_DETAIL_COROUTINE_BASE_RUN_H
 
-#include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include <boost/optional.hpp>
 #include <boost/preprocessor/arithmetic/add.hpp>
@@ -20,7 +19,6 @@
 
 #include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
-#include <boost/coroutine/flags.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -37,7 +35,7 @@ template< typename Signature, typename D >
 struct coroutine_base_run< Signature, D, void, 0 >
 {
     void run_()
-    { static_cast< D * >( this)->exec_(); }
+    { exec_(); }
 
     virtual void exec_() = 0;
 };
@@ -45,54 +43,16 @@ struct coroutine_base_run< Signature, D, void, 0 >
 template< typename Signature, typename D, typename Result >
 struct coroutine_base_run< Signature, D, Result, 0 >
 {
-    typedef Result          result_t;
-
-    optional< result_t >    result_;
+    optional< Result >      result_;
 
     coroutine_base_run() BOOST_NOEXCEPT :
         result_()
     {}
 
     void run_()
-    { static_cast< D * >( this)->result_ = static_cast< D * >( this)->exec_(); }
+    { result_ = exec_(); }
 
     virtual Result exec_() = 0;
-};
-
-template< typename Signature, typename D >
-struct coroutine_base_run< Signature, D, void, 1 >
-{
-    typedef typename arg< Signature >::type_t   arg_t; \
-
-    optional< arg_t >   args_;
-
-    coroutine_base_run() BOOST_NOEXCEPT :
-        args_()
-    {}
-
-    void run_()
-    { static_cast< D * >( this)->exec_( * args_); }
-
-    virtual void exec_( arg_t) = 0;
-};
-
-template< typename Signature, typename D, typename Result >
-struct coroutine_base_run< Signature, D, Result, 1 >
-{
-    typedef typename arg< Signature >::type_t   arg_t;
-    typedef Result                              result_t;
-
-    optional< arg_t >       args_;
-    optional< result_t >    result_;
-
-    coroutine_base_run() BOOST_NOEXCEPT :
-        args_(), result_()
-    {}
-
-    void run_()
-    { static_cast< D * >( this)->result_ = static_cast< D * >( this)->exec_( * args_); }
-
-    virtual Result exec_( arg_t) = 0;
 };
 
 #define BOOST_CONTEXT_BASE_RUN_COMMA(n) BOOST_PP_COMMA_IF(BOOST_PP_SUB(n,1))
@@ -115,30 +75,29 @@ struct coroutine_base_run< Signature, D, void, n > \
     {} \
 \
     void run_() \
-    { static_cast< D * >( this)->exec_(BOOST_CONTEXT_BASE_RUN_VALS(n)); } \
+    { exec_(); } \
 \
-    virtual void exec_(BOOST_CONTEXT_BASE_RUN_ARGS(n)) = 0; \
+    virtual void exec_() = 0; \
 }; \
 \
 template< typename Signature, typename D, typename Result > \
 struct coroutine_base_run< Signature, D, Result, n > \
 { \
-    typedef Result                              result_t; \
     typedef typename arg< Signature >::type_t   arg_t; \
 \
     optional< arg_t >       args_; \
-    optional< result_t >    result_; \
+    optional< Result >      result_; \
 \
     coroutine_base_run() BOOST_NOEXCEPT : \
         args_(), result_() \
     {} \
 \
     void run_() \
-    { static_cast< D * >( this)->result_ = static_cast< D * >( this)->exec_(BOOST_CONTEXT_BASE_RUN_VALS(n)); } \
+    { result_ = exec_(); } \
 \
-    virtual Result exec_(BOOST_CONTEXT_BASE_RUN_ARGS(n)) = 0; \
+    virtual Result exec_() = 0; \
 };
-BOOST_PP_REPEAT_FROM_TO(2,11,BOOST_CONTEXT_BASE_RUN,~)
+BOOST_PP_REPEAT_FROM_TO(1,11,BOOST_CONTEXT_BASE_RUN,~)
 #undef BOOST_CONTEXT_BASE_RUN
 #undef BOOST_CONTEXT_BASE_RUN_ARGS
 #undef BOOST_CONTEXT_BASE_RUN_ARG
