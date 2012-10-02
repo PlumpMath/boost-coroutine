@@ -50,8 +50,8 @@ class coroutine_exec< Signature, D, void, n > : \
 private: \
     void exec_( context::fcontext_t ** callee) \
     { \
-        coroutine_self< Signature, void, n > self( this, callee); \
-        static_cast< D * >( this)->fn_( self); \
+        coroutine_self< Signature, void, n > coro( this, callee); \
+        static_cast< D * >( this)->fn_( coro); \
     } \
 \
 public: \
@@ -68,8 +68,8 @@ class coroutine_exec< Signature, D, Result, n > : \
 private: \
     Result exec_( context::fcontext_t ** callee) \
     { \
-        coroutine_self< Signature, Result, n > self( this, callee); \
-        return static_cast< D * >( this)->fn_( self); \
+        coroutine_self< Signature, Result, n > coro( this, callee); \
+        return static_cast< D * >( this)->fn_( coro); \
     } \
 \
 public: \

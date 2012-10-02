@@ -50,7 +50,7 @@ the active generator.
 
         typedef boost::coro::generator< int > gen_t;
 
-        void f( gen_t::self_t & self)
+        void f( gen_t::caller_t & self)
         {
             ...
             self.yield( 11);
@@ -76,7 +76,7 @@ enclosing the __gen__ is terminated.
 
         typedef boost::coro::generator< int >    gen_t;
 
-        void power( gen_t::self_t & self, int number, int exponent)
+        void power( gen_t::caller_t & self, int number, int exponent)
         {
             int counter = 0, result = 1;
             while ( counter++ < exponent)
@@ -111,7 +111,7 @@ return), e.g. __gen_eval__ returns `true`.
 
         typedef boost::coro::generator< int > gen_t;
 
-        void fn( gen_t::self_t & self, int j)
+        void fn( gen_t::caller_t & self, int j)
         {
             for( int i = 0; i < j; ++i)
             {
@@ -229,7 +229,7 @@ fpu registers for perfromance reasons.
     class generator
     {
     public:
-        class self_t
+        class caller_t
         {
         public:
             void yield( R);
@@ -342,7 +342,7 @@ of `other`.]]
 [[Throws:] [Re-throws exceptions exceptions thrown inside __gen_fn__.]]
 ]
 
-[heading `void self_t::yield( R)`]
+[heading `void caller_t::yield( R)`]
 [variablelist
 [[Effects:] [Gives execution control back to calling context by returning
 a value of type R.]] 

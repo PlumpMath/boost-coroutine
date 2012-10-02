@@ -88,10 +88,10 @@ typedef boost::coro::generator< leaf & > gen_t;
 class tree_visitor : public visitor
 {
 private:
-    gen_t::self_t  &   self_;
+    gen_t::caller_t  &   self_;
 
 public:
-    tree_visitor( gen_t::self_t & self) :
+    tree_visitor( gen_t::caller_t & self) :
         self_( self)
     {}
 
@@ -105,7 +105,7 @@ public:
     { self_.yield( l); }
 };
 
-void enumerate_leafs( gen_t::self_t & self, node::ptr_t root)
+void enumerate_leafs( gen_t::caller_t & self, node::ptr_t root)
 {
     tree_visitor v( self);
     root->accept( v);

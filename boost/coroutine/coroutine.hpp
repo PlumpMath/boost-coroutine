@@ -68,7 +68,7 @@ public:
         Signature,
         typename function_traits< Signature >::result_type,
         function_traits< Signature >::arity
-    >                                                           self_t;
+    >                                                           caller_t;
 
     coroutine() BOOST_NOEXCEPT :
         detail::coroutine_resume<

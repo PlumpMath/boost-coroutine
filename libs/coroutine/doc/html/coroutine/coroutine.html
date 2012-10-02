@@ -94,12 +94,12 @@
     </p>
 <p>
       The first argument of <span class="emphasis"><em>coroutine-function</em></span> must be a reference
-      of type <span class="emphasis"><em>coroutine&lt;&gt;::self_t</em></span>, used for yielding the
+      of type <span class="emphasis"><em>coroutine&lt;&gt;::caller_t</em></span>, used for yielding the
       active coroutine.
     </p>
 <pre class="programlisting"><span class="keyword">typedef</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">coro</span><span class="special">::</span><span class="identifier">coroutine</span><span class="special">&lt;</span> <span class="keyword">void</span><span class="special">(</span><span class="keyword">int</span><span class="special">)</span> <span class="special">&gt;</span> <span class="identifier">coro_t</span><span class="special">;</span>
 
-<span class="keyword">void</span> <span class="identifier">f</span><span class="special">(</span> <span class="identifier">coro_t</span><span class="special">::</span><span class="identifier">self_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">i</span><span class="special">)</span>
+<span class="keyword">void</span> <span class="identifier">f</span><span class="special">(</span> <span class="identifier">coro_t</span><span class="special">::</span><span class="identifier">caller_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">i</span><span class="special">)</span>
 <span class="special">{</span>
     <span class="special">...</span>
     <span class="identifier">self</span><span class="special">.</span><span class="identifier">yield</span><span class="special">();</span>
@@ -127,8 +127,8 @@
       The first invocation of <span class="emphasis"><em>coroutine&lt;&gt;::operator()()</em></span>
       invokes the <span class="emphasis"><em>coroutine-function</em></span> in a newly created coroutine
       complete with registers, flags, stack and instruction pointer. When control
-      should be returned to the original calling routine, call <span class="emphasis"><em>coroutine&lt;&gt;::self_t::yield()</em></span>
-      or <span class="emphasis"><em>coroutine&lt;&gt;::self_t::yield_break()</em></span>. The current
+      should be returned to the original calling routine, call <span class="emphasis"><em>coroutine&lt;&gt;::caller_t::yield()</em></span>
+      or <span class="emphasis"><em>coroutine&lt;&gt;::caller_t::yield_break()</em></span>. The current
       coroutine information (registers, flags, and stack and instruction pointer)
       is saved and the original context information is restored. Calling <span class="emphasis"><em>coroutine&lt;&gt;::operator()()</em></span>
       resumes execution in the coroutine after saving the new state of the original
@@ -136,7 +136,7 @@
     </p>
 <pre class="programlisting"><span class="keyword">typedef</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">coro</span><span class="special">::</span><span class="identifier">coroutine</span><span class="special">&lt;</span> <span class="keyword">void</span><span class="special">()</span> <span class="special">&gt;</span> <span class="identifier">coro_t</span><span class="special">;</span>
 
-<span class="keyword">void</span> <span class="identifier">fn</span><span class="special">(</span> <span class="identifier">coro_t</span><span class="special">::</span><span class="identifier">self_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">j</span><span class="special">)</span>
+<span class="keyword">void</span> <span class="identifier">fn</span><span class="special">(</span> <span class="identifier">coro_t</span><span class="special">::</span><span class="identifier">caller_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">j</span><span class="special">)</span>
 <span class="special">{</span>
     <span class="keyword">for</span><span class="special">(</span> <span class="keyword">int</span> <span class="identifier">i</span> <span class="special">=</span> <span class="number">0</span><span class="special">;</span> <span class="identifier">i</span> <span class="special">&lt;</span> <span class="identifier">j</span><span class="special">;</span> <span class="special">++</span><span class="identifier">i</span><span class="special">)</span>
     <span class="special">{</span>
@@ -226,7 +226,7 @@
 <th align="left">Note</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-        <span class="emphasis"><em>coroutine&lt;&gt;::self_t</em></span> is not part of <span class="emphasis"><em>Signature</em></span>
+        <span class="emphasis"><em>coroutine&lt;&gt;::caller_t</em></span> is not part of <span class="emphasis"><em>Signature</em></span>
         and is always expected to be the first argument of <span class="emphasis"><em>coroutine-function</em></span>.
       </p></td></tr>
 </table></div>
@@ -234,20 +234,20 @@
       <span class="emphasis"><em>coroutine&lt;&gt;::operator()()</em></span> accepts arguments as defined
       in <span class="emphasis"><em>Signature</em></span> and has the same return type. The arguments
       passed to <span class="emphasis"><em>coroutine&lt;&gt;::operator()()</em></span>, in one coroutine,
-      is returned (as a boost::tuple) by <span class="emphasis"><em>coroutine&lt;&gt;::self_t::yield()</em></span>
+      is returned (as a boost::tuple) by <span class="emphasis"><em>coroutine&lt;&gt;::caller_t::yield()</em></span>
       in the other coroutine or, if it is the first call to <span class="emphasis"><em>coroutine&lt;&gt;::operator()()</em></span>
       (<span class="emphasis"><em>coroutine</em></span> was not started), the <span class="emphasis"><em>coroutine-function</em></span>
       will be entered and the arguments are passed to <span class="emphasis"><em>coroutine-function</em></span>
       on entry.
     </p>
 <p>
-      The value given to <span class="emphasis"><em>coroutine&lt;&gt;::self_t::yield()</em></span>,
+      The value given to <span class="emphasis"><em>coroutine&lt;&gt;::caller_t::yield()</em></span>,
       in one coroutine, is returned by <span class="emphasis"><em>coroutine&lt;&gt;::operator()()</em></span>
       in the other routine.
     </p>
 <pre class="programlisting"><span class="keyword">typedef</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">coro</span><span class="special">::</span><span class="identifier">coroutine</span><span class="special">&lt;</span> <span class="keyword">int</span><span class="special">(</span> <span class="keyword">int</span><span class="special">)</span> <span class="special">&gt;</span>    <span class="identifier">coro_t</span><span class="special">;</span>
 
-<span class="keyword">int</span> <span class="identifier">fn</span><span class="special">(</span> <span class="identifier">coro_t</span><span class="special">::</span><span class="identifier">self_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">i</span><span class="special">)</span>
+<span class="keyword">int</span> <span class="identifier">fn</span><span class="special">(</span> <span class="identifier">coro_t</span><span class="special">::</span><span class="identifier">caller_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">i</span><span class="special">)</span>
 <span class="special">{</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"fn(): local variable i == "</span> <span class="special">&lt;&lt;</span> <span class="identifier">i</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 
@@ -293,13 +293,13 @@
     </h4>
 <p>
       If <span class="emphasis"><em>coroutine-function</em></span> has more than one argument <span class="emphasis"><em>coroutine&lt;&gt;::operator()()</em></span>
-      has the same size of arguments and <span class="emphasis"><em>coroutine&lt;&gt;::self_t::yield()</em></span>
+      has the same size of arguments and <span class="emphasis"><em>coroutine&lt;&gt;::caller_t::yield()</em></span>
       returns a <span class="emphasis"><em>boost::tuple</em></span> coresponding to the arguments of
       <span class="emphasis"><em>Signature</em></span>.
     </p>
 <pre class="programlisting"><span class="keyword">typedef</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">coro</span><span class="special">::</span><span class="identifier">coroutine</span><span class="special">&lt;</span> <span class="keyword">int</span><span class="special">(</span><span class="keyword">int</span><span class="special">,</span><span class="keyword">int</span><span class="special">)</span> <span class="special">&gt;</span> <span class="identifier">coro_t</span><span class="special">;</span>
 
-<span class="keyword">int</span> <span class="identifier">fn</span><span class="special">(</span> <span class="identifier">coro_t</span><span class="special">::</span><span class="identifier">self_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">a</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">b</span><span class="special">)</span>
+<span class="keyword">int</span> <span class="identifier">fn</span><span class="special">(</span> <span class="identifier">coro_t</span><span class="special">::</span><span class="identifier">caller_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">a</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">b</span><span class="special">)</span>
 <span class="special">{</span>
     <span class="keyword">int</span> <span class="identifier">tmp</span> <span class="special">=</span> <span class="identifier">a</span> <span class="special">+</span> <span class="identifier">b</span><span class="special">;</span>
     <span class="identifier">boost</span><span class="special">::</span><span class="identifier">tuple</span><span class="special">&lt;</span> <span class="keyword">int</span><span class="special">,</span> <span class="keyword">int</span> <span class="special">&gt;</span> <span class="identifier">ret</span> <span class="special">=</span> <span class="identifier">self</span><span class="special">.</span><span class="identifier">yield</span><span class="special">(</span> <span class="identifier">tmp</span><span class="special">);</span>
@@ -334,13 +334,13 @@
       a <span class="emphasis"><em>coroutine-function</em></span></a>
     </h4>
 <p>
-      <span class="emphasis"><em>coroutine&lt;&gt;::self_t::yield_break()</em></span> does not take
+      <span class="emphasis"><em>coroutine&lt;&gt;::caller_t::yield_break()</em></span> does not take
       arguments and returns nothing, it leaves the current <span class="emphasis"><em>coroutine</em></span>
       and jumps back to the calling routine throwing an exception of type <span class="emphasis"><em>coroutine_terminated</em></span>.
     </p>
 <pre class="programlisting"><span class="keyword">typedef</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">coro</span><span class="special">::</span><span class="identifier">coroutine</span><span class="special">&lt;</span> <span class="keyword">int</span><span class="special">(</span><span class="keyword">int</span><span class="special">,</span><span class="keyword">int</span><span class="special">)</span> <span class="special">&gt;</span> <span class="identifier">coro_t</span><span class="special">;</span>
 
-<span class="keyword">int</span> <span class="identifier">fn</span><span class="special">(</span> <span class="identifier">coro_t</span><span class="special">::</span><span class="identifier">self_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">a</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">b</span><span class="special">)</span>
+<span class="keyword">int</span> <span class="identifier">fn</span><span class="special">(</span> <span class="identifier">coro_t</span><span class="special">::</span><span class="identifier">caller_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">a</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">b</span><span class="special">)</span>
 <span class="special">{</span>
     <span class="keyword">int</span> <span class="identifier">tmp</span> <span class="special">=</span> <span class="identifier">a</span> <span class="special">+</span> <span class="identifier">b</span><span class="special">;</span>
     <span class="identifier">boost</span><span class="special">::</span><span class="identifier">tuple</span><span class="special">&lt;</span> <span class="keyword">int</span><span class="special">,</span> <span class="keyword">int</span> <span class="special">&gt;</span> <span class="identifier">ret</span> <span class="special">=</span> <span class="identifier">self</span><span class="special">.</span><span class="identifier">yield</span><span class="special">(</span> <span class="identifier">tmp</span><span class="special">);</span>
@@ -382,7 +382,7 @@
 <th align="left">Important</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-        After calling <span class="emphasis"><em>coroutine&lt;&gt;::self_t::yield_break()</em></span>
+        After calling <span class="emphasis"><em>coroutine&lt;&gt;::caller_t::yield_break()</em></span>
         the <span class="emphasis"><em>coroutine</em></span> is complete (can not resumed with <span class="emphasis"><em>coroutine&lt;&gt;::operator()()</em></span>).
       </p></td></tr>
 </table></div>

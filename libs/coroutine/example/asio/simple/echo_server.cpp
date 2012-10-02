@@ -29,7 +29,7 @@ private:
     boost::asio::ip::tcp::acceptor      acceptor_;
     coro_t                              coro_;
 
-    void do_( coro_t::self_t & self)
+    void do_( coro_t::caller_t & self)
     {
        for (;;)
        {

@@ -12,13 +12,13 @@
 
 typedef boost::coro::coroutine < void() >        coro_void_t;
 
-void echo( coro_void_t::self_t & self, int i)
+void echo( coro_void_t::caller_t & self, int i)
 {
     std::cout << i; 
     self.yield();
 }
 
-void runit( coro_void_t::self_t & self)
+void runit( coro_void_t::caller_t & self)
 {
     std::cout << "started! ";
     for ( int i = 0; i < 10; ++i)

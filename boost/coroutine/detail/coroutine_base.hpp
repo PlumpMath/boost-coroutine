@@ -22,6 +22,7 @@
 #include <boost/coroutine/detail/coroutine_base_run.hpp>
 #include <boost/coroutine/detail/exceptions.hpp>
 #include <boost/coroutine/detail/flags.hpp>
+#include <boost/coroutine/detail/holder.hpp>
 #include <boost/coroutine/flags.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
@@ -33,25 +34,14 @@ namespace coro {
 namespace detail {
 
 template< typename Context >
-struct holder
-{
-    Context             *   ctx;
-    context::fcontext_t *   caller;
-
-    holder( Context * ctx_, context::fcontext_t * caller_) :
-        ctx( ctx_), caller( caller_)
-    {}
-};
-
-template< typename Context >
 void trampoline( intptr_t vp)
 {
     BOOST_ASSERT( vp);
 
-    holder< Context > * hldr( reinterpret_cast< holder< Context > * >( vp) );
-    Context * ctx( hldr->ctx);
+    holder< Context * > * hldr( reinterpret_cast< holder< Context * > * >( vp) );
+    Context * ctx( hldr->data);
     context::fcontext_t * callee = ( context::fcontext_t *) context::jump_fcontext(
-            ctx->callee_, hldr->caller, ( intptr_t) ctx->callee_, false);
+            ctx->callee_, hldr->ctx, ( intptr_t) ctx->callee_, false);
 
     try
     { ctx->run_( & callee); }
@@ -99,7 +89,7 @@ protected:
     void deallocate_stack( StackAllocator & alloc) BOOST_NOEXCEPT
     {
         if ( ! is_complete() && unwind_forced() ) unwind_stack();
-        alloc.deallocate( sp_, size_);
+        if ( sp_) alloc.deallocate( sp_, size_);
     }
 
     virtual void deallocate_object() = 0;
@@ -123,10 +113,9 @@ public:
         preserve_fpu_( attr.preserve_fpu)
     {
         context::fcontext_t caller;
-        holder< coroutine_base > hldr( this, & caller);
+        holder< coroutine_base * > hldr( & caller, this);
         callee_ = ( context::fcontext_t *) context::jump_fcontext(
             & caller, callee_, ( intptr_t) & hldr, false);
-        BOOST_ASSERT( callee_->fc_stack.size);
     }
 
     virtual ~coroutine_base()

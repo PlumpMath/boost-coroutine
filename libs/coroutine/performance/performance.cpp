@@ -33,7 +33,7 @@ typedef coro::coroutine< void() >   coro_t;
 #define CALL_COROUTINE(z,n,unused) \
     c();
 
-void fn( coro_t::self_t & self)
+void fn( coro_t::caller_t & self)
 { while ( true) self.yield(); }
 
 #ifdef BOOST_CONTEXT_CYCLE

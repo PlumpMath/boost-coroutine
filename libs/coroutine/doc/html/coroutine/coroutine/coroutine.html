@@ -41,7 +41,7 @@
 <span class="keyword">class</span> <span class="identifier">coroutine</span><span class="special">&lt;</span> <span class="identifier">R</span> <span class="special">(</span> <span class="identifier">ArgTypes</span><span class="special">...)&gt;</span>
 <span class="special">{</span>
 <span class="keyword">public</span><span class="special">:</span>
-    <span class="keyword">class</span> <span class="identifier">self_t</span>
+    <span class="keyword">class</span> <span class="identifier">caller_t</span>
     <span class="special">{</span>
     <span class="keyword">public</span><span class="special">:</span>
         <span class="identifier">tuple</span><span class="special">&lt;</span> <span class="identifier">ArgTypes</span><span class="special">...</span> <span class="special">&gt;</span> <span class="identifier">yield</span><span class="special">(</span> <span class="identifier">R</span><span class="special">);</span>
@@ -307,18 +307,18 @@
 <dd><p>
               <span class="emphasis"><em>coroutine-function</em></span> is entered and the arguments
               are passed to the <span class="emphasis"><em>coroutine</em></span>. The return value
-              is the argument passed to <span class="emphasis"><em>coroutine&lt;&gt;::self_t::yield()</em></span>.
+              is the argument passed to <span class="emphasis"><em>coroutine&lt;&gt;::caller_t::yield()</em></span>.
             </p></dd>
 <dt><span class="term">Throws:</span></dt>
 <dd><p>
-              <span class="emphasis"><em>coroutine_terminated</em></span> if <span class="emphasis"><em>coroutine&lt;&gt;::self_t::yield_break()</em></span>
+              <span class="emphasis"><em>coroutine_terminated</em></span> if <span class="emphasis"><em>coroutine&lt;&gt;::caller_t::yield_break()</em></span>
               was called or other exceptions thrown inside <span class="emphasis"><em>coroutine-function</em></span>.
             </p></dd>
 </dl>
 </div>
-<a name="coroutine.coroutine.coroutine._code__phrase_role__identifier__t__phrase___phrase_role__identifier__self_t__phrase__phrase_role__special______phrase__phrase_role__identifier__yield__phrase__phrase_role__special_____phrase___phrase_role__identifier__r__phrase__phrase_role__special_____phrase___code_"></a><h5>
+<a name="coroutine.coroutine.coroutine._code__phrase_role__identifier__t__phrase___phrase_role__identifier__caller_t__phrase__phrase_role__special______phrase__phrase_role__identifier__yield__phrase__phrase_role__special_____phrase___phrase_role__identifier__r__phrase__phrase_role__special_____phrase___code_"></a><h5>
 <a name="idp5963088"></a>
-        <a class="link" href="coroutine.html#coroutine.coroutine.coroutine._code__phrase_role__identifier__t__phrase___phrase_role__identifier__self_t__phrase__phrase_role__special______phrase__phrase_role__identifier__yield__phrase__phrase_role__special_____phrase___phrase_role__identifier__r__phrase__phrase_role__special_____phrase___code_"><code class="computeroutput"><span class="identifier">T</span> <span class="identifier">self_t</span><span class="special">::</span><span class="identifier">yield</span><span class="special">(</span> <span class="identifier">R</span><span class="special">)</span></code></a>
+        <a class="link" href="coroutine.html#coroutine.coroutine.coroutine._code__phrase_role__identifier__t__phrase___phrase_role__identifier__caller_t__phrase__phrase_role__special______phrase__phrase_role__identifier__yield__phrase__phrase_role__special_____phrase___phrase_role__identifier__r__phrase__phrase_role__special_____phrase___code_"><code class="computeroutput"><span class="identifier">T</span> <span class="identifier">caller_t</span><span class="special">::</span><span class="identifier">yield</span><span class="special">(</span> <span class="identifier">R</span><span class="special">)</span></code></a>
       </h5>
 <div class="variablelist">
 <p class="title"><b></b></p>
@@ -335,9 +335,9 @@
             </p></dd>
 </dl>
 </div>
-<a name="coroutine.coroutine.coroutine._code__phrase_role__keyword__void__phrase___phrase_role__identifier__self_t__phrase__phrase_role__special______phrase__phrase_role__identifier__yield_break__phrase__phrase_role__special______phrase___code_"></a><h5>
+<a name="coroutine.coroutine.coroutine._code__phrase_role__keyword__void__phrase___phrase_role__identifier__caller_t__phrase__phrase_role__special______phrase__phrase_role__identifier__yield_break__phrase__phrase_role__special______phrase___code_"></a><h5>
 <a name="idp5974800"></a>
-        <a class="link" href="coroutine.html#coroutine.coroutine.coroutine._code__phrase_role__keyword__void__phrase___phrase_role__identifier__self_t__phrase__phrase_role__special______phrase__phrase_role__identifier__yield_break__phrase__phrase_role__special______phrase___code_"><code class="computeroutput"><span class="keyword">void</span> <span class="identifier">self_t</span><span class="special">::</span><span class="identifier">yield_break</span><span class="special">()</span></code></a>
+        <a class="link" href="coroutine.html#coroutine.coroutine.coroutine._code__phrase_role__keyword__void__phrase___phrase_role__identifier__caller_t__phrase__phrase_role__special______phrase__phrase_role__identifier__yield_break__phrase__phrase_role__special______phrase___code_"><code class="computeroutput"><span class="keyword">void</span> <span class="identifier">caller_t</span><span class="special">::</span><span class="identifier">yield_break</span><span class="special">()</span></code></a>
       </h5>
 <div class="variablelist">
 <p class="title"><b></b></p>

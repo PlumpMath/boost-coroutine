@@ -96,12 +96,12 @@
     </p>
 <p>
       The first argument of <span class="emphasis"><em>generator-function</em></span> must be of type
-      <span class="emphasis"><em>generator&lt;&gt;::self_t</em></span>, used for yielding the active
+      <span class="emphasis"><em>generator&lt;&gt;::caller_t</em></span>, used for yielding the active
       generator.
     </p>
 <pre class="programlisting"><span class="keyword">typedef</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">coro</span><span class="special">::</span><span class="identifier">generator</span><span class="special">&lt;</span> <span class="keyword">int</span> <span class="special">&gt;</span> <span class="identifier">gen_t</span><span class="special">;</span>
 
-<span class="keyword">void</span> <span class="identifier">f</span><span class="special">(</span> <span class="identifier">gen_t</span><span class="special">::</span><span class="identifier">self_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">)</span>
+<span class="keyword">void</span> <span class="identifier">f</span><span class="special">(</span> <span class="identifier">gen_t</span><span class="special">::</span><span class="identifier">caller_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">)</span>
 <span class="special">{</span>
     <span class="special">...</span>
     <span class="identifier">self</span><span class="special">.</span><span class="identifier">yield</span><span class="special">(</span> <span class="number">11</span><span class="special">);</span>
@@ -113,7 +113,7 @@
 </pre>
 <p>
       <span class="emphasis"><em>generator-function</em></span> must return <code class="computeroutput"><span class="keyword">void</span></code>
-      and accept one parameter of type <code class="computeroutput"><span class="emphasis"><em>generator&lt;&gt;::self_t</em></span></code>.
+      and accept one parameter of type <code class="computeroutput"><span class="emphasis"><em>generator&lt;&gt;::caller_t</em></span></code>.
       Use <code class="computeroutput"><span class="identifier">boost</span><span class="special">::</span><span class="identifier">bind</span><span class="special">()</span></code> if
       it is required to passed additional parameters to <span class="emphasis"><em>generator-function</em></span>
       (bound by <code class="computeroutput"><span class="identifier">boost</span><span class="special">::</span><span class="identifier">bind</span><span class="special">()</span></code>).
@@ -121,18 +121,18 @@
     </p>
 <p>
       Usally a <span class="emphasis"><em>generator</em></span> is called inside loops. The <span class="emphasis"><em>generator-function</em></span>
-      executed until <span class="emphasis"><em>generator&lt;&gt;::self_t::yield()</em></span> is called.
-      The value passed to <span class="emphasis"><em>generator&lt;&gt;::self_t::yield()</em></span>
+      executed until <span class="emphasis"><em>generator&lt;&gt;::caller_t::yield()</em></span> is called.
+      The value passed to <span class="emphasis"><em>generator&lt;&gt;::caller_t::yield()</em></span>
       is used as the generated value. The next time the same <span class="emphasis"><em>generator</em></span>
       is called in a subsequent iteration, the execution of the <span class="emphasis"><em>generator-function</em></span>
-      is resumed after <span class="emphasis"><em>generator&lt;&gt;::self_t::yield()</em></span>, until
-      <span class="emphasis"><em>generator&lt;&gt;::self_t::yield()</em></span> is called again. <span class="emphasis"><em>generator-function</em></span>
-      can be terminated by <span class="emphasis"><em>generator&lt;&gt;::self_t::yield_break()</em></span>,
+      is resumed after <span class="emphasis"><em>generator&lt;&gt;::caller_t::yield()</em></span>, until
+      <span class="emphasis"><em>generator&lt;&gt;::caller_t::yield()</em></span> is called again. <span class="emphasis"><em>generator-function</em></span>
+      can be terminated by <span class="emphasis"><em>generator&lt;&gt;::caller_t::yield_break()</em></span>,
       at which time the loop enclosing the <span class="emphasis"><em>generator</em></span> is terminated.
     </p>
 <pre class="programlisting"><span class="keyword">typedef</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">coro</span><span class="special">::</span><span class="identifier">generator</span><span class="special">&lt;</span> <span class="keyword">int</span> <span class="special">&gt;</span>    <span class="identifier">gen_t</span><span class="special">;</span>
 
-<span class="keyword">void</span> <span class="identifier">power</span><span class="special">(</span> <span class="identifier">gen_t</span><span class="special">::</span><span class="identifier">self_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">number</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">exponent</span><span class="special">)</span>
+<span class="keyword">void</span> <span class="identifier">power</span><span class="special">(</span> <span class="identifier">gen_t</span><span class="special">::</span><span class="identifier">caller_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">number</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">exponent</span><span class="special">)</span>
 <span class="special">{</span>
     <span class="keyword">int</span> <span class="identifier">counter</span> <span class="special">=</span> <span class="number">0</span><span class="special">,</span> <span class="identifier">result</span> <span class="special">=</span> <span class="number">1</span><span class="special">;</span>
     <span class="keyword">while</span> <span class="special">(</span> <span class="identifier">counter</span><span class="special">++</span> <span class="special">&lt;</span> <span class="identifier">exponent</span><span class="special">)</span>
@@ -169,7 +169,7 @@
     </p>
 <pre class="programlisting"><span class="keyword">typedef</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">coro</span><span class="special">::</span><span class="identifier">generator</span><span class="special">&lt;</span> <span class="keyword">int</span> <span class="special">&gt;</span> <span class="identifier">gen_t</span><span class="special">;</span>
 
-<span class="keyword">void</span> <span class="identifier">fn</span><span class="special">(</span> <span class="identifier">gen_t</span><span class="special">::</span><span class="identifier">self_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">j</span><span class="special">)</span>
+<span class="keyword">void</span> <span class="identifier">fn</span><span class="special">(</span> <span class="identifier">gen_t</span><span class="special">::</span><span class="identifier">caller_t</span> <span class="special">&amp;</span> <span class="identifier">self</span><span class="special">,</span> <span class="keyword">int</span> <span class="identifier">j</span><span class="special">)</span>
 <span class="special">{</span>
     <span class="keyword">for</span><span class="special">(</span> <span class="keyword">int</span> <span class="identifier">i</span> <span class="special">=</span> <span class="number">0</span><span class="special">;</span> <span class="identifier">i</span> <span class="special">&lt;</span> <span class="identifier">j</span><span class="special">;</span> <span class="special">++</span><span class="identifier">i</span><span class="special">)</span>
     <span class="special">{</span>

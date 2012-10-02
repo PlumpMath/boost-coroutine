@@ -15,7 +15,7 @@
 typedef boost::coro::coroutine< int() >         coro_t;
 typedef boost::range_iterator< coro_t >::type   iterator_t;
 
-int power( coro_t::self_t & self, int number, int exponent)
+int power( coro_t::caller_t & self, int number, int exponent)
 {
     int counter = 0;
     int result = 1;
