@@ -11,6 +11,7 @@
 
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
+#include <boost/context/fcontext.hpp>
 #include <boost/preprocessor/arithmetic/add.hpp>
 #include <boost/preprocessor/arithmetic/sub.hpp>
 #include <boost/preprocessor/cat.hpp>
@@ -47,9 +48,9 @@ class coroutine_exec< Signature, D, void, n > : \
     public coroutine_base< Signature, void, n > \
 { \
 private: \
-    void exec_() \
+    void exec_( context::fcontext_t ** callee) \
     { \
-        coroutine_self< Signature, void, n > self( this); \
+        coroutine_self< Signature, void, n > self( this, callee); \
         static_cast< D * >( this)->fn_( self); \
     } \
 \
@@ -65,9 +66,9 @@ class coroutine_exec< Signature, D, Result, n > : \
     public coroutine_base< Signature, Result, n > \
 { \
 private: \
-    Result exec_() \
+    Result exec_( context::fcontext_t ** callee) \
     { \
-        coroutine_self< Signature, Result, n > self( this); \
+        coroutine_self< Signature, Result, n > self( this, callee); \
         return static_cast< D * >( this)->fn_( self); \
     } \
 \

@@ -8,6 +8,7 @@
 #define BOOST_CORO_DETAIL_COROUTINE_BASE_RUN_H
 
 #include <boost/config.hpp>
+#include <boost/context/fcontext.hpp>
 #include <boost/optional.hpp>
 #include <boost/preprocessor/arithmetic/add.hpp>
 #include <boost/preprocessor/arithmetic/sub.hpp>
@@ -34,10 +35,10 @@ struct coroutine_base_run;
 template< typename Signature, typename D >
 struct coroutine_base_run< Signature, D, void, 0 >
 {
-    void run_()
-    { exec_(); }
+    void run_( context::fcontext_t ** callee)
+    { exec_( callee); }
 
-    virtual void exec_() = 0;
+    virtual void exec_( context::fcontext_t ** callee) = 0;
 };
 
 template< typename Signature, typename D, typename Result >
@@ -49,10 +50,10 @@ struct coroutine_base_run< Signature, D, Result, 0 >
         result_()
     {}
 
-    void run_()
-    { result_ = exec_(); }
+    void run_( context::fcontext_t ** callee)
+    { result_ = exec_( callee); }
 
-    virtual Result exec_() = 0;
+    virtual Result exec_( context::fcontext_t ** callee) = 0;
 };
 
 #define BOOST_CONTEXT_BASE_RUN_COMMA(n) BOOST_PP_COMMA_IF(BOOST_PP_SUB(n,1))
@@ -74,10 +75,10 @@ struct coroutine_base_run< Signature, D, void, n > \
         args_() \
     {} \
 \
-    void run_() \
-    { exec_(); } \
+    void run_( context::fcontext_t ** callee) \
+    { exec_( callee); } \
 \
-    virtual void exec_() = 0; \
+    virtual void exec_( context::fcontext_t ** callee) = 0; \
 }; \
 \
 template< typename Signature, typename D, typename Result > \
@@ -92,10 +93,10 @@ struct coroutine_base_run< Signature, D, Result, n > \
         args_(), result_() \
     {} \
 \
-    void run_() \
-    { result_ = exec_(); } \
+    void run_( context::fcontext_t ** callee) \
+    { result_ = exec_( callee); } \
 \
-    virtual Result exec_() = 0; \
+    virtual Result exec_( context::fcontext_t ** callee) = 0; \
 };
 BOOST_PP_REPEAT_FROM_TO(1,11,BOOST_CONTEXT_BASE_RUN,~)
 #undef BOOST_CONTEXT_BASE_RUN

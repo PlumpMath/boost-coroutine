@@ -20,7 +20,7 @@
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_base_run.hpp>
-#include <boost/coroutine/detail/coroutine_base_suspend.hpp>
+#include <boost/coroutine/detail/exceptions.hpp>
 #include <boost/coroutine/detail/flags.hpp>
 #include <boost/coroutine/flags.hpp>
 
@@ -33,15 +33,28 @@ namespace coro {
 namespace detail {
 
 template< typename Context >
+struct holder
+{
+    Context             *   ctx;
+    context::fcontext_t *   caller;
+
+    holder( Context * ctx_, context::fcontext_t * caller_) :
+        ctx( ctx_), caller( caller_)
+    {}
+};
+
+template< typename Context >
 void trampoline( intptr_t vp)
 {
     BOOST_ASSERT( vp);
 
-    Context * ctx( reinterpret_cast< Context * >( vp) );
-    context::jump_fcontext( ctx->callee_, & ctx->caller_, 0, false);
+    holder< Context > * hldr( reinterpret_cast< holder< Context > * >( vp) );
+    Context * ctx( hldr->ctx);
+    context::fcontext_t * callee = ( context::fcontext_t *) context::jump_fcontext(
+            ctx->callee_, hldr->caller, ( intptr_t) ctx->callee_, false);
 
     try
-    { ctx->run_(); }
+    { ctx->run_( & callee); }
     catch ( forced_unwind const&)
     {}
     catch (...)
@@ -49,16 +62,13 @@ void trampoline( intptr_t vp)
 
     ctx->flags_ |= flag_complete;
     context::jump_fcontext(
-        ctx->callee_, & ctx->caller_,
-        0, fpu_preserved == ctx->preserve_fpu_);
+        ctx->callee_, callee,
+        ( intptr_t) ctx->callee_, fpu_preserved == ctx->preserve_fpu_);
 }
 
 template< typename Signature, typename Result, int arity >
 class coroutine_base :
     private noncopyable,
-    public coroutine_base_suspend<
-        Signature, coroutine_base< Signature, Result, arity >, Result, arity
-    >,
     public coroutine_base_run<
         Signature, coroutine_base< Signature, Result, arity >, Result, arity
     >
@@ -72,12 +82,13 @@ private:
     template< typename X, typename Y, typename Z, int >
     friend struct coroutine_base_run;
     template< typename X, typename Y, typename Z, int >
-    friend struct coroutine_base_suspend;
-    template< typename X, typename Y, typename Z, int >
     friend struct coroutine_resume;
+    template< typename X, typename Y, int >
+    friend class coroutine_self;
 
     std::size_t             use_count_;
-    context::fcontext_t     caller_;
+    std::size_t             size_;
+    void                *   sp_;
     context::fcontext_t *   callee_;
     int                     flags_;
     exception_ptr           except_;
@@ -88,7 +99,7 @@ protected:
     void deallocate_stack( StackAllocator & alloc) BOOST_NOEXCEPT
     {
         if ( ! is_complete() && unwind_forced() ) unwind_stack();
-        alloc.deallocate( callee_->fc_stack.sp, callee_->fc_stack.size);
+        alloc.deallocate( sp_, size_);
     }
 
     virtual void deallocate_object() = 0;
@@ -96,24 +107,27 @@ protected:
 public:
     template< typename StackAllocator >
     coroutine_base( attributes const& attr, StackAllocator const& alloc) :
-        coroutine_base_suspend<
-            Signature, coroutine_base< Signature, Result, arity >, Result, arity
-        >(),
         coroutine_base_run<
             Signature, coroutine_base< Signature, Result, arity >, Result, arity
         >(),
         use_count_( 0),
-        caller_(),
+        size_( attr.size),
+        sp_( alloc.allocate( size_) ),
         callee_(
             context::make_fcontext(
-                alloc.allocate( attr.size), attr.size,
-                trampoline< coroutine_base>) ),
+                sp_, size_, trampoline< coroutine_base>) ),
         flags_( stack_unwind == attr.do_unwind
             ? flag_force_unwind
             : flag_dont_force_unwind),
         except_(),
         preserve_fpu_( attr.preserve_fpu)
-    { context::jump_fcontext( & caller_, callee_, ( intptr_t) this, false); }
+    {
+        context::fcontext_t caller;
+        holder< coroutine_base > hldr( this, & caller);
+        callee_ = ( context::fcontext_t *) context::jump_fcontext(
+            & caller, callee_, ( intptr_t) & hldr, false);
+        BOOST_ASSERT( callee_->fc_stack.size);
+    }
 
     virtual ~coroutine_base()
     {}
@@ -132,9 +146,10 @@ public:
         BOOST_ASSERT( ! is_complete() );
 
         flags_ |= flag_unwind_stack;
-        context::jump_fcontext(
-            & caller_, callee_,
-            0, fpu_preserved == preserve_fpu_);
+        context::fcontext_t caller;
+        callee_ = ( context::fcontext_t *) context::jump_fcontext(
+            & caller, callee_,
+            ( intptr_t) & caller, fpu_preserved == preserve_fpu_);
         flags_ &= ~flag_unwind_stack;
 
         BOOST_ASSERT( is_complete() );

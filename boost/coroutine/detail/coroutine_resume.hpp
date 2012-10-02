@@ -45,10 +45,11 @@ struct coroutine_resume< Signature, D, void, 0 >
         BOOST_ASSERT( static_cast< D * >( this)->impl_);
         BOOST_ASSERT( ! static_cast< D * >( this)->impl_->is_complete() );
 
-        context::jump_fcontext(
-            & static_cast< D * >( this)->impl_->caller_,
+        context::fcontext_t caller;
+        static_cast< D * >( this)->impl_->callee_ = ( context::fcontext_t *) context::jump_fcontext(
+            & caller,
             static_cast< D * >( this)->impl_->callee_,
-            0, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_);
+            ( intptr_t) & caller, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_);
         if ( static_cast< D * >( this)->impl_->except_)
             rethrow_exception( static_cast< D * >( this)->impl_->except_);
 
@@ -182,10 +183,11 @@ struct coroutine_resume< Signature, D, Result, 0 >
         BOOST_ASSERT( static_cast< D * >( this)->impl_);
         BOOST_ASSERT( ! static_cast< D * >( this)->impl_->is_complete() );
 
-        context::jump_fcontext(
-            & static_cast< D * >( this)->impl_->caller_,
+        context::fcontext_t caller;
+        static_cast< D * >( this)->impl_->callee_ = ( context::fcontext_t *) context::jump_fcontext(
+            & caller,
             static_cast< D * >( this)->impl_->callee_,
-            0, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_);
+            ( intptr_t) & caller, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_);
         if ( static_cast< D * >( this)->impl_->except_)
             rethrow_exception( static_cast< D * >( this)->impl_->except_);
 
@@ -244,13 +246,16 @@ struct coroutine_resume< Signature, D, void, 1 >
     {
         BOOST_ASSERT( static_cast< D * >( this)->impl_);
         BOOST_ASSERT( ! static_cast< D * >( this)->impl_->is_complete() );
+
         static_cast< D * >( this)->impl_->args_ = a1;
-        context::jump_fcontext(
-            & static_cast< D * >( this)->impl_->caller_,
+        context::fcontext_t caller;
+        static_cast< D * >( this)->impl_->callee_ = ( context::fcontext_t *) context::jump_fcontext(
+            & caller,
             static_cast< D * >( this)->impl_->callee_,
-            0, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_);
+            ( intptr_t) & caller, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_);
         if ( static_cast< D * >( this)->impl_->except_)
             rethrow_exception( static_cast< D * >( this)->impl_->except_);
+
         return * static_cast< D * >( this);
     }
 };
@@ -264,10 +269,11 @@ struct coroutine_resume< Signature, D, Result, 1 >
         BOOST_ASSERT( ! static_cast< D * >( this)->impl_->is_complete() );
 
         static_cast< D * >( this)->impl_->args_ = a1;
-        context::jump_fcontext(
-            & static_cast< D * >( this)->impl_->caller_,
+        context::fcontext_t caller;
+        static_cast< D * >( this)->impl_->callee_ = ( context::fcontext_t *) context::jump_fcontext(
+            & caller,
             static_cast< D * >( this)->impl_->callee_,
-            0, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_);
+            ( intptr_t) & caller, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_);
         if ( static_cast< D * >( this)->impl_->except_)
             rethrow_exception( static_cast< D * >( this)->impl_->except_);
 
@@ -300,10 +306,11 @@ struct coroutine_resume< Signature, D, void, n > \
         BOOST_ASSERT( ! static_cast< D * >( this)->impl_->is_complete() ); \
 \
         static_cast< D * >( this)->impl_->args_ = typename arg< Signature >::type_t(BOOST_COROUTINE_RESUME_VALS(n)); \
-        context::jump_fcontext( \
-            & static_cast< D * >( this)->impl_->caller_, \
+        context::fcontext_t caller; \
+        static_cast< D * >( this)->impl_->callee_ = ( context::fcontext_t *) context::jump_fcontext( \
+            & caller, \
             static_cast< D * >( this)->impl_->callee_, \
-            0, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_); \
+            ( intptr_t) & caller, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_); \
         if ( static_cast< D * >( this)->impl_->except_) \
             rethrow_exception( static_cast< D * >( this)->impl_->except_); \
 \
@@ -320,10 +327,11 @@ struct coroutine_resume< Signature, D, Result, n > \
         BOOST_ASSERT( ! static_cast< D * >( this)->impl_->is_complete() ); \
 \
         static_cast< D * >( this)->impl_->args_ = typename arg< Signature >::type_t(BOOST_COROUTINE_RESUME_VALS(n)); \
-        context::jump_fcontext( \
-            & static_cast< D * >( this)->impl_->caller_, \
+        context::fcontext_t caller; \
+        static_cast< D * >( this)->impl_->callee_ = ( context::fcontext_t *) context::jump_fcontext( \
+            & caller, \
             static_cast< D * >( this)->impl_->callee_, \
-            0, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_); \
+            ( intptr_t) & caller, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_); \
         if ( static_cast< D * >( this)->impl_->except_) \
             rethrow_exception( static_cast< D * >( this)->impl_->except_); \
 \
