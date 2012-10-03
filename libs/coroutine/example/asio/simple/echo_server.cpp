@@ -35,24 +35,24 @@ private:
        {
             boost::asio::ip::tcp::socket socket( acceptor_.get_io_service() );
             acceptor_.async_accept( socket, boost::bind( & server::operator(), this->shared_from_this(), _1, 0) );
-            self.yield();
+            self();
 
-            while ( ! self.get< 0 >() )
+            while ( ! self.get().get< 0 >() )
             {
                 boost::array< char, 1024 > buffer;
 
                 socket.async_read_some(
                     boost::asio::buffer( buffer),
                     boost::bind( & server::operator(), this->shared_from_this(), _1, _2) ); 
-                self.yield();
+                self();
 
-                if ( self.get< 0 >() ) break;
+                if ( self.get().get< 0 >() ) break;
 
                 boost::asio::async_write(
                     socket,
-                    boost::asio::buffer( buffer, self.get< 1 >() ),
+                    boost::asio::buffer( buffer, self.get().get< 1 >() ),
                     boost::bind( & server::operator(), this->shared_from_this(), _1, _2) ); 
-                self.yield();
+                self();
             }
        }
     }

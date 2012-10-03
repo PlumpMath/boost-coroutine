@@ -19,7 +19,7 @@
 
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/config.hpp>
-#include <boost/coroutine/detail/coroutine_base_run.hpp>
+#include <boost/coroutine/detail/coroutine_base_resume.hpp>
 #include <boost/coroutine/detail/exceptions.hpp>
 #include <boost/coroutine/detail/flags.hpp>
 #include <boost/coroutine/detail/holder.hpp>
@@ -40,41 +40,27 @@ void trampoline( intptr_t vp)
 
     holder< Context * > * hldr( reinterpret_cast< holder< Context * > * >( vp) );
     Context * ctx( hldr->data);
-    context::fcontext_t * callee = ( context::fcontext_t *) context::jump_fcontext(
-            ctx->callee_, hldr->ctx, ( intptr_t) ctx->callee_, false);
 
-    try
-    { ctx->run_( & callee); }
-    catch ( forced_unwind const&)
-    {}
-    catch (...)
-    { ctx->except_ = current_exception(); }
-
-    ctx->flags_ |= flag_complete;
-    context::jump_fcontext(
-        ctx->callee_, callee,
-        ( intptr_t) ctx->callee_, fpu_preserved == ctx->preserve_fpu_);
+    ctx->run( hldr->ctx);
 }
 
 template< typename Signature, typename Result, int arity >
-class coroutine_base :
-    private noncopyable,
-    public coroutine_base_run<
-        Signature, coroutine_base< Signature, Result, arity >, Result, arity
-    >
+class coroutine_base : private noncopyable,
+                       public coroutine_base_resume<
+                            Signature,
+                            coroutine_base< Signature, Result, arity >,
+                            Result,
+                            arity
+                       >
 {
 public:
     typedef intrusive_ptr< coroutine_base >   ptr_t;
 
 private:
-    template< typename T >
-    friend void trampoline( intptr_t);
     template< typename X, typename Y, typename Z, int >
-    friend struct coroutine_base_run;
-    template< typename X, typename Y, typename Z, int >
-    friend struct coroutine_resume;
-    template< typename X, typename Y, int >
-    friend class coroutine_self;
+    friend struct coroutine_base_resume;
+    template< typename X, typename Y, typename Z, int, typename C >
+    friend struct coroutine_exec;
 
     std::size_t             use_count_;
     std::size_t             size_;
@@ -95,17 +81,14 @@ protected:
     virtual void deallocate_object() = 0;
 
 public:
-    template< typename StackAllocator >
-    coroutine_base( attributes const& attr, StackAllocator const& alloc) :
-        coroutine_base_run<
-            Signature, coroutine_base< Signature, Result, arity >, Result, arity
-        >(),
+    template< typename StackAllocator, typename D >
+    coroutine_base( attributes const& attr, StackAllocator const& alloc, D const* dummy) :
         use_count_( 0),
         size_( attr.size),
         sp_( alloc.allocate( size_) ),
         callee_(
             context::make_fcontext(
-                sp_, size_, trampoline< coroutine_base>) ),
+                sp_, size_, trampoline< D >) ),
         flags_( stack_unwind == attr.do_unwind
             ? flag_force_unwind
             : flag_dont_force_unwind),
@@ -117,6 +100,16 @@ public:
         callee_ = ( context::fcontext_t *) context::jump_fcontext(
             & caller, callee_, ( intptr_t) & hldr, false);
     }
+
+    coroutine_base( context::fcontext_t * callee, bool preserve_fpu) :
+        use_count_( 0),
+        size_( 0),
+        sp_( 0),
+        callee_( callee),
+        flags_( flag_dont_force_unwind),
+        except_(),
+        preserve_fpu_( preserve_fpu)
+    {}
 
     virtual ~coroutine_base()
     {}

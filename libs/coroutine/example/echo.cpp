@@ -10,30 +10,30 @@
 #include <boost/bind.hpp>
 #include <boost/coroutine/all.hpp>
 
-typedef boost::coro::coroutine < void() >        coro_void_t;
+typedef boost::coro::coroutine< void() >   coro_t;
 
-void echo( coro_void_t::caller_t & self, int i)
+void echo( coro_t & self, int i)
 {
     std::cout << i; 
-    self.yield();
+    self();
 }
 
-void runit( coro_void_t::caller_t & self)
+void runit( coro_t & self)
 {
     std::cout << "started! ";
     for ( int i = 0; i < 10; ++i)
     {
-        coro_void_t c( boost::bind( echo, _1, i) );
+        coro_t c( boost::bind( echo, _1, i) );
         while ( c)
             c();
-        self.yield();
+        self();
     }
 }
 
 int main( int argc, char * argv[])
 {
     {
-        coro_void_t c( boost::bind( runit, _1) );
+        coro_t c( runit);
         while ( c) {
             std::cout << "-";
             c();

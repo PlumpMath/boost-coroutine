@@ -12,6 +12,7 @@
 
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
+#include <boost/context/fcontext.hpp>
 #include <boost/context/guarded_stack_allocator.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/move/move.hpp>
@@ -22,9 +23,11 @@
 #include <boost/utility/result_of.hpp>
 
 #include <boost/coroutine/attributes.hpp>
+#include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/coroutine_base.hpp>
+#include <boost/coroutine/detail/coroutine_exec.hpp>
 #include <boost/coroutine/detail/coroutine_object.hpp>
-#include <boost/coroutine/detail/coroutine_resume.hpp>
+#include <boost/coroutine/detail/coroutine_op.hpp>
 #include <boost/coroutine/detail/coroutine_self.hpp>
 #include <boost/coroutine/flags.hpp>
 
@@ -34,10 +37,40 @@
 
 namespace boost {
 namespace coro {
+namespace detail {
+
+template< template< class > class C, typename Signature, typename Result, int arity >
+struct caller;
+
+template< template< class > class C, typename Signature >
+struct caller< C, Signature, void, 0 >
+{
+    typedef C< void() >   type;
+};
+
+template< template< class > class C, typename Signature, typename Result >
+struct caller< C, Signature, Result, 0 >
+{
+    typedef C< void( Result) >   type;
+};
+
+template< template< class > class C, typename Signature, int arity >
+struct caller< C, Signature, void, arity >
+{
+    typedef C< typename detail::arg< Signature >::type_t() >   type;
+};
+
+template< template< class > class C, typename Signature, typename Result, int arity >
+struct caller
+{
+    typedef C< typename detail::arg< Signature >::type_t( Result) >   type;
+};
+
+}
 
 template< typename Signature >
 class coroutine :
-    public detail::coroutine_resume<
+    public detail::coroutine_op<
         Signature, coroutine< Signature >,
         typename function_traits< Signature >::result_type,
         function_traits< Signature >::arity
@@ -52,7 +85,9 @@ private:
     typedef typename base_t::ptr_t                              ptr_t;
 
     template< typename X, typename Y, typename Z, int >
-    friend struct detail::coroutine_resume;
+    friend struct detail::coroutine_op;
+    template< typename X, typename Y, typename Z, int, typename C >
+    friend struct detail::coroutine_exec;
 
     struct dummy
     { void nonnull() {} };
@@ -64,20 +99,45 @@ private:
     BOOST_MOVABLE_BUT_NOT_COPYABLE( coroutine);
 
 public:
-    typedef detail::coroutine_self<
+    typedef typename detail::caller<
+        coroutine,
         Signature,
         typename function_traits< Signature >::result_type,
         function_traits< Signature >::arity
-    >                                                           caller_t;
+    >::type                                                     caller_t;
 
     coroutine() BOOST_NOEXCEPT :
-        detail::coroutine_resume<
+        detail::coroutine_op<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
         >(),
         impl_()
     {}
+
+    template< typename Allocator >
+    coroutine( context::fcontext_t * callee,
+               bool preserve_fpu,
+               Allocator const& alloc) :
+        detail::coroutine_op<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        impl_()
+    {
+        typedef detail::coroutine_self<
+                Allocator,
+                Signature,
+                typename function_traits< Signature >::result_type,
+                function_traits< Signature >::arity
+            >                               self_t;
+        typename self_t::allocator_t a( alloc);
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) self_t(
+                callee, preserve_fpu, a) );
+    }
 
 #ifndef BOOST_NO_RVALUE_REFERENCES
     template< typename Fn >
@@ -86,7 +146,7 @@ public:
                 context::guarded_stack_allocator(),
             std::allocator< coroutine > const& alloc =
                 std::allocator< coroutine >() ) :
-        detail::coroutine_resume<
+        detail::coroutine_op<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -99,7 +159,8 @@ public:
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity
+                function_traits< Signature >::arity,
+                caller_t
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -113,7 +174,7 @@ public:
                StackAllocator const& stack_alloc,
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >() ) :
-        detail::coroutine_resume<
+        detail::coroutine_op<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -126,7 +187,8 @@ public:
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity
+                function_traits< Signature >::arity,
+                caller_t
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -139,7 +201,7 @@ public:
     coroutine( Fn && fn, attributes const& attr,
                StackAllocator const& stack_alloc,
                Allocator const& alloc) :
-        detail::coroutine_resume<
+        detail::coroutine_op<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -152,7 +214,8 @@ public:
                 Allocator,
                 Signature,
                 typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity
+                function_traits< Signature >::arity,
+                caller_t
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -167,7 +230,7 @@ public:
                     context::guarded_stack_allocator(),
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >() ) :
-        detail::coroutine_resume<
+        detail::coroutine_op<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -187,7 +250,8 @@ public:
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity
+                function_traits< Signature >::arity,
+                caller_t
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -200,7 +264,7 @@ public:
                StackAllocator const& stack_alloc,
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >() ) :
-        detail::coroutine_resume<
+        detail::coroutine_op<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -213,7 +277,8 @@ public:
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity
+                function_traits< Signature >::arity,
+                caller_t
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -225,7 +290,7 @@ public:
     coroutine( Fn fn, attributes const& attr,
                StackAllocator const& stack_alloc,
                Allocator const& alloc) :
-        detail::coroutine_resume<
+        detail::coroutine_op<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -238,7 +303,8 @@ public:
                 Allocator,
                 Signature,
                 typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity
+                function_traits< Signature >::arity,
+                caller_t
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -252,7 +318,7 @@ public:
                     context::guarded_stack_allocator(),
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >() ) :
-        detail::coroutine_resume<
+        detail::coroutine_op<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -265,7 +331,8 @@ public:
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity
+                function_traits< Signature >::arity,
+                caller_t
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -278,7 +345,7 @@ public:
                StackAllocator const& stack_alloc,
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >() ) :
-        detail::coroutine_resume<
+        detail::coroutine_op<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -291,7 +358,8 @@ public:
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity
+                function_traits< Signature >::arity,
+                caller_t
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -303,7 +371,7 @@ public:
     coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr,
                StackAllocator const& stack_alloc,
                Allocator const& alloc) :
-        detail::coroutine_resume<
+        detail::coroutine_op<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -316,7 +384,8 @@ public:
                 Allocator,
                 Signature,
                 typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity
+                function_traits< Signature >::arity,
+                caller_t
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -326,7 +395,7 @@ public:
 #endif
 
     coroutine( BOOST_RV_REF( coroutine) other) BOOST_NOEXCEPT :
-        detail::coroutine_resume<
+        detail::coroutine_op<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity

@@ -17,7 +17,7 @@ void first( coroutine_t::caller_t & self)
     std::cout << "started first! ";
     for ( int i = 0; i < 10; ++i)
     {
-        self.yield();
+        self();
         std::cout << "a" << i;
     }
 }
@@ -27,7 +27,7 @@ void second( coroutine_t::caller_t & self)
     std::cout << "started second! ";
     for ( int i = 0; i < 10; ++i)
     {
-        self.yield();
+        self();
         std::cout << "b" << i;
     }
 }

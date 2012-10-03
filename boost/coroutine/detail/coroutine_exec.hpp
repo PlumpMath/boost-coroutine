@@ -12,6 +12,8 @@
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include <boost/context/fcontext.hpp>
+#include <boost/exception_ptr.hpp>
+#include <boost/optional.hpp>
 #include <boost/preprocessor/arithmetic/add.hpp>
 #include <boost/preprocessor/arithmetic/sub.hpp>
 #include <boost/preprocessor/cat.hpp>
@@ -19,10 +21,13 @@
 #include <boost/preprocessor/repetition/repeat_from_to.hpp>
 #include <boost/type_traits/function_traits.hpp>
 
+#include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_base.hpp>
-#include <boost/coroutine/detail/coroutine_self.hpp>
+#include <boost/coroutine/detail/exceptions.hpp>
+#include <boost/coroutine/detail/flags.hpp>
+#include <boost/coroutine/detail/holder.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -32,8 +37,94 @@ namespace boost {
 namespace coro {
 namespace detail {
 
-template< typename Signature, typename D, typename Result, int arity >
+template< typename Signature, typename D, typename Result, int arity, typename Caller >
 class coroutine_exec;
+
+template< typename Signature, typename D, typename Caller >
+struct coroutine_exec< Signature, D, void, 0, Caller > :
+    public coroutine_base< Signature, void, 0 >
+{
+    template< typename StackAllocator >
+    coroutine_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT :
+        coroutine_base< Signature, void, 0 >( attr, alloc, this)
+    {}
+
+    void run( context::fcontext_t * callee)
+    {
+        callee = ( context::fcontext_t *) context::jump_fcontext(
+                this->callee_, callee, ( intptr_t) this->callee_, this->preserve_fpu_);
+
+        Caller c( callee, this->preserve_fpu_, static_cast< D const* >( this)->alloc_);
+        try
+        {
+            context::fcontext_t caller;
+            static_cast< D const* >( this)->fn_( c);
+            this->flags_ |= flag_complete;
+            callee = c.impl_->callee_;
+            context::jump_fcontext(
+                    & caller, callee,
+                    ( intptr_t) & caller, fpu_preserved == this->preserve_fpu_);
+            BOOST_ASSERT_MSG( false, "coroutine is complete");
+        }
+        catch ( forced_unwind const&)
+        {}
+        catch (...)
+        { this->except_ = current_exception(); }
+
+        // TODO: transfer exception-pointer to caller context
+        this->flags_ |= flag_complete;
+        context::fcontext_t caller;
+        context::jump_fcontext(
+                & caller, this->callee_,
+                ( intptr_t) & caller, fpu_preserved == this->preserve_fpu_);
+        BOOST_ASSERT_MSG( false, "coroutine is complete");
+    }
+};
+
+template< typename Signature, typename D, typename Result, typename Caller >
+struct coroutine_exec< Signature, D, Result, 0, Caller > :
+    public coroutine_base< Signature, Result, 0 >
+{
+    template< typename StackAllocator >
+    coroutine_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT :
+        coroutine_base< Signature, Result, 0 >( attr, alloc, this),
+        result_()
+    {}
+
+    void run( context::fcontext_t * callee)
+    {
+        callee = ( context::fcontext_t *) context::jump_fcontext(
+                this->callee_, callee, ( intptr_t) this->callee_, this->preserve_fpu_);
+
+        Caller c( callee, this->preserve_fpu_, static_cast< D const* >( this)->alloc_);
+        try
+        {
+            context::fcontext_t caller;
+            holder< Result > hldr( & caller,
+                                   static_cast< D const* >( this)->fn_( c) );
+            this->flags_ |= flag_complete;
+            callee = c.impl_->callee_;
+            context::jump_fcontext(
+                    hldr.ctx, callee,
+                    ( intptr_t) & hldr, fpu_preserved == this->preserve_fpu_);
+            BOOST_ASSERT_MSG( false, "coroutine is complete");
+        }
+        catch ( forced_unwind const&)
+        {}
+        catch (...)
+        { this->except_ = current_exception(); }
+
+        // TODO: transfer exception-pointer to caller context
+        this->flags_ |= flag_complete;
+        context::fcontext_t caller;
+        context::jump_fcontext(
+                & caller, this->callee_,
+                ( intptr_t) & caller, fpu_preserved == this->preserve_fpu_);
+        BOOST_ASSERT_MSG( false, "coroutine is complete");
+    }
+
+    optional< Result >  result_;
+};
 
 #define BOOST_CONTEXT_EXEC_COMMA(n) BOOST_PP_COMMA_IF(BOOST_PP_SUB(n,1))
 #define BOOST_CONTEXT_EXEC_VAL(z,n,unused) BOOST_CONTEXT_EXEC_COMMA(n) BOOST_PP_CAT(a,n)
@@ -43,42 +134,97 @@ class coroutine_exec;
 #define BOOST_CONTEXT_EXEC_ARG(z,n,unused) BOOST_CONTEXT_EXEC_COMMA(n) BOOST_CONTEXT_EXEC_ARG_TYPE(n) BOOST_PP_CAT(a,n)
 #define BOOST_CONTEXT_EXEC_ARGS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_CONTEXT_EXEC_ARG,~)
 #define BOOST_CONTEXT_EXEC(z,n,unused) \
-template< typename Signature, typename D > \
-class coroutine_exec< Signature, D, void, n > : \
+template< typename Signature, typename D, typename Caller > \
+struct coroutine_exec< Signature, D, void, n, Caller > : \
     public coroutine_base< Signature, void, n > \
 { \
-private: \
-    void exec_( context::fcontext_t ** callee) \
+    typedef typename arg< Signature >::type_t   arg_t; \
+\
+    void run( context::fcontext_t * callee) \
     { \
-        coroutine_self< Signature, void, n > coro( this, callee); \
-        static_cast< D * >( this)->fn_( coro); \
+        holder< arg_t > * hldr = ( holder< arg_t > *) context::jump_fcontext( \
+                this->callee_, callee, ( intptr_t) this->callee_, this->preserve_fpu_); \
+        callee = hldr->ctx; \
+\
+        Caller c( callee, this->preserve_fpu_, static_cast< D const* >( this)->alloc_); \
+        c.impl_->result_ = hldr->data; \
+        try \
+        { \
+            context::fcontext_t caller; \
+            static_cast< D const* >( this)->fn_( c); \
+            this->flags_ |= flag_complete; \
+            callee = c.impl_->callee_; \
+            context::jump_fcontext( \
+                    & caller, callee, \
+                    ( intptr_t) & caller, fpu_preserved == this->preserve_fpu_); \
+            BOOST_ASSERT_MSG( false, "coroutine is complete"); \
+        } \
+        catch ( forced_unwind const&) \
+        {} \
+        catch (...) \
+        { this->except_ = current_exception(); } \
+\
+        this->flags_ |= flag_complete; \
+        context::fcontext_t caller; \
+        context::jump_fcontext( \
+                & caller, this->callee_, \
+                ( intptr_t) & caller, fpu_preserved == this->preserve_fpu_); \
+        BOOST_ASSERT_MSG( false, "coroutine is complete"); \
     } \
 \
-public: \
     template< typename StackAllocator > \
     coroutine_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT : \
-        coroutine_base< Signature, void, n >( attr, alloc) \
+        coroutine_base< Signature, void, n >( attr, alloc, this) \
     {} \
 }; \
 \
-template< typename Signature, typename D, typename Result > \
-class coroutine_exec< Signature, D, Result, n > : \
+template< typename Signature, typename D, typename Result, typename Caller > \
+struct coroutine_exec< Signature, D, Result, n, Caller > : \
     public coroutine_base< Signature, Result, n > \
 { \
-private: \
-    Result exec_( context::fcontext_t ** callee) \
-    { \
-        coroutine_self< Signature, Result, n > coro( this, callee); \
-        return static_cast< D * >( this)->fn_( coro); \
-    } \
+    typedef typename arg< Signature >::type_t   arg_t; \
 \
-public: \
     template< typename StackAllocator > \
     coroutine_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT : \
-        coroutine_base< Signature, Result, n >( attr, alloc) \
+        coroutine_base< Signature, Result, n >( attr, alloc, this) \
     {} \
+\
+    void run( context::fcontext_t * callee) \
+    { \
+        holder< arg_t > * hldr = ( holder< arg_t > *) context::jump_fcontext( \
+                this->callee_, callee, ( intptr_t) this->callee_, this->preserve_fpu_); \
+        callee = hldr->ctx; \
+\
+        Caller c( callee, this->preserve_fpu_, static_cast< D const* >( this)->alloc_); \
+        c.impl_->result_ = hldr->data; \
+        try \
+        { \
+            context::fcontext_t caller; \
+            holder< Result > hldr( & caller, \
+                                   static_cast< D const* >( this)->fn_( c) ); \
+            this->flags_ |= flag_complete; \
+            callee = c.impl_->callee_; \
+            context::jump_fcontext( \
+                    hldr.ctx, callee, \
+                    ( intptr_t) & hldr, fpu_preserved == this->preserve_fpu_); \
+            BOOST_ASSERT_MSG( false, "coroutine is complete"); \
+        } \
+        catch ( forced_unwind const&) \
+        {} \
+        catch (...) \
+        { this->except_ = current_exception(); } \
+\
+        this->flags_ |= flag_complete; \
+        context::fcontext_t caller; \
+        context::jump_fcontext( \
+                & caller, this->callee_, \
+                ( intptr_t) & caller, fpu_preserved == this->preserve_fpu_); \
+        BOOST_ASSERT_MSG( false, "coroutine is complete"); \
+    } \
+\
+    optional< Result >  result_; \
 };
-BOOST_PP_REPEAT_FROM_TO(0,11,BOOST_CONTEXT_EXEC,~)
+BOOST_PP_REPEAT_FROM_TO(1,11,BOOST_CONTEXT_EXEC,~)
 #undef BOOST_CONTEXT_EXEC
 #undef BOOST_CONTEXT_EXEC_ARGS
 #undef BOOST_CONTEXT_EXEC_ARG

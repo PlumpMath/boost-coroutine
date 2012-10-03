@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_CORO_DETAIL_COROUTINE_RESUME_H
-#define BOOST_CORO_DETAIL_COROUTINE_RESUME_H
+#ifndef BOOST_CORO_DETAIL_COROUTINE_OP_H
+#define BOOST_CORO_DETAIL_COROUTINE_OP_H
 
 #include <iterator>
 
@@ -22,9 +22,11 @@
 #include <boost/range.hpp>
 #include <boost/type_traits/function_traits.hpp>
 
+#include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_base.hpp>
 #include <boost/coroutine/detail/flags.hpp>
+#include <boost/coroutine/detail/holder.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -35,30 +37,24 @@ namespace coro {
 namespace detail {
 
 template< typename Signature, typename D, typename Result, int arity >
-struct coroutine_resume;
+struct coroutine_op;
 
 template< typename Signature, typename D >
-struct coroutine_resume< Signature, D, void, 0 >
+struct coroutine_op< Signature, D, void, 0 >
 {
     D & operator()()
     {
         BOOST_ASSERT( static_cast< D * >( this)->impl_);
         BOOST_ASSERT( ! static_cast< D * >( this)->impl_->is_complete() );
 
-        context::fcontext_t caller;
-        static_cast< D * >( this)->impl_->callee_ = ( context::fcontext_t *) context::jump_fcontext(
-            & caller,
-            static_cast< D * >( this)->impl_->callee_,
-            ( intptr_t) & caller, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_);
-        if ( static_cast< D * >( this)->impl_->except_)
-            rethrow_exception( static_cast< D * >( this)->impl_->except_);
+        static_cast< D * >( this)->impl_->resume();
 
         return * static_cast< D * >( this);
     }
 };
 
 template< typename Signature, typename D, typename Result >
-struct coroutine_resume< Signature, D, Result, 0 >
+struct coroutine_op< Signature, D, Result, 0 >
 {
     class iterator : public std::iterator< std::input_iterator_tag, Result >
     {
@@ -183,29 +179,20 @@ struct coroutine_resume< Signature, D, Result, 0 >
         BOOST_ASSERT( static_cast< D * >( this)->impl_);
         BOOST_ASSERT( ! static_cast< D * >( this)->impl_->is_complete() );
 
-        context::fcontext_t caller;
-        static_cast< D * >( this)->impl_->callee_ = ( context::fcontext_t *) context::jump_fcontext(
-            & caller,
-            static_cast< D * >( this)->impl_->callee_,
-            ( intptr_t) & caller, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_);
-        if ( static_cast< D * >( this)->impl_->except_)
-            rethrow_exception( static_cast< D * >( this)->impl_->except_);
+        static_cast< D * >( this)->impl_->resume();
 
         return * static_cast< D * >( this);
     }
 
     Result get() const
-    {
-        BOOST_ASSERT( static_cast< D const* >( this)->impl_);
-        BOOST_ASSERT( static_cast< D const* >( this)->impl_->result_);
-
-        return * static_cast< D const* >( this)->impl_->result_;
-    }
+    { return static_cast< D const* >( this)->impl_->result_.get(); }
 };
 
 template< typename Signature, typename D >
-struct coroutine_resume< Signature, D, void, 1 >
+struct coroutine_op< Signature, D, void, 1 >
 {
+    typedef typename arg< Signature >::type_t   arg_t;
+
     class iterator : public std::iterator< std::output_iterator_tag, void, void, void, void >
     {
     private:
@@ -220,7 +207,7 @@ struct coroutine_resume< Signature, D, void, 1 >
             dp_( dp)
         {}
 
-        iterator & operator=( typename function_traits< Signature >::arg1_type a1)
+        iterator & operator=( arg_t a1)
         {
             BOOST_ASSERT( dp_);
             if ( ! ( * dp_)( a1) ) dp_ = 0;
@@ -242,118 +229,68 @@ struct coroutine_resume< Signature, D, void, 1 >
 
     struct const_iterator;
 
-    D & operator()( typename function_traits< Signature >::arg1_type a1)
+    D & operator()( arg_t a1)
     {
         BOOST_ASSERT( static_cast< D * >( this)->impl_);
         BOOST_ASSERT( ! static_cast< D * >( this)->impl_->is_complete() );
 
-        static_cast< D * >( this)->impl_->args_ = a1;
-        context::fcontext_t caller;
-        static_cast< D * >( this)->impl_->callee_ = ( context::fcontext_t *) context::jump_fcontext(
-            & caller,
-            static_cast< D * >( this)->impl_->callee_,
-            ( intptr_t) & caller, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_);
-        if ( static_cast< D * >( this)->impl_->except_)
-            rethrow_exception( static_cast< D * >( this)->impl_->except_);
+        static_cast< D * >( this)->impl_->resume( a1);
 
         return * static_cast< D * >( this);
     }
 };
 
 template< typename Signature, typename D, typename Result >
-struct coroutine_resume< Signature, D, Result, 1 >
+struct coroutine_op< Signature, D, Result, 1 >
 {
-    D & operator()( typename function_traits< Signature >::arg1_type a1)
+    typedef typename arg< Signature >::type_t   arg_t;
+
+    D & operator()( arg_t a1)
     {
         BOOST_ASSERT( static_cast< D * >( this)->impl_);
         BOOST_ASSERT( ! static_cast< D * >( this)->impl_->is_complete() );
 
-        static_cast< D * >( this)->impl_->args_ = a1;
-        context::fcontext_t caller;
-        static_cast< D * >( this)->impl_->callee_ = ( context::fcontext_t *) context::jump_fcontext(
-            & caller,
-            static_cast< D * >( this)->impl_->callee_,
-            ( intptr_t) & caller, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_);
-        if ( static_cast< D * >( this)->impl_->except_)
-            rethrow_exception( static_cast< D * >( this)->impl_->except_);
+        static_cast< D * >( this)->impl_->resume( a1);
 
         return * static_cast< D * >( this);
     }
 
     Result get() const
-    {
-        BOOST_ASSERT( static_cast< D const* >( this)->impl_);
-        BOOST_ASSERT( static_cast< D const* >( this)->impl_->result_);
-
-        return * static_cast< D const* >( this)->impl_->result_;
-    }
+    { return static_cast< D const* >( this)->impl_->result_.get(); }
 };
 
-#define BOOST_COROUTINE_RESUME_COMMA(n) BOOST_PP_COMMA_IF(BOOST_PP_SUB(n,1))
-#define BOOST_COROUTINE_RESUME_VAL(z,n,unused) BOOST_COROUTINE_RESUME_COMMA(n) BOOST_PP_CAT(a,n)
-#define BOOST_COROUTINE_RESUME_VALS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_COROUTINE_RESUME_VAL,~)
-#define BOOST_COROUTINE_RESUME_ARG_TYPE(n) \
+#define BOOST_COROUTINE_OP_COMMA(n) BOOST_PP_COMMA_IF(BOOST_PP_SUB(n,1))
+#define BOOST_COROUTINE_OP_VAL(z,n,unused) BOOST_COROUTINE_OP_COMMA(n) BOOST_PP_CAT(a,n)
+#define BOOST_COROUTINE_OP_VALS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_COROUTINE_OP_VAL,~)
+#define BOOST_COROUTINE_OP_ARG_TYPE(n) \
     typename function_traits< Signature >::BOOST_PP_CAT(BOOST_PP_CAT(arg,n),_type)
-#define BOOST_COROUTINE_RESUME_ARG(z,n,unused) BOOST_COROUTINE_RESUME_COMMA(n) BOOST_COROUTINE_RESUME_ARG_TYPE(n) BOOST_PP_CAT(a,n)
-#define BOOST_COROUTINE_RESUME_ARGS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_COROUTINE_RESUME_ARG,~)
-#define BOOST_COROUTINE_RESUME(z,n,unused) \
-template< typename Signature, typename D > \
-struct coroutine_resume< Signature, D, void, n > \
-{ \
-    D & operator()( BOOST_COROUTINE_RESUME_ARGS(n)) \
-    { \
-        BOOST_ASSERT( static_cast< D * >( this)->impl_); \
-        BOOST_ASSERT( ! static_cast< D * >( this)->impl_->is_complete() ); \
-\
-        static_cast< D * >( this)->impl_->args_ = typename arg< Signature >::type_t(BOOST_COROUTINE_RESUME_VALS(n)); \
-        context::fcontext_t caller; \
-        static_cast< D * >( this)->impl_->callee_ = ( context::fcontext_t *) context::jump_fcontext( \
-            & caller, \
-            static_cast< D * >( this)->impl_->callee_, \
-            ( intptr_t) & caller, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_); \
-        if ( static_cast< D * >( this)->impl_->except_) \
-            rethrow_exception( static_cast< D * >( this)->impl_->except_); \
-\
-        return * static_cast< D * >( this); \
-    } \
-}; \
-\
+#define BOOST_COROUTINE_OP_ARG(z,n,unused) BOOST_COROUTINE_OP_COMMA(n) BOOST_COROUTINE_OP_ARG_TYPE(n) BOOST_PP_CAT(a,n)
+#define BOOST_COROUTINE_OP_ARGS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_COROUTINE_OP_ARG,~)
+#define BOOST_COROUTINE_OP(z,n,unused) \
 template< typename Signature, typename D, typename Result > \
-struct coroutine_resume< Signature, D, Result, n > \
+struct coroutine_op< Signature, D, Result, n > \
 { \
-    D & operator()( BOOST_COROUTINE_RESUME_ARGS(n)) \
+    D & operator()( BOOST_COROUTINE_OP_ARGS(n)) \
     { \
         BOOST_ASSERT( static_cast< D * >( this)->impl_); \
         BOOST_ASSERT( ! static_cast< D * >( this)->impl_->is_complete() ); \
 \
-        static_cast< D * >( this)->impl_->args_ = typename arg< Signature >::type_t(BOOST_COROUTINE_RESUME_VALS(n)); \
-        context::fcontext_t caller; \
-        static_cast< D * >( this)->impl_->callee_ = ( context::fcontext_t *) context::jump_fcontext( \
-            & caller, \
-            static_cast< D * >( this)->impl_->callee_, \
-            ( intptr_t) & caller, fpu_preserved == static_cast< D * >( this)->impl_->preserve_fpu_); \
-        if ( static_cast< D * >( this)->impl_->except_) \
-            rethrow_exception( static_cast< D * >( this)->impl_->except_); \
+        static_cast< D * >( this)->impl_->resume(BOOST_COROUTINE_OP_VALS(n)); \
 \
         return * static_cast< D * >( this); \
     } \
 \
     Result get() const \
-    { \
-        BOOST_ASSERT( static_cast< D const* >( this)->impl_); \
-        BOOST_ASSERT( static_cast< D const* >( this)->impl_->result_); \
-\
-        return * static_cast< D const* >( this)->impl_->result_; \
-    } \
+    { return static_cast< D const* >( this)->impl_->result_.get(); } \
 };
-BOOST_PP_REPEAT_FROM_TO(2,11,BOOST_COROUTINE_RESUME,~)
-#undef BOOST_COROUTINE_RESUME
-#undef BOOST_COROUTINE_RESUME_ARGS
-#undef BOOST_COROUTINE_RESUME_ARG
-#undef BOOST_COROUTINE_RESUME_ARG_TYPE
-#undef BOOST_COROUTINE_RESUME_VALS
-#undef BOOST_COROUTINE_RESUME_VAL
-#undef BOOST_COROUTINE_RESUME_COMMA
+BOOST_PP_REPEAT_FROM_TO(2,11,BOOST_COROUTINE_OP,~)
+#undef BOOST_COROUTINE_OP
+#undef BOOST_COROUTINE_OP_ARGS
+#undef BOOST_COROUTINE_OP_ARG
+#undef BOOST_COROUTINE_OP_ARG_TYPE
+#undef BOOST_COROUTINE_OP_VALS
+#undef BOOST_COROUTINE_OP_VAL
+#undef BOOST_COROUTINE_OP_COMMA
 
 }}}
 
@@ -361,4 +298,4 @@ BOOST_PP_REPEAT_FROM_TO(2,11,BOOST_COROUTINE_RESUME,~)
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_CORO_DETAIL_COROUTINE_RESUME_H
+#endif // BOOST_CORO_DETAIL_COROUTINE_OP_H

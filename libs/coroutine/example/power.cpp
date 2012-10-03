@@ -12,17 +12,18 @@
 #include <boost/range.hpp>
 #include <boost/coroutine/all.hpp>
 
-typedef boost::coro::coroutine< int() >         coro_t;
-typedef boost::range_iterator< coro_t >::type   iterator_t;
+typedef boost::coro::coroutine< int() >             coro1_t;
+typedef boost::coro::coroutine< void( int) >        coro2_t;
+typedef boost::range_iterator< coro1_t >::type      iterator_t;
 
-int power( coro_t::caller_t & self, int number, int exponent)
+int power( coro2_t & c, int number, int exponent)
 {
     int counter = 0;
     int result = 1;
     while ( counter++ < exponent - 1)
     {
             result = result * number;
-            self.yield( result);
+            c( result);
     }
     return result * number;
 }
@@ -31,7 +32,7 @@ int main()
 {
     {
         std::cout << "using range functions" << std::endl;
-        coro_t c( boost::bind( power, _1, 2, 8) );
+        coro1_t c( boost::bind( power, _1, 2, 8) );
         iterator_t e( boost::end( c) );
         for ( iterator_t i( boost::begin( c) ); i != e; ++i)
             std::cout << * i <<  " ";
@@ -39,7 +40,7 @@ int main()
 
     {
         std::cout << "\nusing BOOST_FOREACH" << std::endl;
-        coro_t c( boost::bind( power, _1, 2, 8) );
+        coro1_t c( boost::bind( power, _1, 2, 8) );
         BOOST_FOREACH( int i, c)
         { std::cout << i <<  " "; }
     }
