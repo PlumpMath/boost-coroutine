@@ -87,8 +87,7 @@ struct coroutine_exec< Signature, D, Result, 0, Caller > :
 {
     template< typename StackAllocator >
     coroutine_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT :
-        coroutine_base< Signature, Result, 0 >( attr, alloc, this),
-        result_()
+        coroutine_base< Signature, Result, 0 >( attr, alloc, this)
     {}
 
     void run( context::fcontext_t * callee)
@@ -122,8 +121,6 @@ struct coroutine_exec< Signature, D, Result, 0, Caller > :
                 ( intptr_t) & caller, fpu_preserved == this->preserve_fpu_);
         BOOST_ASSERT_MSG( false, "coroutine is complete");
     }
-
-    optional< Result >  result_;
 };
 
 #define BOOST_CONTEXT_EXEC_COMMA(n) BOOST_PP_COMMA_IF(BOOST_PP_SUB(n,1))
@@ -223,8 +220,6 @@ struct coroutine_exec< Signature, D, Result, n, Caller > : \
                 ( intptr_t) & caller, fpu_preserved == this->preserve_fpu_); \
         BOOST_ASSERT_MSG( false, "coroutine is complete"); \
     } \
-\
-    optional< Result >  result_; \
 };
 BOOST_PP_REPEAT_FROM_TO(1,11,BOOST_CONTEXT_EXEC,~)
 #undef BOOST_CONTEXT_EXEC
