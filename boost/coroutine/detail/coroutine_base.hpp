@@ -129,9 +129,10 @@ public:
 
         flags_ |= flag_unwind_stack;
         context::fcontext_t caller;
-        callee_ = ( context::fcontext_t *) context::jump_fcontext(
-            & caller, callee_,
-            ( intptr_t) & caller, fpu_preserved == preserve_fpu_);
+        holder< Result > hldr( & caller, true);
+        context::jump_fcontext(
+            hldr.ctx, callee_,
+            ( intptr_t) & hldr, fpu_preserved == preserve_fpu_);
         flags_ &= ~flag_unwind_stack;
 
         BOOST_ASSERT( is_complete() );

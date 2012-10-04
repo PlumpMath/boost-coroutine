@@ -7,6 +7,7 @@
 #ifndef BOOST_CORO_DETAIL_HOLDER_H
 #define BOOST_CORO_DETAIL_HOLDER_H
 
+#include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include <boost/optional.hpp>
 
@@ -23,10 +24,29 @@ struct holder
 {
     context::fcontext_t *   ctx;
     optional< Data >        data;
+    bool                    force_unwind;
 
     holder( context::fcontext_t * ctx_, Data data_) :
-        ctx( ctx_), data( data_)
-    {}
+        ctx( ctx_), data( data_), force_unwind( false)
+    { BOOST_ASSERT( ctx); }
+
+    holder( context::fcontext_t * ctx_, bool force_unwind_) :
+        ctx( ctx_), data(), force_unwind( force_unwind_)
+    {
+        BOOST_ASSERT( ctx);
+        BOOST_ASSERT( force_unwind);
+    }
+};
+
+template<>
+struct holder< void >
+{
+    context::fcontext_t *   ctx;
+    bool                    force_unwind;
+
+    holder( context::fcontext_t * ctx_, bool force_unwind_ = false) :
+        ctx( ctx_), force_unwind( force_unwind_)
+    { BOOST_ASSERT( ctx); }
 };
 
 }}}

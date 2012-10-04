@@ -341,7 +341,6 @@ void test_unwind()
         BOOST_CHECK_EQUAL( ( int) 7, value1);
         BOOST_CHECK( coro);
         BOOST_CHECK_EQUAL( ( int) 10, res);
-        int i = 3;
     }
     BOOST_CHECK_EQUAL( ( int) 0, value1);
 }
@@ -434,7 +433,7 @@ boost::unit_test::test_suite * init_unit_test_suite( int, char* [])
     test->add( BOOST_TEST_CASE( & test_ptr) );
     test->add( BOOST_TEST_CASE( & test_ref) );
     test->add( BOOST_TEST_CASE( & test_tuple) );
-//    test->add( BOOST_TEST_CASE( & test_unwind) );
+    test->add( BOOST_TEST_CASE( & test_unwind) );
     test->add( BOOST_TEST_CASE( & test_no_unwind) );
     test->add( BOOST_TEST_CASE( & test_exceptions) );
     test->add( BOOST_TEST_CASE( & test_output_iterator) );

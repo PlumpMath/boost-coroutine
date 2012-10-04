@@ -51,8 +51,9 @@ struct coroutine_exec< Signature, D, void, 0, Caller > :
 
     void run( context::fcontext_t * callee)
     {
-        callee = ( context::fcontext_t *) context::jump_fcontext(
+        holder< void > * hldr_from = ( holder< void > *) context::jump_fcontext(
                 this->callee_, callee, ( intptr_t) this->callee_, this->preserve_fpu_);
+        callee = hldr_from->ctx;
 
         Caller c( callee, this->preserve_fpu_, static_cast< D const* >( this)->alloc_);
         try
@@ -61,9 +62,11 @@ struct coroutine_exec< Signature, D, void, 0, Caller > :
             static_cast< D const* >( this)->fn_( c);
             this->flags_ |= flag_complete;
             callee = c.impl_->callee_;
+            BOOST_ASSERT( callee);
+            holder< void > hldr( & caller);
             context::jump_fcontext(
-                    & caller, callee,
-                    ( intptr_t) & caller, fpu_preserved == this->preserve_fpu_);
+                    hldr.ctx, callee,
+                    ( intptr_t) & hldr, fpu_preserved == this->preserve_fpu_);
             BOOST_ASSERT_MSG( false, "coroutine is complete");
         }
         catch ( forced_unwind const&)
@@ -73,6 +76,7 @@ struct coroutine_exec< Signature, D, void, 0, Caller > :
 
         this->flags_ |= flag_complete;
         callee = c.impl_->callee_;
+        BOOST_ASSERT( callee);
         context::fcontext_t caller;
         context::jump_fcontext(
                 & caller, callee,
@@ -92,20 +96,22 @@ struct coroutine_exec< Signature, D, Result, 0, Caller > :
 
     void run( context::fcontext_t * callee)
     {
-        callee = ( context::fcontext_t *) context::jump_fcontext(
+        holder< void > * hldr_from = ( holder< void > *) context::jump_fcontext(
                 this->callee_, callee, ( intptr_t) this->callee_, this->preserve_fpu_);
+        callee = hldr_from->ctx;
 
         Caller c( callee, this->preserve_fpu_, static_cast< D const* >( this)->alloc_);
         try
         {
             context::fcontext_t caller;
-            holder< Result > hldr( & caller,
+            holder< Result > hldr_to( & caller,
                                    static_cast< D * >( this)->fn_( c) );
             this->flags_ |= flag_complete;
             callee = c.impl_->callee_;
+            BOOST_ASSERT( callee);
             context::jump_fcontext(
-                    hldr.ctx, callee,
-                    ( intptr_t) & hldr, fpu_preserved == this->preserve_fpu_);
+                    hldr_to.ctx, callee,
+                    ( intptr_t) & hldr_to, fpu_preserved == this->preserve_fpu_);
             BOOST_ASSERT_MSG( false, "coroutine is complete");
         }
         catch ( forced_unwind const&)
@@ -115,6 +121,7 @@ struct coroutine_exec< Signature, D, Result, 0, Caller > :
 
         this->flags_ |= flag_complete;
         callee = c.impl_->callee_;
+        BOOST_ASSERT( callee);
         context::fcontext_t caller;
         context::jump_fcontext(
                 & caller, callee,
@@ -139,18 +146,19 @@ struct coroutine_exec< Signature, D, void, n, Caller > : \
 \
     void run( context::fcontext_t * callee) \
     { \
-        holder< arg_t > * hldr = ( holder< arg_t > *) context::jump_fcontext( \
+        holder< arg_t > * hldr_from = ( holder< arg_t > *) context::jump_fcontext( \
                 this->callee_, callee, ( intptr_t) this->callee_, this->preserve_fpu_); \
-        callee = hldr->ctx; \
+        callee = hldr_from->ctx; \
 \
         Caller c( callee, this->preserve_fpu_, static_cast< D const* >( this)->alloc_); \
-        c.impl_->result_ = hldr->data; \
+        c.impl_->result_ = hldr_from->data; \
         try \
         { \
             context::fcontext_t caller; \
             static_cast< D const* >( this)->fn_( c); \
             this->flags_ |= flag_complete; \
             callee = c.impl_->callee_; \
+            BOOST_ASSERT( callee); \
             context::jump_fcontext( \
                     & caller, callee, \
                     ( intptr_t) & caller, fpu_preserved == this->preserve_fpu_); \
@@ -163,6 +171,7 @@ struct coroutine_exec< Signature, D, void, n, Caller > : \
 \
         this->flags_ |= flag_complete; \
         callee = c.impl_->callee_; \
+        BOOST_ASSERT( callee); \
         context::fcontext_t caller; \
         context::jump_fcontext( \
                 & caller, callee, \
@@ -189,22 +198,23 @@ struct coroutine_exec< Signature, D, Result, n, Caller > : \
 \
     void run( context::fcontext_t * callee) \
     { \
-        holder< arg_t > * hldr = ( holder< arg_t > *) context::jump_fcontext( \
+        holder< arg_t > * hldr_from = ( holder< arg_t > *) context::jump_fcontext( \
                 this->callee_, callee, ( intptr_t) this->callee_, this->preserve_fpu_); \
-        callee = hldr->ctx; \
+        callee = hldr_from->ctx; \
 \
         Caller c( callee, this->preserve_fpu_, static_cast< D const* >( this)->alloc_); \
-        c.impl_->result_ = hldr->data; \
+        c.impl_->result_ = hldr_from->data; \
         try \
         { \
             context::fcontext_t caller; \
-            holder< Result > hldr( & caller, \
+            holder< Result > hldr_to( & caller, \
                                    static_cast< D * >( this)->fn_( c) ); \
             this->flags_ |= flag_complete; \
             callee = c.impl_->callee_; \
+            BOOST_ASSERT( callee); \
             context::jump_fcontext( \
-                    hldr.ctx, callee, \
-                    ( intptr_t) & hldr, fpu_preserved == this->preserve_fpu_); \
+                    hldr_to.ctx, callee, \
+                    ( intptr_t) & hldr_to, fpu_preserved == this->preserve_fpu_); \
             BOOST_ASSERT_MSG( false, "coroutine is complete"); \
         } \
         catch ( forced_unwind const&) \
@@ -214,6 +224,7 @@ struct coroutine_exec< Signature, D, Result, n, Caller > : \
 \
         this->flags_ |= flag_complete; \
         callee = c.impl_->callee_; \
+        BOOST_ASSERT( callee); \
         context::fcontext_t caller; \
         context::jump_fcontext( \
                 & caller, callee, \
