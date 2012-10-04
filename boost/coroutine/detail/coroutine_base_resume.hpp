@@ -11,7 +11,7 @@
 
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
-#include <boost/exception_ptr.hpp>
+#include <boost/throw_exception.hpp>
 #include <boost/context/fcontext.hpp>
 #include <boost/optional.hpp>
 #include <boost/preprocessor/arithmetic/add.hpp>
@@ -24,6 +24,7 @@
 
 #include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
+#include <boost/coroutine/detail/exceptions.hpp>
 #include <boost/coroutine/detail/holder.hpp>
 #include <boost/coroutine/flags.hpp>
 
@@ -68,7 +69,6 @@ public:
             static_cast< D * >( this)->callee_,
             ( intptr_t) & caller, fpu_preserved == static_cast< D * >( this)->preserve_fpu_);
         static_cast< D * >( this)->callee_ = hldr->ctx;
-        // TODO: transfer exception-pointer -> move to coroutine_exec
         if ( static_cast< D * >( this)->except_)
             rethrow_exception( static_cast< D * >( this)->except_);
         static_cast< D * >( this)->result_ = hldr->data;
@@ -76,7 +76,7 @@ public:
 
 private:
     template< typename X, typename Y, typename Z, int >
-    friend struct coroutine_op;
+    friend struct coroutine_get;
     template< typename X, typename Y, typename Z, int, typename C >
     friend struct coroutine_exec;
 
@@ -94,12 +94,11 @@ struct coroutine_base_resume< Signature, D, void, 1 >
         BOOST_ASSERT( ! static_cast< D * >( this)->is_complete() );
 
         context::fcontext_t caller;
-        holder< arg_t > hldr( & caller, a1); 
+        holder< arg_t > hldr_to( & caller, a1);
         static_cast< D * >( this)->callee_ = ( context::fcontext_t *) context::jump_fcontext(
-            hldr.ctx,
+            hldr_to.ctx,
             static_cast< D * >( this)->callee_,
-            ( intptr_t) & hldr, fpu_preserved == static_cast< D * >( this)->preserve_fpu_);
-        // TODO: transfer exception-pointer -> move to coroutine_exec
+            ( intptr_t) & hldr_to, fpu_preserved == static_cast< D * >( this)->preserve_fpu_);
         if ( static_cast< D * >( this)->except_)
             rethrow_exception( static_cast< D * >( this)->except_);
     }
@@ -123,7 +122,6 @@ public:
             static_cast< D * >( this)->callee_,
             ( intptr_t) & hldr_to, fpu_preserved == static_cast< D * >( this)->preserve_fpu_);
         static_cast< D * >( this)->callee_ = hldr_from->ctx;
-        // TODO: transfer exception-pointer -> move to coroutine_exec
         if ( static_cast< D * >( this)->except_)
             rethrow_exception( static_cast< D * >( this)->except_);
         static_cast< D * >( this)->result_ = hldr_from->data;
@@ -131,7 +129,7 @@ public:
 
 private:
     template< typename X, typename Y, typename Z, int >
-    friend struct coroutine_op;
+    friend struct coroutine_get;
     template< typename X, typename Y, typename Z, int, typename C >
     friend struct coroutine_exec;
 
@@ -157,11 +155,11 @@ struct coroutine_base_resume< Signature, D, void, n > \
         BOOST_ASSERT( ! static_cast< D * >( this)->is_complete() ); \
 \
         context::fcontext_t caller; \
-        holder< arg_t > hldr( & caller, arg_t(BOOST_COROUTINE_BASE_RESUME_VALS(n) ) ); \
+        holder< arg_t > hldr_to( & caller, arg_t(BOOST_COROUTINE_BASE_RESUME_VALS(n) ) ); \
         static_cast< D * >( this)->callee_ = ( context::fcontext_t *) context::jump_fcontext( \
-            hldr.ctx, \
+            hldr_to.ctx, \
             static_cast< D * >( this)->callee_, \
-            ( intptr_t) & hldr, fpu_preserved == static_cast< D * >( this)->preserve_fpu_); \
+            ( intptr_t) & hldr_to, fpu_preserved == static_cast< D * >( this)->preserve_fpu_); \
         if ( static_cast< D * >( this)->except_) \
             rethrow_exception( static_cast< D * >( this)->except_); \
     } \
@@ -193,7 +191,7 @@ public: \
 \
 private: \
     template< typename X, typename Y, typename Z, int > \
-    friend struct coroutine_op; \
+    friend struct coroutine_get; \
     template< typename X, typename Y, typename Z, int, typename C > \
     friend struct coroutine_exec; \
 \

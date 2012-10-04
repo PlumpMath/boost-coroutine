@@ -183,9 +183,6 @@ struct coroutine_op< Signature, D, Result, 0 >
 
         return * static_cast< D * >( this);
     }
-
-    Result get() const
-    { return static_cast< D const* >( this)->impl_->result_.get(); }
 };
 
 template< typename Signature, typename D >
@@ -254,9 +251,6 @@ struct coroutine_op< Signature, D, Result, 1 >
 
         return * static_cast< D * >( this);
     }
-
-    Result get() const
-    { return static_cast< D const* >( this)->impl_->result_.get(); }
 };
 
 #define BOOST_COROUTINE_OP_COMMA(n) BOOST_PP_COMMA_IF(BOOST_PP_SUB(n,1))
@@ -279,9 +273,6 @@ struct coroutine_op< Signature, D, Result, n > \
 \
         return * static_cast< D * >( this); \
     } \
-\
-    Result get() const \
-    { return static_cast< D const* >( this)->impl_->result_.get(); } \
 };
 BOOST_PP_REPEAT_FROM_TO(2,11,BOOST_COROUTINE_OP,~)
 #undef BOOST_COROUTINE_OP

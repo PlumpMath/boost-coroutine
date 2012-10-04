@@ -28,7 +28,6 @@ struct holder
     {}
 };
 
-
 }}}
 
 #ifdef BOOST_HAS_ABI_HEADERS

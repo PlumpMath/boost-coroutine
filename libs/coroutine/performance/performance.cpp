@@ -33,8 +33,8 @@ typedef coro::coroutine< void() >   coro_t;
 #define CALL_COROUTINE(z,n,unused) \
     c();
 
-void fn( coro_t::caller_t & self)
-{ while ( true) self.yield(); }
+void fn( coro_t::caller_t & c)
+{ while ( true) c(); }
 
 #ifdef BOOST_CONTEXT_CYCLE
 cycle_t test_cycles( cycle_t ov, coro::flag_fpu_t preserve_fpu)

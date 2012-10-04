@@ -26,6 +26,7 @@
 #include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/coroutine_base.hpp>
 #include <boost/coroutine/detail/coroutine_exec.hpp>
+#include <boost/coroutine/detail/coroutine_get.hpp>
 #include <boost/coroutine/detail/coroutine_object.hpp>
 #include <boost/coroutine/detail/coroutine_op.hpp>
 #include <boost/coroutine/detail/coroutine_self.hpp>
@@ -69,12 +70,16 @@ struct caller
 }
 
 template< typename Signature >
-class coroutine :
-    public detail::coroutine_op<
-        Signature, coroutine< Signature >,
-        typename function_traits< Signature >::result_type,
-        function_traits< Signature >::arity
-    >
+class coroutine : public detail::coroutine_op<
+                        Signature, coroutine< Signature >,
+                        typename function_traits< Signature >::result_type,
+                        function_traits< Signature >::arity
+                  >,
+                  public detail::coroutine_get<
+                        Signature, coroutine< Signature >,
+                        typename function_traits< Signature >::result_type,
+                        function_traits< Signature >::arity
+                  >
 {
 private:
     typedef detail::coroutine_base<
@@ -84,10 +89,12 @@ private:
      >                                                          base_t;
     typedef typename base_t::ptr_t                              ptr_t;
 
-    template< typename X, typename Y, typename Z, int >
-    friend struct detail::coroutine_op;
     template< typename X, typename Y, typename Z, int, typename C >
     friend struct detail::coroutine_exec;
+    template< typename X, typename Y, typename Z, int >
+    friend struct detail::coroutine_get;
+    template< typename X, typename Y, typename Z, int >
+    friend struct detail::coroutine_op;
 
     struct dummy
     { void nonnull() {} };
@@ -112,6 +119,11 @@ public:
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
         >(),
+        detail::coroutine_get<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
         impl_()
     {}
 
@@ -120,6 +132,11 @@ public:
                bool preserve_fpu,
                Allocator const& alloc) :
         detail::coroutine_op<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        detail::coroutine_get<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -147,6 +164,11 @@ public:
             std::allocator< coroutine > const& alloc =
                 std::allocator< coroutine >() ) :
         detail::coroutine_op<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        detail::coroutine_get<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -179,6 +201,11 @@ public:
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
         >(),
+        detail::coroutine_get<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
         impl_()
     {
         typedef detail::coroutine_object<
@@ -202,6 +229,11 @@ public:
                StackAllocator const& stack_alloc,
                Allocator const& alloc) :
         detail::coroutine_op<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        detail::coroutine_get<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -231,6 +263,11 @@ public:
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >() ) :
         detail::coroutine_op<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        detail::coroutine_get<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -269,6 +306,11 @@ public:
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
         >(),
+        detail::coroutine_get<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
         impl_()
     {
         typedef detail::coroutine_object<
@@ -291,6 +333,11 @@ public:
                StackAllocator const& stack_alloc,
                Allocator const& alloc) :
         detail::coroutine_op<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        detail::coroutine_get<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -323,6 +370,11 @@ public:
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
         >(),
+        detail::coroutine_get<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
         impl_()
     {
         typedef detail::coroutine_object<
@@ -346,6 +398,11 @@ public:
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >() ) :
         detail::coroutine_op<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        detail::coroutine_get<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
@@ -376,6 +433,11 @@ public:
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
         >(),
+        detail::coroutine_get<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
         impl_()
     {
         typedef detail::coroutine_object<
@@ -396,6 +458,11 @@ public:
 
     coroutine( BOOST_RV_REF( coroutine) other) BOOST_NOEXCEPT :
         detail::coroutine_op<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        detail::coroutine_get<
             Signature, coroutine< Signature >,
             typename function_traits< Signature >::result_type,
             function_traits< Signature >::arity
