@@ -82,7 +82,7 @@ int main( int argc, char * argv[])
 {
     try
     {
-        coro::flag_fpu_t preserve_fpu = coro::fpu_not_preserved;
+        coro::flag_fpu_t preserve_fpu = coro::fpu_preserved; // coro::fpu_not_preserved;
         bind_to_processor( 0);
 
 #ifdef BOOST_CONTEXT_CYCLE
