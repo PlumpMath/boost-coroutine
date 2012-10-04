@@ -8,6 +8,7 @@
 #define BOOST_CORO_DETAIL_HOLDER_H
 
 #include <boost/config.hpp>
+#include <boost/optional.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -21,7 +22,7 @@ template< typename Data >
 struct holder
 {
     context::fcontext_t *   ctx;
-    Data                    data;
+    optional< Data >        data;
 
     holder( context::fcontext_t * ctx_, Data data_) :
         ctx( ctx_), data( data_)

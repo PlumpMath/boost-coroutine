@@ -39,7 +39,7 @@ void trampoline( intptr_t vp)
     BOOST_ASSERT( vp);
 
     holder< Context * > * hldr( reinterpret_cast< holder< Context * > * >( vp) );
-    Context * ctx( hldr->data);
+    Context * ctx( hldr->data.get() );
 
     ctx->run( hldr->ctx);
 }
