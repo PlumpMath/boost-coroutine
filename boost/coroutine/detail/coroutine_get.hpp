@@ -25,7 +25,10 @@ template< typename Signature, typename D, typename Result, int arity >
 struct coroutine_get
 {
     typename param_type< Result >::type get() const
-    { return static_cast< D const* >( this)->impl_->result_.get(); }
+    {
+        BOOST_ASSERT( static_cast< D const* >( this)->impl_->result_);
+        return static_cast< D const* >( this)->impl_->result_.get();
+    }
 };
 
 template< typename Signature, typename D, int arity >

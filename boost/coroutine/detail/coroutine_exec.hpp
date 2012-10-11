@@ -104,8 +104,8 @@ struct coroutine_exec< Signature, D, Result, 0, Caller > :
         try
         {
             context::fcontext_t caller;
-            holder< Result > hldr_to( & caller,
-                                   static_cast< D * >( this)->fn_( c) );
+            static_cast< D * >( this)->fn_( c);
+            holder< Result > hldr_to( & caller);
             this->flags_ |= flag_complete;
             callee = c.impl_->callee_;
             BOOST_ASSERT( callee);
@@ -207,8 +207,8 @@ struct coroutine_exec< Signature, D, Result, n, Caller > : \
         try \
         { \
             context::fcontext_t caller; \
-            holder< Result > hldr_to( & caller, \
-                                   static_cast< D * >( this)->fn_( c) ); \
+            static_cast< D const* >( this)->fn_( c); \
+            holder< Result > hldr_to( & caller); \
             this->flags_ |= flag_complete; \
             callee = c.impl_->callee_; \
             BOOST_ASSERT( callee); \

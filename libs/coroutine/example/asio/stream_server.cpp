@@ -1,9 +1,3 @@
-
-//          Copyright Oliver Kowalke 2009.
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
 #define NOMINMAX
 
 #include <cstdlib>
@@ -18,7 +12,7 @@
 #include <boost/coroutine/all.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/function.hpp>
-#include <boost/lexical_cast.hpp>
+#include <boost/program_options.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -49,8 +43,11 @@ private:
                 boost::asio::buffer( buffer_ + pb_size, bf_size - pb_size),
                 boost::bind( & coro_t::operator(), & coro_, _1, _2) );
         self_();
-        boost::system::error_code ec = self_.get().get< 0 >();
-        std::size_t n = self_.get().get< 1 >();
+
+        boost::system::error_code ec;
+        std::size_t n = 0;
+
+        boost::tie( ec, n) = self_.get();
         if ( ec)
         {
             setg( 0, 0, 0);
@@ -61,10 +58,10 @@ private:
         return n;
     }
 
-    boost::asio::ip::tcp::socket    &   s_;
-    coro_t                          &   coro_;
+    boost::asio::ip::tcp::socket      &   s_;
+    coro_t                            &   coro_;
     coro_t::caller_t                  &   self_;
-    char                                buffer_[bf_size];
+    char                                  buffer_[bf_size];
 
 protected:
     virtual int underflow()
@@ -122,10 +119,10 @@ public:
         coro_( boost::bind( & session::handle_read_, this, _1) ),
         io_service_( io_service),
         socket_( io_service_)
-    { std::cout << "serivce()" << std::endl; }
+    { std::cout << "serivce(): " << socket_.remote_endpoint() << std::endl; }
 
     ~session()
-    { std::cout << "~serivce()" << std::endl; }
+    { std::cout << "~serivce(): " << socket_.remote_endpoint() << std::endl; }
 
     boost::asio::ip::tcp::socket & socket()
     { return socket_; }
@@ -176,10 +173,24 @@ int main( int argc, char * argv[])
 {
     try
     {
-        if ( argc != 2)
-        {
-            std::cerr << "Usage: echo_server <port>\n";
-            return 1;
+        int port = 0;
+        boost::program_options::options_description desc("allowed options");
+        desc.add_options()
+            ("help,h", "help message")
+            ("port,p", boost::program_options::value< int >( & port), "port service is listening");
+
+        boost::program_options::variables_map vm;
+        boost::program_options::store(
+            boost::program_options::parse_command_line(
+                argc,
+                argv,
+                desc),
+            vm);
+        boost::program_options::notify( vm);
+ 
+        if ( vm.count("help") ) {
+            std::cout << desc << std::endl;
+            return EXIT_SUCCESS;
         }
         {
             boost::asio::io_service io_service;
@@ -187,7 +198,7 @@ int main( int argc, char * argv[])
                 boost::bind(
                     & server::start,
                     server::create(
-                        io_service, boost::lexical_cast< short >( argv[1]) ) ) );
+                        io_service, port) ) );
             io_service.run();
         }
         std::cout << "Done" << std::endl;

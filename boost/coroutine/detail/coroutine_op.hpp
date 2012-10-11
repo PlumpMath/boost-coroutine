@@ -21,6 +21,7 @@
 #include <boost/preprocessor/repetition/repeat_from_to.hpp>
 #include <boost/range.hpp>
 #include <boost/type_traits/function_traits.hpp>
+#include <boost/type_traits/remove_reference.hpp>
 
 #include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
@@ -56,7 +57,7 @@ struct coroutine_op< Signature, D, void, 0 >
 template< typename Signature, typename D, typename Result >
 struct coroutine_op< Signature, D, Result, 0 >
 {
-    class iterator : public std::iterator< std::input_iterator_tag, Result >
+    class iterator : public std::iterator< std::input_iterator_tag, typename remove_reference< Result >::type >
     {
     private:
         D               *   dp_;
@@ -67,15 +68,22 @@ struct coroutine_op< Signature, D, Result, 0 >
             BOOST_ASSERT( dp_);
 
             if ( * dp_)
-            { val_ = ( * dp_)().get(); }
-            else
             {
-                dp_ = 0;
-                val_ = none;
+                ( * dp_)();
+                if ( ! ( * dp_) )
+                {
+                    dp_ = 0;
+                    val_ = none;
+                    return;
+                }
+                val_ = dp_->get();
             }
         }
 
     public:
+        typedef typename std::iterator_traits< iterator >::pointer      pointer_t;
+        typedef typename std::iterator_traits< iterator >::reference    reference_t;
+
         iterator() :
             dp_( 0), val_()
         {}
@@ -108,14 +116,14 @@ struct coroutine_op< Signature, D, Result, 0 >
             return * this;
         }
 
-        Result & operator*() const
+        reference_t operator*() const
         { return const_cast< optional< Result > & >( val_).get(); }
 
-        Result * operator->() const
+        pointer_t operator->() const
         { return const_cast< optional< Result > & >( val_).get_ptr(); }
     };
 
-    class const_iterator : public std::iterator< std::input_iterator_tag, const Result >
+    class const_iterator : public std::iterator< std::input_iterator_tag, typename remove_reference< const Result >::type >
     {
     private:
         D                       *   dp_;
@@ -126,15 +134,22 @@ struct coroutine_op< Signature, D, Result, 0 >
             BOOST_ASSERT( dp_);
 
             if ( * dp_)
-            { val_ = ( * dp_)().get(); }
-            else
             {
-                dp_ = 0;
-                val_ = none;
+                ( * dp_)();
+                if ( ! ( * dp_) )
+                {
+                    dp_ = 0;
+                    val_ = none;
+                    return;
+                }
+                val_ = dp_->get();
             }
         }
 
     public:
+        typedef typename std::iterator_traits< iterator >::pointer      pointer_t;
+        typedef typename std::iterator_traits< iterator >::reference    reference_t;
+
         const_iterator() :
             dp_( 0), val_()
         {}
@@ -167,10 +182,10 @@ struct coroutine_op< Signature, D, Result, 0 >
             return * this;
         }
 
-        Result const& operator*() const
+        reference_t operator*() const
         { return val_.get(); }
 
-        Result const* operator->() const
+        pointer_t operator->() const
         { return val_.get_ptr(); }
     };
 

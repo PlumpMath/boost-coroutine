@@ -26,6 +26,10 @@ struct holder
     optional< Data >        data;
     bool                    force_unwind;
 
+    holder( context::fcontext_t * ctx_) :
+        ctx( ctx_), data(), force_unwind( false)
+    { BOOST_ASSERT( ctx); }
+
     holder( context::fcontext_t * ctx_, Data data_) :
         ctx( ctx_), data( data_), force_unwind( false)
     { BOOST_ASSERT( ctx); }
@@ -35,6 +39,20 @@ struct holder
     {
         BOOST_ASSERT( ctx);
         BOOST_ASSERT( force_unwind);
+    }
+
+    holder( holder const& other) :
+        ctx( other.ctx), data( other.data),
+        force_unwind( other.force_unwind)
+    {}
+
+    holder & operator=( holder const& other)
+    {
+        if ( this == & other) return * this;
+        ctx = other.ctx;
+        data = other.data;
+        force_unwind = other.force_unwind;
+        return * this;
     }
 };
 
@@ -47,6 +65,18 @@ struct holder< void >
     holder( context::fcontext_t * ctx_, bool force_unwind_ = false) :
         ctx( ctx_), force_unwind( force_unwind_)
     { BOOST_ASSERT( ctx); }
+
+    holder( holder const& other) :
+        ctx( other.ctx), force_unwind( other.force_unwind)
+    {}
+
+    holder & operator=( holder const& other)
+    {
+        if ( this == & other) return * this;
+        ctx = other.ctx;
+        force_unwind = other.force_unwind;
+        return * this;
+    }
 };
 
 }}}

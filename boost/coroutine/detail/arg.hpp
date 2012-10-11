@@ -32,6 +32,12 @@ template<
 struct arg;
 
 template< typename Signature >
+struct arg< Signature, 0 >
+{
+    typedef void    type_t;
+};
+
+template< typename Signature >
 struct arg< Signature, 1 >
 {
     typedef typename function_traits< Signature >::arg1_type    type_t;

@@ -59,8 +59,8 @@ public:
         i_( i)
     {}
 
-    int operator()( coro_int_void::caller_t &)
-    { return i_; }
+    void operator()( coro_int_void::caller_t &)
+    {}
 };
 
 class moveable
@@ -96,8 +96,8 @@ public:
         return * this;
     }
 
-    int operator()( coro_int_void::caller_t &)
-    { return i_; }
+    void operator()( coro_int_void::caller_t &)
+    {}
 };
 
 struct my_exception {};
@@ -115,17 +115,18 @@ void f3( coro_void_void::caller_t & self)
     ++value1;
 }
 
-int f4( coro_int_void::caller_t & self)
+void f4( coro_int_void::caller_t & self)
 {
     self( 3);
-    return 7;
+    self( 7);
 }
 
-std::string f5( coro_string_void::caller_t & self)
+void f5( coro_string_void::caller_t & self)
 {
     std::string res("abc");
     self( res);
-    return "xyz";
+    res = "xyz";
+    self( res);
 }
 
 void f6( coro_void_int::caller_t & self)
@@ -134,49 +135,48 @@ void f6( coro_void_int::caller_t & self)
 void f7( coro_void_string::caller_t & self)
 { value2 = self.get(); }
 
-double f8( coro_double::caller_t & self)
+void f8( coro_double::caller_t & self)
 {
     double tmp = self.get().get< 0 >() + self.get().get< 1 >();
     self( tmp);
     double x = self.get().get< 0 >();
     double y = self.get().get< 1 >();
-    return x + y;
+    tmp = x + y;
+    self( tmp);
 }
 
-int * f9( coro_ptr::caller_t & self)
-{ return self.get(); }
+void f9( coro_ptr::caller_t & self)
+{ self( self.get() ); }
 
-int & f10( coro_ref::caller_t & self)
-{ return self.get(); }
+void f10( coro_ref::caller_t & self)
+{ self( self.get() ); }
 
-boost::tuple<int&,int&> f11( coro_tuple::caller_t & self)
+void f11( coro_tuple::caller_t & self)
 {
     boost::tuple<int&,int&> tpl( self.get().get< 0 >(), self.get().get< 1 >() );
-    return tpl;
+    self( tpl);
 }
 
-int f12( coro_int::caller_t & self)
+void f12( coro_int::caller_t & self)
 {
     X x_;
     int tmp = self.get().get< 0 >() + self.get().get< 1 >();
     self( tmp);
-    int x = self.get().get< 0 >();
-    int y = self.get().get< 1 >();
-    value1 = 1;
-    return x + y;
+    tmp = self.get().get< 0 >() + self.get().get< 1 >();
+    self( tmp);
 }
 
 template< typename E >
 void f14( coro_void_void::caller_t & self, E const& e)
 { throw e; }
 
-int f16( coro_int_void::caller_t & self)
+void f16( coro_int_void::caller_t & self)
 {
     self( 1);
     self( 2);
     self( 3);
     self( 4);
-    return 5;
+    self( 5);
 }
 
 void f17( coro_void_int::caller_t & self)
@@ -249,8 +249,10 @@ void test_result_int()
     BOOST_CHECK( coro);
     BOOST_CHECK_EQUAL( 3, result);
     result = coro().get();
-    BOOST_CHECK( ! coro);
+    BOOST_CHECK( coro);
     BOOST_CHECK_EQUAL( 7, result);
+    coro();
+    BOOST_CHECK( ! coro);
 }
 
 void test_result_string()
@@ -261,8 +263,10 @@ void test_result_string()
     BOOST_CHECK( coro);
     BOOST_CHECK_EQUAL( std::string("abc"), result);
     result = coro().get();
-    BOOST_CHECK( ! coro);
+    BOOST_CHECK( coro);
     BOOST_CHECK_EQUAL( std::string("xyz"), result);
+    coro();
+    BOOST_CHECK( ! coro);
 }
 
 void test_arg_int()
@@ -295,8 +299,10 @@ void test_fp()
     BOOST_CHECK( coro);
     BOOST_CHECK_EQUAL( ( double) 10.49, res);
     res = coro( 1.15, 3.14).get();
-    BOOST_CHECK( ! coro);
+    BOOST_CHECK( coro);
     BOOST_CHECK_EQUAL( ( double) 4.29, res);
+    coro( 1.15, 3.14);
+    BOOST_CHECK( ! coro);
 }
 
 void test_ptr()
@@ -305,8 +311,10 @@ void test_ptr()
     BOOST_CHECK( coro);
     int a = 3;
     int * res = coro( & a).get();
-    BOOST_CHECK( ! coro);
+    BOOST_CHECK( coro);
     BOOST_CHECK_EQUAL( & a, res);
+    coro( & a);
+    BOOST_CHECK( ! coro);
 }
 
 void test_ref()
@@ -315,8 +323,10 @@ void test_ref()
     BOOST_CHECK( coro);
     int a = 3;
     int & res = coro( a).get();
-    BOOST_CHECK( ! coro);
+    BOOST_CHECK( coro);
     BOOST_CHECK_EQUAL( & a, & res);
+    coro( a);
+    BOOST_CHECK( ! coro);
 }
 
 void test_tuple()
@@ -325,9 +335,11 @@ void test_tuple()
     BOOST_CHECK( coro);
     int a = 3, b = 7;
     boost::tuple<int&,int&> tpl = coro( a, b).get();
-    BOOST_CHECK( ! coro);
+    BOOST_CHECK( coro);
     BOOST_CHECK_EQUAL( & a, & tpl.get< 0 >() );
     BOOST_CHECK_EQUAL( & b, & tpl.get< 1 >() );
+    coro( a, b);
+    BOOST_CHECK( ! coro);
 }
 
 void test_unwind()
@@ -341,6 +353,7 @@ void test_unwind()
         BOOST_CHECK_EQUAL( ( int) 7, value1);
         BOOST_CHECK( coro);
         BOOST_CHECK_EQUAL( ( int) 10, res);
+        int i;
     }
     BOOST_CHECK_EQUAL( ( int) 0, value1);
 }

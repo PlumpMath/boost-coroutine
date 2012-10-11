@@ -32,6 +32,7 @@ else if [ os.name ] = HPUX
 project boost/coroutine/example
     : requirements
       <library>/boost/context//boost_context
+      <library>/boost/program_options//boost_program_options
       <library>/boost/system//boost_system
       <library>/boost/thread//boost_thread
       <define>BOOST_ALL_NO_LIB=1
@@ -59,18 +60,14 @@ exe parallel
     : parallel.cpp
     ;
 
-exe asio/simple/echo_client
-    : asio/simple/echo_client.cpp
+exe tree
+    : tree.cpp
     ;
 
-exe asio/simple/echo_server
-    : asio/simple/echo_server.cpp
+exe asio/stream_client
+    : asio/stream_client.cpp
     ;
 
-exe asio/stream/dummy_client
-    : asio/stream/dummy_client.cpp
-    ;
-
-exe asio/stream/dummy_server
-    : asio/stream/dummy_server.cpp
+exe asio/stream_server
+    : asio/stream_server.cpp
     ;

@@ -18,6 +18,7 @@
 #include <boost/utility.hpp>
 
 #include <boost/coroutine/attributes.hpp>
+#include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_base_resume.hpp>
 #include <boost/coroutine/detail/exceptions.hpp>
@@ -125,11 +126,13 @@ public:
 
     void unwind_stack() BOOST_NOEXCEPT
     {
+        typedef typename arg< Signature >::type_t   arg_t;
+
         BOOST_ASSERT( ! is_complete() );
 
         flags_ |= flag_unwind_stack;
         context::fcontext_t caller;
-        holder< Result > hldr( & caller, true);
+        holder< arg_t > hldr( & caller, true);
         context::jump_fcontext(
             hldr.ctx, callee_,
             ( intptr_t) & hldr, fpu_preserved == preserve_fpu_);

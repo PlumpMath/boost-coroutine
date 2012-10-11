@@ -16,16 +16,15 @@ typedef boost::coro::coroutine< int() >             coro1_t;
 typedef boost::coro::coroutine< void( int) >        coro2_t;
 typedef boost::range_iterator< coro1_t >::type      iterator_t;
 
-int power( coro2_t & c, int number, int exponent)
+void power( coro2_t & c, int number, int exponent)
 {
     int counter = 0;
     int result = 1;
-    while ( counter++ < exponent - 1)
+    while ( counter++ < exponent)
     {
             result = result * number;
             c( result);
     }
-    return result * number;
 }
 
 int main()
