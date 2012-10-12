@@ -24,6 +24,9 @@ namespace detail {
 template< typename Signature, typename D, typename Result, int arity >
 struct coroutine_get
 {
+    bool has_result() const
+    { return static_cast< D const* >( this)->impl_->result_; }
+
     typename param_type< Result >::type get() const
     {
         BOOST_ASSERT( static_cast< D const* >( this)->impl_->result_);
