@@ -54,8 +54,9 @@ struct coroutine_exec< Signature, D, void, 0, Caller > :
         Caller c( callee, this->preserve_fpu_, static_cast< D const* >( this)->alloc_);
         try
         {
+            D * dp = static_cast< D * >( this);
             context::fcontext_t caller;
-            static_cast< D const* >( this)->fn_( c);
+            dp->fn_( c);
             this->flags_ |= flag_complete;
             callee = c.impl_->callee_;
             BOOST_ASSERT( callee);
@@ -146,14 +147,15 @@ struct coroutine_exec< Signature, D, void, n, Caller > : \
         coroutine_base< Signature, void, n >( arg, attr, alloc, this) \
     {} \
 \
-    void run( context::fcontext_t * callee) \
+    void run( context::fcontext_t * callee, arg_t * arg = 0) \
     { \
 \
         Caller c( callee, this->preserve_fpu_, static_cast< D const* >( this)->alloc_); \
+        if ( arg) c.impl_->result_ = * arg; \
         try \
         { \
             context::fcontext_t caller; \
-            static_cast< D const* >( this)->fn_( c); \
+            static_cast< D * >( this)->fn_( c); \
             this->flags_ |= flag_complete; \
             callee = c.impl_->callee_; \
             BOOST_ASSERT( callee); \
@@ -194,14 +196,15 @@ struct coroutine_exec< Signature, D, Result, n, Caller > : \
         coroutine_base< Signature, Result, n >( arg, attr, alloc, this) \
     {} \
 \
-    void run( context::fcontext_t * callee) \
+    void run( context::fcontext_t * callee, arg_t * arg = 0) \
     { \
 \
         Caller c( callee, this->preserve_fpu_, static_cast< D const* >( this)->alloc_); \
+        if ( arg) c.impl_->result_ = * arg; \
         try \
         { \
             context::fcontext_t caller; \
-            static_cast< D const* >( this)->fn_( c); \
+            static_cast< D * >( this)->fn_( c); \
             holder< Result > hldr_to( & caller); \
             this->flags_ |= flag_complete; \
             callee = c.impl_->callee_; \

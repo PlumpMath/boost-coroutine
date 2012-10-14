@@ -81,7 +81,7 @@ public:
             rethrow_exception( static_cast< D * >( this)->except_);
     }
 
-private:
+protected:
     template< typename X, typename Y, typename Z, int >
     friend struct coroutine_get;
     template< typename X, typename Y, typename Z, int, typename C >
@@ -139,7 +139,7 @@ public:
             rethrow_exception( static_cast< D * >( this)->except_);
     }
 
-private:
+protected:
     template< typename X, typename Y, typename Z, int >
     friend struct coroutine_get;
     template< typename X, typename Y, typename Z, int, typename C >
@@ -206,7 +206,7 @@ public: \
             rethrow_exception( static_cast< D * >( this)->except_); \
     } \
 \
-private: \
+protected: \
     template< typename X, typename Y, typename Z, int > \
     friend struct coroutine_get; \
     template< typename X, typename Y, typename Z, int, typename C > \

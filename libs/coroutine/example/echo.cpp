@@ -21,13 +21,13 @@ void echo( coro_t & self, int i)
 void runit( coro_t & self)
 {
     std::cout << "started! ";
-    for ( int i = 0; i < 10; ++i)
-    {
-        coro_t c( boost::bind( echo, _1, i) );
-        while ( c)
-            c();
-        self();
-    }
+//  for ( int i = 0; i < 10; ++i)
+//  {
+//      coro_t c( boost::bind( echo, _1, i) );
+//      while ( c)
+//          c();
+//      self();
+//  }
 }
 
 int main( int argc, char * argv[])
