@@ -3,7 +3,6 @@
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
-
 #ifndef BOOST_CORO_DETAIL_ARG_H
 #define BOOST_CORO_DETAIL_ARG_H
 
@@ -30,12 +29,6 @@ template<
     typename Signature,
     int arity = function_traits< Signature >::arity >
 struct arg;
-
-template< typename Signature >
-struct arg< Signature, 0 >
-{
-    typedef void    type_t;
-};
 
 template< typename Signature >
 struct arg< Signature, 1 >
