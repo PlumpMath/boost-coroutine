@@ -75,7 +75,7 @@ public:
             static_cast< D * >( this)->callee_,
             ( intptr_t) & hldr_to, fpu_preserved == static_cast< D * >( this)->preserve_fpu_);
         static_cast< D * >( this)->callee_ = hldr_from->ctx;
-        static_cast< D * >( this)->result_ = hldr_from->data;
+        result_ = hldr_from->data;
         if ( hldr_from->force_unwind) throw forced_unwind();
         if ( static_cast< D * >( this)->except_)
             rethrow_exception( static_cast< D * >( this)->except_);
@@ -133,7 +133,7 @@ public:
             static_cast< D * >( this)->callee_,
             ( intptr_t) & hldr_to, fpu_preserved == static_cast< D * >( this)->preserve_fpu_);
         static_cast< D * >( this)->callee_ = hldr_from->ctx;
-        static_cast< D * >( this)->result_ = hldr_from->data;
+        result_ = hldr_from->data;
         if ( hldr_from->force_unwind) throw forced_unwind();
         if ( static_cast< D * >( this)->except_)
             rethrow_exception( static_cast< D * >( this)->except_);
@@ -200,7 +200,7 @@ public: \
             ( intptr_t) & hldr_to, \
             fpu_preserved == static_cast< D * >( this)->preserve_fpu_); \
         static_cast< D * >( this)->callee_ = hldr_from->ctx; \
-        static_cast< D * >( this)->result_ = hldr_from->data; \
+        result_ = hldr_from->data; \
         if ( hldr_from->force_unwind) throw forced_unwind(); \
         if ( static_cast< D * >( this)->except_) \
             rethrow_exception( static_cast< D * >( this)->except_); \

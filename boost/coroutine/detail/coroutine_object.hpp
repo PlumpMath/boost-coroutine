@@ -45,7 +45,8 @@ public:
         coroutine_object<
             Fn, StackAllocator, Allocator, Signature, Result, arity, Caller
         >
-    >::other   allocator_t;
+    >::other                                            allocator_t;
+    typedef typename arg< Signature >::type_t           arg_type;
 
 #ifndef BOOST_NO_RVALUE_REFERENCES
     coroutine_object( Fn && fn, attributes const& attr,
@@ -60,6 +61,23 @@ public:
             arity,
             Caller
         >( attr, stack_alloc),
+        fn_( static_cast< Fn && >( fn) ),
+        stack_alloc_( stack_alloc),
+        alloc_( alloc)
+    {}
+
+    coroutine_object( Fn && fn, arg_type const& arg, attributes const& attr,
+                      StackAllocator const& stack_alloc,
+                      allocator_t const& alloc) :
+        coroutine_exec<
+            Signature,
+            coroutine_object<
+                Fn, StackAllocator, Allocator, Signature, Result, arity, Caller
+            >,
+            Result,
+            arity,
+            Caller
+        >( arg, attr, stack_alloc),
         fn_( static_cast< Fn && >( fn) ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -82,6 +100,23 @@ public:
         alloc_( alloc)
     {}
 
+    coroutine_object( Fn fn, arg_type const& arg, attributes const& attr,
+                      StackAllocator const& stack_alloc,
+                      allocator_t const& alloc) :
+        coroutine_exec<
+            Signature,
+            coroutine_object<
+                Fn, StackAllocator, Allocator, Signature, Result, arity, Caller
+            >,
+            Result,
+            arity,
+            Caller
+        >( arg, attr, stack_alloc),
+        fn_( fn),
+        stack_alloc_( stack_alloc),
+        alloc_( alloc)
+    {}
+
     coroutine_object( BOOST_RV_REF( Fn) fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
@@ -92,6 +127,122 @@ public:
             >,
             Result,
             arity,
+            Caller
+        >( attr, stack_alloc),
+        fn_( fn),
+        stack_alloc_( stack_alloc),
+        alloc_( alloc)
+    {}
+
+    coroutine_object( BOOST_RV_REF( Fn) fn, arg_type const& arg, attributes const& attr,
+                      StackAllocator const& stack_alloc,
+                      allocator_t const& alloc) :
+        coroutine_exec<
+            Signature,
+            coroutine_object<
+                Fn, StackAllocator, Allocator, Signature, Result, arity, Caller
+            >,
+            Result,
+            arity,
+            Caller
+        >( arg, attr, stack_alloc),
+        fn_( fn),
+        stack_alloc_( stack_alloc),
+        alloc_( alloc)
+    {}
+#endif
+
+    ~coroutine_object()
+    { deallocate_stack( stack_alloc_); }
+
+    void deallocate_object()
+    { destroy_( alloc_, this); }
+
+private:
+    template< typename X, typename Y, typename R, int, typename C >
+    friend class coroutine_exec;
+
+    Fn              fn_;
+    StackAllocator  stack_alloc_;
+    allocator_t     alloc_;
+
+    coroutine_object( coroutine_object &);
+    coroutine_object & operator=( coroutine_object const&);
+
+    static void destroy_( allocator_t & alloc, coroutine_object * p)
+    {
+        alloc.destroy( p);
+        alloc.deallocate( p, 1);
+    }
+};
+
+template<
+    typename Fn, typename StackAllocator, typename Allocator,
+    typename Signature, typename Result, typename Caller
+>
+class coroutine_object< Fn, StackAllocator, Allocator, Signature, Result, 0, Caller > :
+    public coroutine_exec<
+        Signature,
+        coroutine_object<
+            Fn, StackAllocator, Allocator, Signature, Result, 0, Caller
+        >,
+        Result,
+        0,
+        Caller
+    >
+{
+public:
+    typedef typename Allocator::template rebind<
+        coroutine_object<
+            Fn, StackAllocator, Allocator, Signature, Result, 0, Caller
+        >
+    >::other                                            allocator_t;
+
+#ifndef BOOST_NO_RVALUE_REFERENCES
+    coroutine_object( Fn && fn, attributes const& attr,
+                      StackAllocator const& stack_alloc,
+                      allocator_t const& alloc) :
+        coroutine_exec<
+            Signature,
+            coroutine_object<
+                Fn, StackAllocator, Allocator, Signature, Result, 0, Caller
+            >,
+            Result,
+            0,
+            Caller
+        >( attr, stack_alloc),
+        fn_( static_cast< Fn && >( fn) ),
+        stack_alloc_( stack_alloc),
+        alloc_( alloc)
+    {}
+#else
+    coroutine_object( Fn fn, attributes const& attr,
+                      StackAllocator const& stack_alloc,
+                      allocator_t const& alloc) :
+        coroutine_exec<
+            Signature,
+            coroutine_object<
+                Fn, StackAllocator, Allocator, Signature, Result, 0, Caller
+            >,
+            Result,
+            0,
+            Caller
+        >( attr, stack_alloc),
+        fn_( fn),
+        stack_alloc_( stack_alloc),
+        alloc_( alloc)
+    {}
+
+    coroutine_object( BOOST_RV_REF( Fn) fn, attributes const& attr,
+                      StackAllocator const& stack_alloc,
+                      allocator_t const& alloc) :
+        coroutine_exec<
+            Signature,
+            coroutine_object<
+                Fn, StackAllocator, Allocator, Signature, Result, 0, Caller
+            >,
+            Result,
+            0,
             Caller
         >( attr, stack_alloc),
         fn_( fn),
@@ -148,6 +299,7 @@ public:
             Fn, StackAllocator, Allocator, Signature, Result, arity, Caller
         >
     >::other   allocator_t;
+    typedef typename arg< Signature >::type_t           arg_type;
 
     coroutine_object( reference_wrapper< Fn > fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
@@ -159,6 +311,89 @@ public:
             >,
             Result,
             arity,
+            Caller
+        >( attr, stack_alloc),
+        fn_( fn),
+        stack_alloc_( stack_alloc),
+        alloc_( alloc)
+    {}
+
+    coroutine_object( reference_wrapper< Fn > fn, arg_type const& arg, attributes const& attr,
+                      StackAllocator const& stack_alloc,
+                      allocator_t const& alloc) :
+        coroutine_exec<
+            Signature,
+            coroutine_object<
+                Fn, StackAllocator, Allocator, Signature, Result, arity, Caller
+            >,
+            Result,
+            arity,
+            Caller
+        >( arg, attr, stack_alloc),
+        fn_( fn),
+        stack_alloc_( stack_alloc),
+        alloc_( alloc)
+    {}
+
+    ~coroutine_object()
+    { deallocate_stack( stack_alloc_); }
+
+    void deallocate_object()
+    { destroy_( alloc_, this); }
+
+private:
+    template< typename X, typename Y, typename R, int, typename C >
+    friend class coroutine_exec;
+
+    Fn              fn_;
+    StackAllocator  stack_alloc_;
+    allocator_t     alloc_;
+
+    coroutine_object( coroutine_object &);
+    coroutine_object & operator=( coroutine_object const&);
+
+    static void destroy_( allocator_t & alloc, coroutine_object * p)
+    {
+        alloc.destroy( p);
+        alloc.deallocate( p, 1);
+    }
+};
+
+template<
+    typename Fn, typename StackAllocator, typename Allocator,
+    typename Signature, typename Result, typename Caller
+>
+class coroutine_object<
+        reference_wrapper< Fn >, StackAllocator,
+        Allocator, Signature, Result, 0, Caller
+    > :
+    public coroutine_exec<
+        Signature,
+        coroutine_object<
+            Fn, StackAllocator, Allocator, Signature, Result, 0, Caller
+        >,
+        Result,
+        0,
+        Caller
+    >
+{
+public:
+    typedef typename Allocator::template rebind<
+        coroutine_object<
+            Fn, StackAllocator, Allocator, Signature, Result, 0, Caller
+        >
+    >::other   allocator_t;
+
+    coroutine_object( reference_wrapper< Fn > fn, attributes const& attr,
+                      StackAllocator const& stack_alloc,
+                      allocator_t const& alloc) :
+        coroutine_exec<
+            Signature,
+            coroutine_object<
+                Fn, StackAllocator, Allocator, Signature, Result, 0, Caller
+            >,
+            Result,
+            0,
             Caller
         >( attr, stack_alloc),
         fn_( fn),
@@ -214,6 +449,7 @@ public:
             Fn, StackAllocator, Allocator, Signature, Result, arity, Caller
         >
     >::other   allocator_t;
+    typedef typename arg< Signature >::type_t           arg_type;
 
     coroutine_object( const reference_wrapper< Fn > fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
@@ -225,6 +461,89 @@ public:
             >,
             Result,
             arity,
+            Caller
+        >( attr, stack_alloc),
+        fn_( fn),
+        stack_alloc_( stack_alloc),
+        alloc_( alloc)
+    {}
+
+    coroutine_object( const reference_wrapper< Fn > fn, arg_type const& arg, attributes const& attr,
+                      StackAllocator const& stack_alloc,
+                      allocator_t const& alloc) :
+        coroutine_exec<
+            Signature,
+            coroutine_object<
+                Fn, StackAllocator, Allocator, Signature, Result, arity, Caller
+            >,
+            Result,
+            arity,
+            Caller
+        >( arg, attr, stack_alloc),
+        fn_( fn),
+        stack_alloc_( stack_alloc),
+        alloc_( alloc)
+    {}
+
+    ~coroutine_object()
+    { deallocate_stack( stack_alloc_); }
+
+    void deallocate_object()
+    { destroy_( alloc_, this); }
+
+private:
+    template< typename X, typename Y, typename R, int, typename C >
+    friend class coroutine_exec;
+
+    Fn              fn_;
+    StackAllocator  stack_alloc_;
+    allocator_t     alloc_;
+
+    coroutine_object( coroutine_object &);
+    coroutine_object & operator=( coroutine_object const&);
+
+    static void destroy_( allocator_t const& alloc, coroutine_object * p)
+    {
+        alloc.destroy( p);
+        alloc.deallocate( p, 1);
+    }
+};
+
+template<
+    typename Fn, typename StackAllocator, typename Allocator,
+    typename Signature, typename Result, typename Caller
+>
+class coroutine_object<
+        const reference_wrapper< Fn >, StackAllocator,
+        Allocator, Signature, Result, 0, Caller
+    > :
+    public coroutine_exec<
+        Signature,
+        coroutine_object<
+            Fn, StackAllocator, Allocator, Signature, Result, 0, Caller
+        >,
+        Result,
+        0,
+        Caller
+    >
+{
+public:
+    typedef typename Allocator::template rebind<
+        coroutine_object<
+            Fn, StackAllocator, Allocator, Signature, Result, 0, Caller
+        >
+    >::other   allocator_t;
+
+    coroutine_object( const reference_wrapper< Fn > fn, attributes const& attr,
+                      StackAllocator const& stack_alloc,
+                      allocator_t const& alloc) :
+        coroutine_exec<
+            Signature,
+            coroutine_object<
+                Fn, StackAllocator, Allocator, Signature, Result, 0, Caller
+            >,
+            Result,
+            0,
             Caller
         >( attr, stack_alloc),
         fn_( fn),

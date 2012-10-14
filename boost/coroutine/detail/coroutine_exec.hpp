@@ -51,10 +51,6 @@ struct coroutine_exec< Signature, D, void, 0, Caller > :
 
     void run( context::fcontext_t * callee)
     {
-        holder< void > * hldr_from = ( holder< void > *) context::jump_fcontext(
-                this->callee_, callee, ( intptr_t) this->callee_, this->preserve_fpu_);
-        callee = hldr_from->ctx;
-
         Caller c( callee, this->preserve_fpu_, static_cast< D const* >( this)->alloc_);
         try
         {
@@ -96,10 +92,6 @@ struct coroutine_exec< Signature, D, Result, 0, Caller > :
 
     void run( context::fcontext_t * callee)
     {
-        holder< void > * hldr_from = ( holder< void > *) context::jump_fcontext(
-                this->callee_, callee, ( intptr_t) this->callee_, this->preserve_fpu_);
-        callee = hldr_from->ctx;
-
         Caller c( callee, this->preserve_fpu_, static_cast< D const* >( this)->alloc_);
         try
         {
@@ -144,14 +136,20 @@ struct coroutine_exec< Signature, D, void, n, Caller > : \
 { \
     typedef typename arg< Signature >::type_t   arg_t; \
 \
+    template< typename StackAllocator > \
+    coroutine_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT : \
+        coroutine_base< Signature, void, n >( attr, alloc, this) \
+    {} \
+\
+    template< typename StackAllocator > \
+    coroutine_exec( arg_t const& arg, attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT : \
+        coroutine_base< Signature, void, n >( arg, attr, alloc, this) \
+    {} \
+\
     void run( context::fcontext_t * callee) \
     { \
-        holder< arg_t > * hldr_from = ( holder< arg_t > *) context::jump_fcontext( \
-                this->callee_, callee, ( intptr_t) this->callee_, this->preserve_fpu_); \
-        callee = hldr_from->ctx; \
 \
         Caller c( callee, this->preserve_fpu_, static_cast< D const* >( this)->alloc_); \
-        c.impl_->result_ = hldr_from->data; \
         try \
         { \
             context::fcontext_t caller; \
@@ -178,11 +176,6 @@ struct coroutine_exec< Signature, D, void, n, Caller > : \
                 ( intptr_t) & caller, fpu_preserved == this->preserve_fpu_); \
         BOOST_ASSERT_MSG( false, "coroutine is complete"); \
     } \
-\
-    template< typename StackAllocator > \
-    coroutine_exec( attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT : \
-        coroutine_base< Signature, void, n >( attr, alloc, this) \
-    {} \
 }; \
 \
 template< typename Signature, typename D, typename Result, typename Caller > \
@@ -196,14 +189,15 @@ struct coroutine_exec< Signature, D, Result, n, Caller > : \
         coroutine_base< Signature, Result, n >( attr, alloc, this) \
     {} \
 \
+    template< typename StackAllocator > \
+    coroutine_exec( arg_t const& arg, attributes const& attr, StackAllocator const& alloc) BOOST_NOEXCEPT : \
+        coroutine_base< Signature, Result, n >( arg, attr, alloc, this) \
+    {} \
+\
     void run( context::fcontext_t * callee) \
     { \
-        holder< arg_t > * hldr_from = ( holder< arg_t > *) context::jump_fcontext( \
-                this->callee_, callee, ( intptr_t) this->callee_, this->preserve_fpu_); \
-        callee = hldr_from->ctx; \
 \
         Caller c( callee, this->preserve_fpu_, static_cast< D const* >( this)->alloc_); \
-        c.impl_->result_ = hldr_from->data; \
         try \
         { \
             context::fcontext_t caller; \
