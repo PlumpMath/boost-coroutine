@@ -38,6 +38,7 @@ typedef coro::coroutine< void(int) > coro_void_int;
 typedef coro::coroutine< void(std::string const&) > coro_void_string;
 typedef coro::coroutine< double(double,double) > coro_double;
 typedef coro::coroutine< int(int,int) > coro_int;
+typedef coro::coroutine< int(int) > coro_int_int;
 typedef coro::coroutine< int*(int*) > coro_ptr;
 typedef coro::coroutine< int&(int&) > coro_ref;
 typedef coro::coroutine< boost::tuple<int&,int&>(int&,int&) > coro_tuple;
@@ -185,6 +186,19 @@ void f17( coro_void_int::caller_t & self, std::vector< int > & vec)
     {
         vec.push_back( x);
         x = self().get();
+    }
+}
+
+void f18( coro_int_int::caller_t & self)
+{
+    if ( self.has_result() )
+    {
+        int x = self.get();
+        self( x + 1);
+    }
+    else
+    {
+        self( -1);
     }
 }
 
@@ -344,7 +358,6 @@ void test_unwind()
         BOOST_CHECK_EQUAL( ( int) 7, value1);
         BOOST_CHECK( coro);
         BOOST_CHECK_EQUAL( ( int) 10, res);
-        int i;
     }
     BOOST_CHECK_EQUAL( ( int) 0, value1);
 }
@@ -422,6 +435,28 @@ void test_input_iterator()
     BOOST_CHECK_EQUAL( ( int)4, vec[4] );
 }
 
+void test_pre()
+{
+    coro_int_int coro( f18, 0);
+    BOOST_CHECK( coro);
+    int res = coro.get();
+    BOOST_CHECK_EQUAL( ( int) 1, res);
+    BOOST_CHECK( coro);
+    coro( -1);
+    BOOST_CHECK( ! coro);
+}
+
+void test_post()
+{
+    coro_int_int coro( f18);
+    BOOST_CHECK( coro);
+    int res = coro.get();
+    BOOST_CHECK_EQUAL( ( int) -1, res);
+    BOOST_CHECK( coro);
+    coro( -1);
+    BOOST_CHECK( ! coro);
+}
+
 
 boost::unit_test::test_suite * init_unit_test_suite( int, char* [])
 {
@@ -431,6 +466,8 @@ boost::unit_test::test_suite * init_unit_test_suite( int, char* [])
     test->add( BOOST_TEST_CASE( & test_move) );
     test->add( BOOST_TEST_CASE( & test_complete) );
     test->add( BOOST_TEST_CASE( & test_jump) );
+    test->add( BOOST_TEST_CASE( & test_pre) );
+    test->add( BOOST_TEST_CASE( & test_post) );
     test->add( BOOST_TEST_CASE( & test_result_int) );
     test->add( BOOST_TEST_CASE( & test_result_string) );
     test->add( BOOST_TEST_CASE( & test_arg_int) );
