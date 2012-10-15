@@ -25,7 +25,6 @@
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/coroutine_base.hpp>
-#include <boost/coroutine/detail/coroutine_exec.hpp>
 #include <boost/coroutine/detail/coroutine_get.hpp>
 #include <boost/coroutine/detail/coroutine_object.hpp>
 #include <boost/coroutine/detail/coroutine_op.hpp>
@@ -84,12 +83,12 @@ private:
      >                                                          base_t;
     typedef typename base_t::ptr_t                              ptr_t;
 
-    template< typename X, typename Y, typename Z, int, typename C >
-    friend struct detail::coroutine_exec;
     template< typename X, typename Y, typename Z, int >
     friend struct detail::coroutine_get;
     template< typename X, typename Y, typename Z, int >
     friend struct detail::coroutine_op;
+    template< typename X, typename Y, typename Z, typename A, typename B, int, typename C >
+    friend class detail::coroutine_object;
 
     struct dummy
     { void nonnull() {} };
@@ -516,12 +515,12 @@ private:
      >                                                          base_t;
     typedef typename base_t::ptr_t                              ptr_t;
 
-    template< typename X, typename Y, typename Z, int, typename C >
-    friend struct detail::coroutine_exec;
     template< typename X, typename Y, typename Z, int >
     friend struct detail::coroutine_get;
     template< typename X, typename Y, typename Z, int >
     friend struct detail::coroutine_op;
+    template< typename X, typename Y, typename Z, typename A, typename B, int, typename C >
+    friend class detail::coroutine_object;
 
     struct dummy
     { void nonnull() {} };
@@ -622,7 +621,7 @@ public:
     }
 
     template< typename Fn >
-    coroutine( Fn && fn, arg_type const& arg, attributes const& attr = attributes(),
+    coroutine( Fn && fn, arg_type arg, attributes const& attr = attributes(),
             context::guarded_stack_allocator const& stack_alloc =
                 context::guarded_stack_allocator(),
             std::allocator< coroutine > const& alloc =
@@ -693,7 +692,7 @@ public:
     }
 
     template< typename Fn, typename StackAllocator >
-    coroutine( Fn && fn, arg_type const& arg, attributes const& attr,
+    coroutine( Fn && fn, arg_type arg, attributes const& attr,
                StackAllocator const& stack_alloc,
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >() ) :
@@ -762,7 +761,7 @@ public:
     }
 
     template< typename Fn, typename StackAllocator, typename Allocator >
-    coroutine( Fn && fn, arg_type const& arg, attributes const& attr,
+    coroutine( Fn && fn, arg_type arg, attributes const& attr,
                StackAllocator const& stack_alloc,
                Allocator const& alloc) :
         detail::coroutine_op<
@@ -831,7 +830,7 @@ public:
     }
 
     template< typename Fn >
-    coroutine( Fn fn, arg_type const& arg, attributes const& attr = attributes(),
+    coroutine( Fn fn, arg_type arg, attributes const& attr = attributes(),
                context::guarded_stack_allocator const& stack_alloc =
                     context::guarded_stack_allocator(),
                std::allocator< coroutine > const& alloc =
@@ -1106,7 +1105,6 @@ struct range_mutable_iterator< coro::coroutine< Signature > >
 template< typename Signature >
 struct range_const_iterator< coro::coroutine< Signature > >
 { typedef typename coro::coroutine< Signature >::const_iterator type; };
-
 
 }
 

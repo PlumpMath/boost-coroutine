@@ -63,21 +63,26 @@ struct coroutine_op< Signature, D, Result, 0 >
         D               *   dp_;
         optional< Result >  val_;
 
-        void increment_()
+        void fetch_()
         {
             BOOST_ASSERT( dp_);
 
-            if ( * dp_)
+            if ( ! dp_->has_result() )
             {
-                ( * dp_)();
-                if ( ! ( * dp_) )
-                {
-                    dp_ = 0;
-                    val_ = none;
-                    return;
-                }
-                val_ = dp_->get();
+                dp_ = 0;
+                val_ = none;
+                return;
             }
+            val_ = dp_->get();
+        }
+
+        void increment_()
+        {
+            BOOST_ASSERT( dp_);
+            BOOST_ASSERT( * dp_);
+
+            ( * dp_)();
+            fetch_();
         }
 
     public:
@@ -90,7 +95,7 @@ struct coroutine_op< Signature, D, Result, 0 >
 
         explicit iterator( D * dp) :
             dp_( dp), val_()
-        { increment_(); }
+        { fetch_(); }
 
         iterator( iterator const& other) :
             dp_( other.dp_), val_( other.val_)
@@ -129,21 +134,26 @@ struct coroutine_op< Signature, D, Result, 0 >
         D                       *   dp_;
         optional< const Result >    val_;
 
-        void increment_()
+        void fetch_()
         {
             BOOST_ASSERT( dp_);
 
-            if ( * dp_)
+            if ( ! dp_->has_result() )
             {
-                ( * dp_)();
-                if ( ! ( * dp_) )
-                {
-                    dp_ = 0;
-                    val_ = none;
-                    return;
-                }
-                val_ = dp_->get();
+                dp_ = 0;
+                val_ = none;
+                return;
             }
+            val_ = dp_->get();
+        }
+
+        void increment_()
+        {
+            BOOST_ASSERT( dp_);
+            BOOST_ASSERT( * dp_);
+
+            ( * dp_)();
+            fetch_();
         }
 
     public:
@@ -156,7 +166,7 @@ struct coroutine_op< Signature, D, Result, 0 >
 
         explicit const_iterator( D * dp) :
             dp_( dp), val_()
-        { increment_(); }
+        { fetch_(); }
 
         const_iterator( const_iterator const& other) :
             dp_( other.dp_), val_( other.val_)

@@ -48,12 +48,12 @@ project boost/coroutine/example
       <link>static
     ;
 
-exe power
-    : power.cpp
-    ;
-
 exe echo
     : echo.cpp
+    ;
+
+exe power
+    : power.cpp
     ;
 
 exe parallel

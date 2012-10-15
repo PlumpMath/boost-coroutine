@@ -84,8 +84,6 @@ public:
 protected:
     template< typename X, typename Y, typename Z, int >
     friend struct coroutine_get;
-    template< typename X, typename Y, typename Z, int, typename C >
-    friend struct coroutine_exec;
 
     optional< Result >  result_;
 };
@@ -142,8 +140,6 @@ public:
 protected:
     template< typename X, typename Y, typename Z, int >
     friend struct coroutine_get;
-    template< typename X, typename Y, typename Z, int, typename C >
-    friend struct coroutine_exec;
 
     optional< Result >  result_;
 };
@@ -209,8 +205,6 @@ public: \
 protected: \
     template< typename X, typename Y, typename Z, int > \
     friend struct coroutine_get; \
-    template< typename X, typename Y, typename Z, int, typename C > \
-    friend struct coroutine_exec; \
 \
     optional< Result >  result_; \
 };
