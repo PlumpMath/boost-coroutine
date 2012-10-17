@@ -119,13 +119,13 @@
     </para>
     <para>
       The first argument of <emphasis>coroutine-function</emphasis> must be a reference
-      of type <emphasis>coroutine&lt;&gt;::caller_t</emphasis>, used for yielding the
+      of type <emphasis>coroutine&lt;&gt;::caller_type</emphasis>, used for yielding the
       active coroutine.
     </para>
     
 <programlisting><phrase role="keyword">typedef</phrase> <phrase role="identifier">boost</phrase><phrase role="special">::</phrase><phrase role="identifier">coro</phrase><phrase role="special">::</phrase><phrase role="identifier">coroutine</phrase><phrase role="special">&lt;</phrase> <phrase role="keyword">void</phrase><phrase role="special">(</phrase><phrase role="keyword">int</phrase><phrase role="special">)</phrase> <phrase role="special">&gt;</phrase> <phrase role="identifier">coro_t</phrase><phrase role="special">;</phrase>
 
-<phrase role="keyword">void</phrase> <phrase role="identifier">f</phrase><phrase role="special">(</phrase> <phrase role="identifier">coro_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_t</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">i</phrase><phrase role="special">)</phrase>
+<phrase role="keyword">void</phrase> <phrase role="identifier">f</phrase><phrase role="special">(</phrase> <phrase role="identifier">coro_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_type</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">i</phrase><phrase role="special">)</phrase>
 <phrase role="special">{</phrase>
     <phrase role="special">...</phrase>
     <phrase role="identifier">self</phrase><phrase role="special">.</phrase><phrase role="identifier">yield</phrase><phrase role="special">();</phrase>
@@ -149,8 +149,8 @@
       The first invocation of <emphasis>coroutine&lt;&gt;::operator()()</emphasis>
       invokes the <emphasis>coroutine-function</emphasis> in a newly created coroutine
       complete with registers, flags, stack and instruction pointer. When control
-      should be returned to the original calling routine, call <emphasis>coroutine&lt;&gt;::caller_t::yield()</emphasis>
-      or <emphasis>coroutine&lt;&gt;::caller_t::yield_break()</emphasis>. The current
+      should be returned to the original calling routine, call <emphasis>coroutine&lt;&gt;::caller_type::yield()</emphasis>
+      or <emphasis>coroutine&lt;&gt;::caller_type::yield_break()</emphasis>. The current
       coroutine information (registers, flags, and stack and instruction pointer)
       is saved and the original context information is restored. Calling <emphasis>coroutine&lt;&gt;::operator()()</emphasis>
       resumes execution in the coroutine after saving the new state of the original
@@ -159,7 +159,7 @@
     
 <programlisting><phrase role="keyword">typedef</phrase> <phrase role="identifier">boost</phrase><phrase role="special">::</phrase><phrase role="identifier">coro</phrase><phrase role="special">::</phrase><phrase role="identifier">coroutine</phrase><phrase role="special">&lt;</phrase> <phrase role="keyword">void</phrase><phrase role="special">()</phrase> <phrase role="special">&gt;</phrase> <phrase role="identifier">coro_t</phrase><phrase role="special">;</phrase>
 
-<phrase role="keyword">void</phrase> <phrase role="identifier">fn</phrase><phrase role="special">(</phrase> <phrase role="identifier">coro_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_t</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">j</phrase><phrase role="special">)</phrase>
+<phrase role="keyword">void</phrase> <phrase role="identifier">fn</phrase><phrase role="special">(</phrase> <phrase role="identifier">coro_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_type</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">j</phrase><phrase role="special">)</phrase>
 <phrase role="special">{</phrase>
     <phrase role="keyword">for</phrase><phrase role="special">(</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">i</phrase> <phrase role="special">=</phrase> <phrase role="number">0</phrase><phrase role="special">;</phrase> <phrase role="identifier">i</phrase> <phrase role="special">&lt;</phrase> <phrase role="identifier">j</phrase><phrase role="special">;</phrase> <phrase role="special">++</phrase><phrase role="identifier">i</phrase><phrase role="special">)</phrase>
     <phrase role="special">{</phrase>
@@ -237,7 +237,7 @@
     </para>
     <note>
       <para>
-        <emphasis>coroutine&lt;&gt;::caller_t</emphasis> is not part of <emphasis>Signature</emphasis>
+        <emphasis>coroutine&lt;&gt;::caller_type</emphasis> is not part of <emphasis>Signature</emphasis>
         and is always expected to be the first argument of <emphasis>coroutine-function</emphasis>.
       </para>
     </note>
@@ -245,21 +245,21 @@
       <emphasis>coroutine&lt;&gt;::operator()()</emphasis> accepts arguments as defined
       in <emphasis>Signature</emphasis> and has the same return type. The arguments
       passed to <emphasis>coroutine&lt;&gt;::operator()()</emphasis>, in one coroutine,
-      is returned (as a boost::tuple) by <emphasis>coroutine&lt;&gt;::caller_t::yield()</emphasis>
+      is returned (as a boost::tuple) by <emphasis>coroutine&lt;&gt;::caller_type::yield()</emphasis>
       in the other coroutine or, if it is the first call to <emphasis>coroutine&lt;&gt;::operator()()</emphasis>
       (<emphasis>coroutine</emphasis> was not started), the <emphasis>coroutine-function</emphasis>
       will be entered and the arguments are passed to <emphasis>coroutine-function</emphasis>
       on entry.
     </para>
     <para>
-      The value given to <emphasis>coroutine&lt;&gt;::caller_t::yield()</emphasis>,
+      The value given to <emphasis>coroutine&lt;&gt;::caller_type::yield()</emphasis>,
       in one coroutine, is returned by <emphasis>coroutine&lt;&gt;::operator()()</emphasis>
       in the other routine.
     </para>
     
 <programlisting><phrase role="keyword">typedef</phrase> <phrase role="identifier">boost</phrase><phrase role="special">::</phrase><phrase role="identifier">coro</phrase><phrase role="special">::</phrase><phrase role="identifier">coroutine</phrase><phrase role="special">&lt;</phrase> <phrase role="keyword">int</phrase><phrase role="special">(</phrase> <phrase role="keyword">int</phrase><phrase role="special">)</phrase> <phrase role="special">&gt;</phrase>    <phrase role="identifier">coro_t</phrase><phrase role="special">;</phrase>
 
-<phrase role="keyword">int</phrase> <phrase role="identifier">fn</phrase><phrase role="special">(</phrase> <phrase role="identifier">coro_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_t</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">i</phrase><phrase role="special">)</phrase>
+<phrase role="keyword">int</phrase> <phrase role="identifier">fn</phrase><phrase role="special">(</phrase> <phrase role="identifier">coro_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_type</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">i</phrase><phrase role="special">)</phrase>
 <phrase role="special">{</phrase>
     <phrase role="identifier">std</phrase><phrase role="special">::</phrase><phrase role="identifier">cout</phrase> <phrase role="special">&lt;&lt;</phrase> <phrase role="string">&quot;fn(): local variable i == &quot;</phrase> <phrase role="special">&lt;&lt;</phrase> <phrase role="identifier">i</phrase> <phrase role="special">&lt;&lt;</phrase> <phrase role="identifier">std</phrase><phrase role="special">::</phrase><phrase role="identifier">endl</phrase><phrase role="special">;</phrase>
 
@@ -305,14 +305,14 @@
     </bridgehead>
     <para>
       If <emphasis>coroutine-function</emphasis> has more than one argument <emphasis>coroutine&lt;&gt;::operator()()</emphasis>
-      has the same size of arguments and <emphasis>coroutine&lt;&gt;::caller_t::yield()</emphasis>
+      has the same size of arguments and <emphasis>coroutine&lt;&gt;::caller_type::yield()</emphasis>
       returns a <emphasis>boost::tuple</emphasis> coresponding to the arguments of
       <emphasis>Signature</emphasis>.
     </para>
     
 <programlisting><phrase role="keyword">typedef</phrase> <phrase role="identifier">boost</phrase><phrase role="special">::</phrase><phrase role="identifier">coro</phrase><phrase role="special">::</phrase><phrase role="identifier">coroutine</phrase><phrase role="special">&lt;</phrase> <phrase role="keyword">int</phrase><phrase role="special">(</phrase><phrase role="keyword">int</phrase><phrase role="special">,</phrase><phrase role="keyword">int</phrase><phrase role="special">)</phrase> <phrase role="special">&gt;</phrase> <phrase role="identifier">coro_t</phrase><phrase role="special">;</phrase>
 
-<phrase role="keyword">int</phrase> <phrase role="identifier">fn</phrase><phrase role="special">(</phrase> <phrase role="identifier">coro_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_t</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">a</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">b</phrase><phrase role="special">)</phrase>
+<phrase role="keyword">int</phrase> <phrase role="identifier">fn</phrase><phrase role="special">(</phrase> <phrase role="identifier">coro_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_type</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">a</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">b</phrase><phrase role="special">)</phrase>
 <phrase role="special">{</phrase>
     <phrase role="keyword">int</phrase> <phrase role="identifier">tmp</phrase> <phrase role="special">=</phrase> <phrase role="identifier">a</phrase> <phrase role="special">+</phrase> <phrase role="identifier">b</phrase><phrase role="special">;</phrase>
     <phrase role="identifier">boost</phrase><phrase role="special">::</phrase><phrase role="identifier">tuple</phrase><phrase role="special">&lt;</phrase> <phrase role="keyword">int</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="special">&gt;</phrase> <phrase role="identifier">ret</phrase> <phrase role="special">=</phrase> <phrase role="identifier">self</phrase><phrase role="special">.</phrase><phrase role="identifier">yield</phrase><phrase role="special">(</phrase> <phrase role="identifier">tmp</phrase><phrase role="special">);</phrase>
@@ -347,14 +347,14 @@
       a <emphasis>coroutine-function</emphasis></link>
     </bridgehead>
     <para>
-      <emphasis>coroutine&lt;&gt;::caller_t::yield_break()</emphasis> does not take
+      <emphasis>coroutine&lt;&gt;::caller_type::yield_break()</emphasis> does not take
       arguments and returns nothing, it leaves the current <emphasis>coroutine</emphasis>
       and jumps back to the calling routine throwing an exception of type <emphasis>coroutine_terminated</emphasis>.
     </para>
     
 <programlisting><phrase role="keyword">typedef</phrase> <phrase role="identifier">boost</phrase><phrase role="special">::</phrase><phrase role="identifier">coro</phrase><phrase role="special">::</phrase><phrase role="identifier">coroutine</phrase><phrase role="special">&lt;</phrase> <phrase role="keyword">int</phrase><phrase role="special">(</phrase><phrase role="keyword">int</phrase><phrase role="special">,</phrase><phrase role="keyword">int</phrase><phrase role="special">)</phrase> <phrase role="special">&gt;</phrase> <phrase role="identifier">coro_t</phrase><phrase role="special">;</phrase>
 
-<phrase role="keyword">int</phrase> <phrase role="identifier">fn</phrase><phrase role="special">(</phrase> <phrase role="identifier">coro_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_t</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">a</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">b</phrase><phrase role="special">)</phrase>
+<phrase role="keyword">int</phrase> <phrase role="identifier">fn</phrase><phrase role="special">(</phrase> <phrase role="identifier">coro_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_type</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">a</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">b</phrase><phrase role="special">)</phrase>
 <phrase role="special">{</phrase>
     <phrase role="keyword">int</phrase> <phrase role="identifier">tmp</phrase> <phrase role="special">=</phrase> <phrase role="identifier">a</phrase> <phrase role="special">+</phrase> <phrase role="identifier">b</phrase><phrase role="special">;</phrase>
     <phrase role="identifier">boost</phrase><phrase role="special">::</phrase><phrase role="identifier">tuple</phrase><phrase role="special">&lt;</phrase> <phrase role="keyword">int</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="special">&gt;</phrase> <phrase role="identifier">ret</phrase> <phrase role="special">=</phrase> <phrase role="identifier">self</phrase><phrase role="special">.</phrase><phrase role="identifier">yield</phrase><phrase role="special">(</phrase> <phrase role="identifier">tmp</phrase><phrase role="special">);</phrase>
@@ -392,7 +392,7 @@
 </programlisting>
     <important>
       <para>
-        After calling <emphasis>coroutine&lt;&gt;::caller_t::yield_break()</emphasis>
+        After calling <emphasis>coroutine&lt;&gt;::caller_type::yield_break()</emphasis>
         the <emphasis>coroutine</emphasis> is complete (can not resumed with <emphasis>coroutine&lt;&gt;::operator()()</emphasis>).
       </para>
     </important>
@@ -562,7 +562,7 @@
 <phrase role="keyword">class</phrase> <phrase role="identifier">coroutine</phrase><phrase role="special">&lt;</phrase> <phrase role="identifier">R</phrase> <phrase role="special">(</phrase> <phrase role="identifier">ArgTypes</phrase><phrase role="special">...)&gt;</phrase>
 <phrase role="special">{</phrase>
 <phrase role="keyword">public</phrase><phrase role="special">:</phrase>
-    <phrase role="keyword">class</phrase> <phrase role="identifier">caller_t</phrase>
+    <phrase role="keyword">class</phrase> <phrase role="identifier">caller_type</phrase>
     <phrase role="special">{</phrase>
     <phrase role="keyword">public</phrase><phrase role="special">:</phrase>
         <phrase role="identifier">tuple</phrase><phrase role="special">&lt;</phrase> <phrase role="identifier">ArgTypes</phrase><phrase role="special">...</phrase> <phrase role="special">&gt;</phrase> <phrase role="identifier">yield</phrase><phrase role="special">(</phrase> <phrase role="identifier">R</phrase><phrase role="special">);</phrase>
@@ -934,7 +934,7 @@
             <para>
               <emphasis>coroutine-function</emphasis> is entered and the arguments
               are passed to the <emphasis>coroutine</emphasis>. The return value
-              is the argument passed to <emphasis>coroutine&lt;&gt;::caller_t::yield()</emphasis>.
+              is the argument passed to <emphasis>coroutine&lt;&gt;::caller_type::yield()</emphasis>.
             </para>
           </listitem>
         </varlistentry>
@@ -942,16 +942,16 @@
           <term>Throws:</term>
           <listitem>
             <para>
-              <emphasis>coroutine_terminated</emphasis> if <emphasis>coroutine&lt;&gt;::caller_t::yield_break()</emphasis>
+              <emphasis>coroutine_terminated</emphasis> if <emphasis>coroutine&lt;&gt;::caller_type::yield_break()</emphasis>
               was called or other exceptions thrown inside <emphasis>coroutine-function</emphasis>.
             </para>
           </listitem>
         </varlistentry>
       </variablelist>
-      <anchor id="coroutine.coroutine.coroutine._code__phrase_role__identifier__t__phrase___phrase_role__identifier__caller_t__phrase__phrase_role__special______phrase__phrase_role__identifier__yield__phrase__phrase_role__special_____phrase___phrase_role__identifier__r__phrase__phrase_role__special_____phrase___code_"/>
+      <anchor id="coroutine.coroutine.coroutine._code__phrase_role__identifier__t__phrase___phrase_role__identifier__caller_type__phrase__phrase_role__special______phrase__phrase_role__identifier__yield__phrase__phrase_role__special_____phrase___phrase_role__identifier__r__phrase__phrase_role__special_____phrase___code_"/>
       <bridgehead renderas="sect4">
-        <link linkend="coroutine.coroutine.coroutine._code__phrase_role__identifier__t__phrase___phrase_role__identifier__caller_t__phrase__phrase_role__special______phrase__phrase_role__identifier__yield__phrase__phrase_role__special_____phrase___phrase_role__identifier__r__phrase__phrase_role__special_____phrase___code_"><code><phrase
-        role="identifier">T</phrase> <phrase role="identifier">caller_t</phrase><phrase
+        <link linkend="coroutine.coroutine.coroutine._code__phrase_role__identifier__t__phrase___phrase_role__identifier__caller_type__phrase__phrase_role__special______phrase__phrase_role__identifier__yield__phrase__phrase_role__special_____phrase___phrase_role__identifier__r__phrase__phrase_role__special_____phrase___code_"><code><phrase
+        role="identifier">T</phrase> <phrase role="identifier">caller_type</phrase><phrase
         role="special">::</phrase><phrase role="identifier">yield</phrase><phrase
         role="special">(</phrase> <phrase role="identifier">R</phrase><phrase role="special">)</phrase></code></link>
       </bridgehead>
@@ -976,10 +976,10 @@
           </listitem>
         </varlistentry>
       </variablelist>
-      <anchor id="coroutine.coroutine.coroutine._code__phrase_role__keyword__void__phrase___phrase_role__identifier__caller_t__phrase__phrase_role__special______phrase__phrase_role__identifier__yield_break__phrase__phrase_role__special______phrase___code_"/>
+      <anchor id="coroutine.coroutine.coroutine._code__phrase_role__keyword__void__phrase___phrase_role__identifier__caller_type__phrase__phrase_role__special______phrase__phrase_role__identifier__yield_break__phrase__phrase_role__special______phrase___code_"/>
       <bridgehead renderas="sect4">
-        <link linkend="coroutine.coroutine.coroutine._code__phrase_role__keyword__void__phrase___phrase_role__identifier__caller_t__phrase__phrase_role__special______phrase__phrase_role__identifier__yield_break__phrase__phrase_role__special______phrase___code_"><code><phrase
-        role="keyword">void</phrase> <phrase role="identifier">caller_t</phrase><phrase
+        <link linkend="coroutine.coroutine.coroutine._code__phrase_role__keyword__void__phrase___phrase_role__identifier__caller_type__phrase__phrase_role__special______phrase__phrase_role__identifier__yield_break__phrase__phrase_role__special______phrase___code_"><code><phrase
+        role="keyword">void</phrase> <phrase role="identifier">caller_type</phrase><phrase
         role="special">::</phrase><phrase role="identifier">yield_break</phrase><phrase
         role="special">()</phrase></code></link>
       </bridgehead>
@@ -1039,7 +1039,7 @@
 <phrase role="special">{</phrase>
 <phrase role="keyword">private</phrase><phrase role="special">:</phrase>
     <phrase role="comment">// handle input
-</phrase>    <phrase role="keyword">void</phrase> <phrase role="identifier">handle_read_</phrase><phrase role="special">(</phrase> <phrase role="identifier">coro_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_t</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">,</phrase> <phrase role="identifier">boost</phrase><phrase role="special">::</phrase><phrase role="identifier">system</phrase><phrase role="special">::</phrase><phrase role="identifier">error_code</phrase> <phrase role="keyword">const</phrase><phrase role="special">&amp;</phrase> <phrase role="identifier">ec</phrase><phrase role="special">,</phrase> <phrase role="identifier">std</phrase><phrase role="special">::</phrase><phrase role="identifier">size_t</phrase> <phrase role="identifier">n</phrase><phrase role="special">)</phrase>
+</phrase>    <phrase role="keyword">void</phrase> <phrase role="identifier">handle_read_</phrase><phrase role="special">(</phrase> <phrase role="identifier">coro_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_type</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">,</phrase> <phrase role="identifier">boost</phrase><phrase role="special">::</phrase><phrase role="identifier">system</phrase><phrase role="special">::</phrase><phrase role="identifier">error_code</phrase> <phrase role="keyword">const</phrase><phrase role="special">&amp;</phrase> <phrase role="identifier">ec</phrase><phrase role="special">,</phrase> <phrase role="identifier">std</phrase><phrase role="special">::</phrase><phrase role="identifier">size_t</phrase> <phrase role="identifier">n</phrase><phrase role="special">)</phrase>
     <phrase role="special">{</phrase>
         <phrase role="keyword">if</phrase> <phrase role="special">(</phrase> <phrase role="special">!</phrase> <phrase role="identifier">ec</phrase><phrase role="special">)</phrase>
         <phrase role="special">{</phrase>
@@ -1149,7 +1149,7 @@
 
     <phrase role="identifier">boost</phrase><phrase role="special">::</phrase><phrase role="identifier">asio</phrase><phrase role="special">::</phrase><phrase role="identifier">ip</phrase><phrase role="special">::</phrase><phrase role="identifier">tcp</phrase><phrase role="special">::</phrase><phrase role="identifier">socket</phrase>    <phrase role="special">&amp;</phrase>   <phrase role="identifier">s_</phrase><phrase role="special">;</phrase>
     <phrase role="identifier">coro_t</phrase>                          <phrase role="special">&amp;</phrase>   <phrase role="identifier">coro_</phrase><phrase role="special">;</phrase>
-    <phrase role="identifier">coro_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_t</phrase>                  <phrase role="special">&amp;</phrase>   <phrase role="identifier">self_</phrase><phrase role="special">;</phrase>
+    <phrase role="identifier">coro_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_type</phrase>                  <phrase role="special">&amp;</phrase>   <phrase role="identifier">self_</phrase><phrase role="special">;</phrase>
     <phrase role="keyword">char</phrase>                                <phrase role="identifier">buffer_</phrase><phrase role="special">[</phrase><phrase role="identifier">bf_size</phrase><phrase role="special">];</phrase>
 
 <phrase role="keyword">protected</phrase><phrase role="special">:</phrase>
@@ -1168,7 +1168,7 @@
     <phrase role="identifier">inbuf</phrase><phrase role="special">(</phrase>
             <phrase role="identifier">boost</phrase><phrase role="special">::</phrase><phrase role="identifier">asio</phrase><phrase role="special">::</phrase><phrase role="identifier">ip</phrase><phrase role="special">::</phrase><phrase role="identifier">tcp</phrase><phrase role="special">::</phrase><phrase role="identifier">socket</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">s</phrase><phrase role="special">,</phrase>
             <phrase role="identifier">coro_t</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">coro</phrase><phrase role="special">,</phrase>
-            <phrase role="identifier">coro_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_t</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">)</phrase> <phrase role="special">:</phrase>
+            <phrase role="identifier">coro_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_type</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">)</phrase> <phrase role="special">:</phrase>
         <phrase role="identifier">s_</phrase><phrase role="special">(</phrase> <phrase role="identifier">s</phrase><phrase role="special">),</phrase> <phrase role="identifier">coro_</phrase><phrase role="special">(</phrase> <phrase role="identifier">coro</phrase><phrase role="special">),</phrase> <phrase role="identifier">self_</phrase><phrase role="special">(</phrase> <phrase role="identifier">self</phrase><phrase role="special">),</phrase> <phrase role="identifier">buffer_</phrase><phrase role="special">()</phrase>
     <phrase role="special">{</phrase> <phrase role="identifier">setg</phrase><phrase role="special">(</phrase> <phrase role="identifier">buffer_</phrase> <phrase role="special">+</phrase> <phrase role="number">4</phrase><phrase role="special">,</phrase> <phrase role="identifier">buffer_</phrase> <phrase role="special">+</phrase> <phrase role="number">4</phrase><phrase role="special">,</phrase> <phrase role="identifier">buffer_</phrase> <phrase role="special">+</phrase> <phrase role="number">4</phrase><phrase role="special">);</phrase> <phrase role="special">}</phrase>
 <phrase role="special">};</phrase>
@@ -1249,13 +1249,13 @@
     </para>
     <para>
       The first argument of <emphasis>generator-function</emphasis> must be of type
-      <emphasis>generator&lt;&gt;::caller_t</emphasis>, used for yielding the active
+      <emphasis>generator&lt;&gt;::caller_type</emphasis>, used for yielding the active
       generator.
     </para>
     
 <programlisting><phrase role="keyword">typedef</phrase> <phrase role="identifier">boost</phrase><phrase role="special">::</phrase><phrase role="identifier">coro</phrase><phrase role="special">::</phrase><phrase role="identifier">generator</phrase><phrase role="special">&lt;</phrase> <phrase role="keyword">int</phrase> <phrase role="special">&gt;</phrase> <phrase role="identifier">gen_t</phrase><phrase role="special">;</phrase>
 
-<phrase role="keyword">void</phrase> <phrase role="identifier">f</phrase><phrase role="special">(</phrase> <phrase role="identifier">gen_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_t</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">)</phrase>
+<phrase role="keyword">void</phrase> <phrase role="identifier">f</phrase><phrase role="special">(</phrase> <phrase role="identifier">gen_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_type</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">)</phrase>
 <phrase role="special">{</phrase>
     <phrase role="special">...</phrase>
     <phrase role="identifier">self</phrase><phrase role="special">.</phrase><phrase role="identifier">yield</phrase><phrase role="special">(</phrase> <phrase role="number">11</phrase><phrase role="special">);</phrase>
@@ -1267,7 +1267,7 @@
 </programlisting>
     <para>
       <emphasis>generator-function</emphasis> must return <code><phrase role="keyword">void</phrase></code>
-      and accept one parameter of type <code><emphasis>generator&lt;&gt;::caller_t</emphasis></code>.
+      and accept one parameter of type <code><emphasis>generator&lt;&gt;::caller_type</emphasis></code>.
       Use <code><phrase role="identifier">boost</phrase><phrase role="special">::</phrase><phrase
       role="identifier">bind</phrase><phrase role="special">()</phrase></code> if
       it is required to passed additional parameters to <emphasis>generator-function</emphasis>
@@ -1277,19 +1277,19 @@
     </para>
     <para>
       Usally a <emphasis>generator</emphasis> is called inside loops. The <emphasis>generator-function</emphasis>
-      executed until <emphasis>generator&lt;&gt;::caller_t::yield()</emphasis> is called.
-      The value passed to <emphasis>generator&lt;&gt;::caller_t::yield()</emphasis>
+      executed until <emphasis>generator&lt;&gt;::caller_type::yield()</emphasis> is called.
+      The value passed to <emphasis>generator&lt;&gt;::caller_type::yield()</emphasis>
       is used as the generated value. The next time the same <emphasis>generator</emphasis>
       is called in a subsequent iteration, the execution of the <emphasis>generator-function</emphasis>
-      is resumed after <emphasis>generator&lt;&gt;::caller_t::yield()</emphasis>, until
-      <emphasis>generator&lt;&gt;::caller_t::yield()</emphasis> is called again. <emphasis>generator-function</emphasis>
-      can be terminated by <emphasis>generator&lt;&gt;::caller_t::yield_break()</emphasis>,
+      is resumed after <emphasis>generator&lt;&gt;::caller_type::yield()</emphasis>, until
+      <emphasis>generator&lt;&gt;::caller_type::yield()</emphasis> is called again. <emphasis>generator-function</emphasis>
+      can be terminated by <emphasis>generator&lt;&gt;::caller_type::yield_break()</emphasis>,
       at which time the loop enclosing the <emphasis>generator</emphasis> is terminated.
     </para>
     
 <programlisting><phrase role="keyword">typedef</phrase> <phrase role="identifier">boost</phrase><phrase role="special">::</phrase><phrase role="identifier">coro</phrase><phrase role="special">::</phrase><phrase role="identifier">generator</phrase><phrase role="special">&lt;</phrase> <phrase role="keyword">int</phrase> <phrase role="special">&gt;</phrase>    <phrase role="identifier">gen_t</phrase><phrase role="special">;</phrase>
 
-<phrase role="keyword">void</phrase> <phrase role="identifier">power</phrase><phrase role="special">(</phrase> <phrase role="identifier">gen_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_t</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">number</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">exponent</phrase><phrase role="special">)</phrase>
+<phrase role="keyword">void</phrase> <phrase role="identifier">power</phrase><phrase role="special">(</phrase> <phrase role="identifier">gen_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_type</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">number</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">exponent</phrase><phrase role="special">)</phrase>
 <phrase role="special">{</phrase>
     <phrase role="keyword">int</phrase> <phrase role="identifier">counter</phrase> <phrase role="special">=</phrase> <phrase role="number">0</phrase><phrase role="special">,</phrase> <phrase role="identifier">result</phrase> <phrase role="special">=</phrase> <phrase role="number">1</phrase><phrase role="special">;</phrase>
     <phrase role="keyword">while</phrase> <phrase role="special">(</phrase> <phrase role="identifier">counter</phrase><phrase role="special">++</phrase> <phrase role="special">&lt;</phrase> <phrase role="identifier">exponent</phrase><phrase role="special">)</phrase>
@@ -1327,7 +1327,7 @@
     
 <programlisting><phrase role="keyword">typedef</phrase> <phrase role="identifier">boost</phrase><phrase role="special">::</phrase><phrase role="identifier">coro</phrase><phrase role="special">::</phrase><phrase role="identifier">generator</phrase><phrase role="special">&lt;</phrase> <phrase role="keyword">int</phrase> <phrase role="special">&gt;</phrase> <phrase role="identifier">gen_t</phrase><phrase role="special">;</phrase>
 
-<phrase role="keyword">void</phrase> <phrase role="identifier">fn</phrase><phrase role="special">(</phrase> <phrase role="identifier">gen_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_t</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">j</phrase><phrase role="special">)</phrase>
+<phrase role="keyword">void</phrase> <phrase role="identifier">fn</phrase><phrase role="special">(</phrase> <phrase role="identifier">gen_t</phrase><phrase role="special">::</phrase><phrase role="identifier">caller_type</phrase> <phrase role="special">&amp;</phrase> <phrase role="identifier">self</phrase><phrase role="special">,</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">j</phrase><phrase role="special">)</phrase>
 <phrase role="special">{</phrase>
     <phrase role="keyword">for</phrase><phrase role="special">(</phrase> <phrase role="keyword">int</phrase> <phrase role="identifier">i</phrase> <phrase role="special">=</phrase> <phrase role="number">0</phrase><phrase role="special">;</phrase> <phrase role="identifier">i</phrase> <phrase role="special">&lt;</phrase> <phrase role="identifier">j</phrase><phrase role="special">;</phrase> <phrase role="special">++</phrase><phrase role="identifier">i</phrase><phrase role="special">)</phrase>
     <phrase role="special">{</phrase>
@@ -1487,7 +1487,7 @@
 <phrase role="keyword">class</phrase> <phrase role="identifier">generator</phrase>
 <phrase role="special">{</phrase>
 <phrase role="keyword">public</phrase><phrase role="special">:</phrase>
-    <phrase role="keyword">class</phrase> <phrase role="identifier">caller_t</phrase>
+    <phrase role="keyword">class</phrase> <phrase role="identifier">caller_type</phrase>
     <phrase role="special">{</phrase>
     <phrase role="keyword">public</phrase><phrase role="special">:</phrase>
         <phrase role="keyword">void</phrase> <phrase role="identifier">yield</phrase><phrase role="special">(</phrase> <phrase role="identifier">R</phrase><phrase role="special">);</phrase>
@@ -1814,7 +1814,7 @@
           <term>Effects:</term>
           <listitem>
             <para>
-              The return value is the argument passed to <emphasis>generator&lt;&gt;::caller_t::yield()</emphasis>.
+              The return value is the argument passed to <emphasis>generator&lt;&gt;::caller_type::yield()</emphasis>.
             </para>
           </listitem>
         </varlistentry>
@@ -1827,10 +1827,10 @@
           </listitem>
         </varlistentry>
       </variablelist>
-      <anchor id="coroutine.generator.generator._code__phrase_role__keyword__void__phrase___phrase_role__identifier__caller_t__phrase__phrase_role__special______phrase__phrase_role__identifier__yield__phrase__phrase_role__special_____phrase___phrase_role__identifier__r__phrase__phrase_role__special_____phrase___code_"/>
+      <anchor id="coroutine.generator.generator._code__phrase_role__keyword__void__phrase___phrase_role__identifier__caller_type__phrase__phrase_role__special______phrase__phrase_role__identifier__yield__phrase__phrase_role__special_____phrase___phrase_role__identifier__r__phrase__phrase_role__special_____phrase___code_"/>
       <bridgehead renderas="sect4">
-        <link linkend="coroutine.generator.generator._code__phrase_role__keyword__void__phrase___phrase_role__identifier__caller_t__phrase__phrase_role__special______phrase__phrase_role__identifier__yield__phrase__phrase_role__special_____phrase___phrase_role__identifier__r__phrase__phrase_role__special_____phrase___code_"><code><phrase
-        role="keyword">void</phrase> <phrase role="identifier">caller_t</phrase><phrase
+        <link linkend="coroutine.generator.generator._code__phrase_role__keyword__void__phrase___phrase_role__identifier__caller_type__phrase__phrase_role__special______phrase__phrase_role__identifier__yield__phrase__phrase_role__special_____phrase___phrase_role__identifier__r__phrase__phrase_role__special_____phrase___code_"><code><phrase
+        role="keyword">void</phrase> <phrase role="identifier">caller_type</phrase><phrase
         role="special">::</phrase><phrase role="identifier">yield</phrase><phrase
         role="special">(</phrase> <phrase role="identifier">R</phrase><phrase role="special">)</phrase></code></link>
       </bridgehead>

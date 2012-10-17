@@ -12,7 +12,7 @@
 
 typedef boost::coro::coroutine< void() > coroutine_t;
 
-void first( coroutine_t::caller_t & self)
+void first( coroutine_t::caller_type & self)
 {
     std::cout << "started first! ";
     for ( int i = 0; i < 10; ++i)
@@ -22,7 +22,7 @@ void first( coroutine_t::caller_t & self)
     }
 }
 
-void second( coroutine_t::caller_t & self)
+void second( coroutine_t::caller_type & self)
 {
     std::cout << "started second! ";
     for ( int i = 0; i < 10; ++i)

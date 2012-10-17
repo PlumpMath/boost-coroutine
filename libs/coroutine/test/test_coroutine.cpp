@@ -59,7 +59,7 @@ public:
         i_( i)
     {}
 
-    void operator()( coro_int_void::caller_t &)
+    void operator()( coro_int_void::caller_type &)
     {}
 };
 
@@ -96,32 +96,32 @@ public:
         return * this;
     }
 
-    void operator()( coro_int_void::caller_t &)
+    void operator()( coro_int_void::caller_type &)
     {}
 };
 
 struct my_exception {};
 
-void f1( coro_void_void::caller_t & s)
+void f1( coro_void_void::caller_type & s)
 { s(); }
 
-void f2( coro_void_void::caller_t &)
+void f2( coro_void_void::caller_type &)
 { ++value1; }
 
-void f3( coro_void_void::caller_t & self)
+void f3( coro_void_void::caller_type & self)
 {
     ++value1;
     self();
     ++value1;
 }
 
-void f4( coro_int_void::caller_t & self)
+void f4( coro_int_void::caller_type & self)
 {
     self( 3);
     self( 7);
 }
 
-void f5( coro_string_void::caller_t & self)
+void f5( coro_string_void::caller_type & self)
 {
     std::string res("abc");
     self( res);
@@ -129,13 +129,13 @@ void f5( coro_string_void::caller_t & self)
     self( res);
 }
 
-void f6( coro_void_int::caller_t & self)
+void f6( coro_void_int::caller_type & self)
 { value1 = self.get(); }
 
-void f7( coro_void_string::caller_t & self)
+void f7( coro_void_string::caller_type & self)
 { value2 = self.get(); }
 
-void f8( coro_double::caller_t & self)
+void f8( coro_double::caller_type & self)
 {
     double x = 0, y = 0;
     boost::tie( x, y) = self.get();
@@ -144,19 +144,19 @@ void f8( coro_double::caller_t & self)
     self( x + y);
 }
 
-void f9( coro_ptr::caller_t & self)
+void f9( coro_ptr::caller_type & self)
 { self( self.get() ); }
 
-void f10( coro_ref::caller_t & self)
+void f10( coro_ref::caller_type & self)
 { self( self.get() ); }
 
-void f11( coro_tuple::caller_t & self)
+void f11( coro_tuple::caller_type & self)
 {
     boost::tuple<int&,int&> tpl( self.get().get< 0 >(), self.get().get< 1 >() );
     self( tpl);
 }
 
-void f12( coro_int::caller_t & self)
+void f12( coro_int::caller_type & self)
 {
     X x_;
     int x, y;
@@ -167,10 +167,10 @@ void f12( coro_int::caller_t & self)
 }
 
 template< typename E >
-void f14( coro_void_void::caller_t & self, E const& e)
+void f14( coro_void_void::caller_type & self, E const& e)
 { throw e; }
 
-void f16( coro_int_void::caller_t & self)
+void f16( coro_int_void::caller_type & self)
 {
     self( 1);
     self( 2);
@@ -179,7 +179,7 @@ void f16( coro_int_void::caller_t & self)
     self( 5);
 }
 
-void f17( coro_void_int::caller_t & self, std::vector< int > & vec)
+void f17( coro_void_int::caller_type & self, std::vector< int > & vec)
 {
     int x = self.get();
     while ( 5 > x)
@@ -189,7 +189,7 @@ void f17( coro_void_int::caller_t & self, std::vector< int > & vec)
     }
 }
 
-void f18( coro_int_int::caller_t & self)
+void f18( coro_int_int::caller_type & self)
 {
     if ( self.has_result() )
     {

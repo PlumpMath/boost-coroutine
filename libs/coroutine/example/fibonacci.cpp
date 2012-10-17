@@ -14,7 +14,7 @@
 typedef boost::coro::coroutine< int() >         coro_t;
 typedef boost::range_iterator< coro_t >::type   iterator_t;
 
-void fibonacci( coro_t::caller_t & c)
+void fibonacci( coro_t::caller_type & c)
 {
     int first = 1, second = 1;
     while ( true)

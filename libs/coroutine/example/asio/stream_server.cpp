@@ -60,7 +60,7 @@ private:
 
     boost::asio::ip::tcp::socket      &   s_;
     coro_t                            &   coro_;
-    coro_t::caller_t                  &   self_;
+    coro_t::caller_type                  &   self_;
     char                                  buffer_[bf_size];
 
 protected:
@@ -79,7 +79,7 @@ public:
     inbuf(
             boost::asio::ip::tcp::socket & s,
             coro_t & coro,
-            coro_t::caller_t & self) :
+            coro_t::caller_type & self) :
         s_( s), coro_( coro), self_( self), buffer_()
     { setg( buffer_ + 4, buffer_ + 4, buffer_ + 4); }
 };
@@ -88,7 +88,7 @@ const std::streamsize inbuf::pb_size = 4;
 class session : private boost::noncopyable
 {
 private:
-    void handle_read_( coro_t::caller_t & self)
+    void handle_read_( coro_t::caller_type & self)
     {
         if ( ! self.get().get< 0 >() )
         {

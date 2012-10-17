@@ -96,10 +96,10 @@ typedef boost::coro::coroutine< leaf&() > coro_t;
 class tree_visitor : public visitor
 {
 private:
-    coro_t::caller_t  &   c_;
+    coro_t::caller_type  &   c_;
 
 public:
-    tree_visitor( coro_t::caller_t & c) :
+    tree_visitor( coro_t::caller_type & c) :
         c_( c)
     {}
 
@@ -113,7 +113,7 @@ public:
     { c_( l); }
 };
 
-void enumerate_leafs( coro_t::caller_t & c, node::ptr_t root)
+void enumerate_leafs( coro_t::caller_type & c, node::ptr_t root)
 {
     tree_visitor v( c);
     root->accept( v);

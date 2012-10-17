@@ -46,7 +46,7 @@ used for yielding the active coroutine.
 
         typedef boost::coro::coroutine< void(int) > coro_t;
 
-        void f( coro_t::caller_t & self, int i)
+        void f( coro_t::caller_type & self, int i)
         {
             ...
             self.yield();
@@ -72,7 +72,7 @@ original routine.
 
         typedef boost::coro::coroutine< void() > coro_t;
 
-        void fn( coro_t::caller_t & self, int j)
+        void fn( coro_t::caller_type & self, int j)
         {
             for( int i = 0; i < j; ++i)
             {
@@ -154,7 +154,7 @@ the other routine.
 
         typedef boost::coro::coroutine< int( int) >    coro_t;
 
-        int fn( coro_t::caller_t & self, int i)
+        int fn( coro_t::caller_type & self, int i)
         {
             std::cout << "fn(): local variable i == " << i << std::endl;
 
@@ -202,7 +202,7 @@ arguments of __signature__.
 
         typedef boost::coro::coroutine< int(int,int) > coro_t;
 
-        int fn( coro_t::caller_t & self, int a, int b)
+        int fn( coro_t::caller_type & self, int a, int b)
         {
             int tmp = a + b;
             boost::tuple< int, int > ret = self.yield( tmp);
@@ -239,7 +239,7 @@ type __terminated_ex__.
 
         typedef boost::coro::coroutine< int(int,int) > coro_t;
 
-        int fn( coro_t::caller_t & self, int a, int b)
+        int fn( coro_t::caller_type & self, int a, int b)
         {
             int tmp = a + b;
             boost::tuple< int, int > ret = self.yield( tmp);
@@ -407,7 +407,7 @@ fpu registers for performance reasons.
     class coroutine< R ( ArgTypes...)>
     {
     public:
-        class caller_t
+        class caller_type
         {
         public:
             tuple< ArgTypes... > yield( R);
@@ -533,7 +533,7 @@ __coro__. The return value is the argument passed to __coro_yield__.]]
 exceptions thrown inside __coro_fn__.]]
 ]
 
-[heading `T caller_t::yield( R)`]
+[heading `T caller_type::yield( R)`]
 [variablelist
 [[Effects:] [Gives execution control back to calling context by returning
 a value of type R. The return type of this function is a __tuple__ containing
@@ -541,7 +541,7 @@ the arguments passed to __coro_op__.]]
 [[Throws:] [Nothing.]]
 ]
 
-[heading `void caller_t::yield_break()`]
+[heading `void caller_type::yield_break()`]
 [variablelist
 [[Effects:] [Gives execution control back to calling context and sets the 
 __coro__ to be complete. __coro_op__ in the other coroutine throws exception

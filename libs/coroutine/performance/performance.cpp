@@ -34,7 +34,7 @@ typedef coro::coroutine< void() >   coro_t;
 #define CALL_COROUTINE(z,n,unused) \
     c();
 
-void fn( coro_t::caller_t & c)
+void fn( coro_t::caller_type & c)
 { while ( true) c(); }
 
 #ifdef BOOST_CONTEXT_CYCLE

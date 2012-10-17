@@ -105,7 +105,7 @@ public:
         Signature,
         typename function_traits< Signature >::result_type,
         0
-    >::type                                                     caller_t;
+    >::type                                                     caller_type;
 
     coroutine() BOOST_NOEXCEPT :
         detail::coroutine_op<
@@ -178,7 +178,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 0,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -213,7 +213,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 0,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -247,7 +247,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 0,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -283,7 +283,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 0,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -317,7 +317,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 0,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -350,7 +350,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 0,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -385,7 +385,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 0,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -419,7 +419,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 0,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -452,7 +452,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 0,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -537,7 +537,7 @@ public:
         Signature,
         typename function_traits< Signature >::result_type,
         function_traits< Signature >::arity
-    >::type                                                     caller_t;
+    >::type                                                     caller_type;
     typedef typename detail::arg< Signature >::type             arg_type;
 
     coroutine() BOOST_NOEXCEPT :
@@ -611,7 +611,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -647,7 +647,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -682,7 +682,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -717,7 +717,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -751,7 +751,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -785,7 +785,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -821,7 +821,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -856,7 +856,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -890,7 +890,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -923,7 +923,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -958,7 +958,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -992,7 +992,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -1025,7 +1025,7 @@ public:
                 Signature,
                 typename function_traits< Signature >::result_type,
                 function_traits< Signature >::arity,
-                caller_t
+                caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
