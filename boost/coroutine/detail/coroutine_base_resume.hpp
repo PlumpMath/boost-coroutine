@@ -164,7 +164,7 @@ struct coroutine_base_resume< Signature, D, void, n > \
         BOOST_ASSERT( static_cast< D * >( this)->callee_); \
 \
         context::fcontext_t caller; \
-        holder< arg_type > hldr_to( & caller, arg_t(BOOST_COROUTINE_BASE_RESUME_VALS(n) ) ); \
+        holder< arg_type > hldr_to( & caller, arg_type(BOOST_COROUTINE_BASE_RESUME_VALS(n) ) ); \
         holder< void > * hldr_from = ( holder< void > *) context::jump_fcontext( \
             hldr_to.ctx, \
             static_cast< D * >( this)->callee_, \

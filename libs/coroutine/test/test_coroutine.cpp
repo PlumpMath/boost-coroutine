@@ -298,7 +298,7 @@ void test_arg_string()
 
 void test_fp()
 {
-    coro_double coro( f8, coro_double::arg_type( 7.35, 3.14) );
+    coro_double coro( f8, coro_double::arguments( 7.35, 3.14) );
     BOOST_CHECK( coro);
     double res = coro.get();
     BOOST_CHECK( coro);
@@ -337,7 +337,7 @@ void test_ref()
 void test_tuple()
 {
     int a = 3, b = 7;
-    coro_tuple coro( f11, coro_tuple::arg_type( a, b) );
+    coro_tuple coro( f11, coro_tuple::arguments( a, b) );
     BOOST_CHECK( coro);
     boost::tuple<int&,int&> tpl = coro.get();
     BOOST_CHECK( coro);
@@ -352,7 +352,7 @@ void test_unwind()
     value1 = 0;
     {
         BOOST_CHECK_EQUAL( ( int) 0, value1);
-        coro_int coro( f12, coro_int::arg_type( 3, 7) );
+        coro_int coro( f12, coro_int::arguments( 3, 7) );
         BOOST_CHECK( coro);
         int res = coro.get();
         BOOST_CHECK_EQUAL( ( int) 7, value1);
@@ -369,7 +369,7 @@ void test_no_unwind()
         BOOST_CHECK_EQUAL( ( int) 0, value1);
         coro_int coro(
             f12,
-            coro_int::arg_type( 3, 7),
+            coro_int::arguments( 3, 7),
             coro::attributes(
                 ctx::guarded_stack_allocator::default_stacksize(),
                 coro::no_stack_unwind) );

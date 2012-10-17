@@ -44,19 +44,19 @@ struct caller;
 
 template< template< class, int > class C, typename Signature >
 struct caller< C, Signature, void, 0 >
-{ typedef C< void(), 0 >   type; };
+{ typedef C< void(), 0 > type; };
 
 template< template< class, int > class C, typename Signature, typename Result >
 struct caller< C, Signature, Result, 0 >
-{ typedef C< void( Result), 1 >   type; };
+{ typedef C< void( Result), 1 > type; };
 
 template< template< class, int > class C, typename Signature, int arity >
 struct caller< C, Signature, void, arity >
-{ typedef C< typename detail::arg< Signature >::type(), 0 >   type; };
+{ typedef C< typename detail::arg< Signature >::type(), 0 > type; };
 
 template< template< class, int > class C, typename Signature, typename Result, int arity >
 struct caller
-{ typedef C< typename detail::arg< Signature >::type( Result), 1 >   type; };
+{ typedef C< typename detail::arg< Signature >::type( Result), 1 > type; };
 
 }
 
@@ -538,7 +538,7 @@ public:
         typename function_traits< Signature >::result_type,
         function_traits< Signature >::arity
     >::type                                                     caller_type;
-    typedef typename detail::arg< Signature >::type             arg_type;
+    typedef typename detail::arg< Signature >::type             arguments;
 
     coroutine() BOOST_NOEXCEPT :
         detail::coroutine_op<
@@ -621,7 +621,7 @@ public:
     }
 
     template< typename Fn >
-    coroutine( Fn && fn, arg_type arg, attributes const& attr = attributes(),
+    coroutine( Fn && fn, arguments arg, attributes const& attr = attributes(),
             context::guarded_stack_allocator const& stack_alloc =
                 context::guarded_stack_allocator(),
             std::allocator< coroutine > const& alloc =
@@ -692,7 +692,7 @@ public:
     }
 
     template< typename Fn, typename StackAllocator >
-    coroutine( Fn && fn, arg_type arg, attributes const& attr,
+    coroutine( Fn && fn, arguments arg, attributes const& attr,
                StackAllocator const& stack_alloc,
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >() ) :
@@ -761,7 +761,7 @@ public:
     }
 
     template< typename Fn, typename StackAllocator, typename Allocator >
-    coroutine( Fn && fn, arg_type arg, attributes const& attr,
+    coroutine( Fn && fn, arguments arg, attributes const& attr,
                StackAllocator const& stack_alloc,
                Allocator const& alloc) :
         detail::coroutine_op<
@@ -830,7 +830,7 @@ public:
     }
 
     template< typename Fn >
-    coroutine( Fn fn, arg_type arg, attributes const& attr = attributes(),
+    coroutine( Fn fn, arguments arg, attributes const& attr = attributes(),
                context::guarded_stack_allocator const& stack_alloc =
                     context::guarded_stack_allocator(),
                std::allocator< coroutine > const& alloc =
