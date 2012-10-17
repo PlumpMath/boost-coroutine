@@ -52,11 +52,11 @@ struct caller< C, Signature, Result, 0 >
 
 template< template< class, int > class C, typename Signature, int arity >
 struct caller< C, Signature, void, arity >
-{ typedef C< typename detail::arg< Signature >::type_t(), 0 >   type; };
+{ typedef C< typename detail::arg< Signature >::type(), 0 >   type; };
 
 template< template< class, int > class C, typename Signature, typename Result, int arity >
 struct caller
-{ typedef C< typename detail::arg< Signature >::type_t( Result), 1 >   type; };
+{ typedef C< typename detail::arg< Signature >::type( Result), 1 >   type; };
 
 }
 
@@ -538,7 +538,7 @@ public:
         typename function_traits< Signature >::result_type,
         function_traits< Signature >::arity
     >::type                                                     caller_t;
-    typedef typename detail::arg< Signature >::type_t           arg_type;
+    typedef typename detail::arg< Signature >::type             arg_type;
 
     coroutine() BOOST_NOEXCEPT :
         detail::coroutine_op<

@@ -257,8 +257,8 @@ class coroutine_base< Signature, void, arity > : private noncopyable,
                        >
 {
 public:
-    typedef intrusive_ptr< coroutine_base >      ptr_t;
-    typedef typename arg< Signature >::type_t    arg_type;
+    typedef intrusive_ptr< coroutine_base >     ptr_t;
+    typedef typename arg< Signature >::type     arg_type;
 
 private:
     template< typename X, typename Y, typename Z, int >
@@ -362,8 +362,8 @@ class coroutine_base : private noncopyable,
                        >
 {
 public:
-    typedef intrusive_ptr< coroutine_base >      ptr_t;
-    typedef typename arg< Signature >::type_t    arg_type;
+    typedef intrusive_ptr< coroutine_base >     ptr_t;
+    typedef typename arg< Signature >::type     arg_type;
 
 private:
     template< typename X, typename Y, typename Z, int >

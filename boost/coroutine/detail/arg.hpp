@@ -33,7 +33,7 @@ struct arg;
 template< typename Signature >
 struct arg< Signature, 1 >
 {
-    typedef typename function_traits< Signature >::arg1_type    type_t;
+    typedef typename function_traits< Signature >::arg1_type    type;
 };
 
 #define BOOST_CONTEXT_TUPLE_COMMA(n) BOOST_PP_COMMA_IF(BOOST_PP_SUB(n,1))
@@ -44,7 +44,7 @@ struct arg< Signature, 1 >
 template< typename Signature > \
 struct arg< Signature, n > \
 { \
-    typedef tuple< BOOST_CONTEXT_TUPLE_TYPES(n) >   type_t; \
+    typedef tuple< BOOST_CONTEXT_TUPLE_TYPES(n) >   type; \
 };
 BOOST_PP_REPEAT_FROM_TO(2,11,BOOST_CONTEXT_TUPLE,~)
 #undef BOOST_CONTEXT_TUPLE

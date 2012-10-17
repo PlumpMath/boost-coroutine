@@ -13,7 +13,6 @@
 #include <boost/mpl/equal_to.hpp>
 #include <boost/mpl/int.hpp>
 
-#include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_base.hpp>
 #include <boost/coroutine/detail/exceptions.hpp>

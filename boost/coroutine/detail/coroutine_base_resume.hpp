@@ -91,16 +91,16 @@ protected:
 template< typename Signature, typename D >
 struct coroutine_base_resume< Signature, D, void, 1 >
 {
-    typedef typename arg< Signature >::type_t   arg_t;
+    typedef typename arg< Signature >::type     arg_type;
 
-    void resume( arg_t a1)
+    void resume( arg_type a1)
     {
         BOOST_ASSERT( static_cast< D * >( this));
         BOOST_ASSERT( ! static_cast< D * >( this)->is_complete() );
         BOOST_ASSERT( static_cast< D * >( this)->callee_);
 
         context::fcontext_t caller;
-        holder< arg_t > hldr_to( & caller, a1);
+        holder< arg_type > hldr_to( & caller, a1);
         holder< void > * hldr_from = ( holder< void > *) context::jump_fcontext(
             hldr_to.ctx,
             static_cast< D * >( this)->callee_,
@@ -116,16 +116,16 @@ template< typename Signature, typename D, typename Result >
 class coroutine_base_resume< Signature, D, Result, 1 >
 {
 public:
-    typedef typename arg< Signature >::type_t   arg_t;
+    typedef typename arg< Signature >::type     arg_type;
 
-    void resume( arg_t a1)
+    void resume( arg_type a1)
     {
         BOOST_ASSERT( static_cast< D * >( this));
         BOOST_ASSERT( ! static_cast< D * >( this)->is_complete() );
         BOOST_ASSERT( static_cast< D * >( this)->callee_);
 
         context::fcontext_t caller;
-        holder< arg_t > hldr_to( & caller, a1); 
+        holder< arg_type > hldr_to( & caller, a1);
         holder< Result > * hldr_from = ( holder< Result > *) context::jump_fcontext(
             hldr_to.ctx,
             static_cast< D * >( this)->callee_,
@@ -155,7 +155,7 @@ protected:
 template< typename Signature, typename D > \
 struct coroutine_base_resume< Signature, D, void, n > \
 { \
-    typedef typename arg< Signature >::type_t   arg_t; \
+    typedef typename arg< Signature >::type     arg_type; \
 \
     void resume( BOOST_COROUTINE_BASE_RESUME_ARGS(n)) \
     { \
@@ -164,7 +164,7 @@ struct coroutine_base_resume< Signature, D, void, n > \
         BOOST_ASSERT( static_cast< D * >( this)->callee_); \
 \
         context::fcontext_t caller; \
-        holder< arg_t > hldr_to( & caller, arg_t(BOOST_COROUTINE_BASE_RESUME_VALS(n) ) ); \
+        holder< arg_type > hldr_to( & caller, arg_t(BOOST_COROUTINE_BASE_RESUME_VALS(n) ) ); \
         holder< void > * hldr_from = ( holder< void > *) context::jump_fcontext( \
             hldr_to.ctx, \
             static_cast< D * >( this)->callee_, \
@@ -180,7 +180,7 @@ template< typename Signature, typename D, typename Result > \
 class coroutine_base_resume< Signature, D, Result, n > \
 { \
 public: \
-    typedef typename arg< Signature >::type_t   arg_t; \
+    typedef typename arg< Signature >::type     arg_type; \
 \
     void resume( BOOST_COROUTINE_BASE_RESUME_ARGS(n)) \
     { \
@@ -189,7 +189,7 @@ public: \
         BOOST_ASSERT( static_cast< D * >( this)->callee_); \
 \
         context::fcontext_t caller; \
-        holder< arg_t > hldr_to( & caller, arg_t(BOOST_COROUTINE_BASE_RESUME_VALS(n) ) ); \
+        holder< arg_type > hldr_to( & caller, arg_type(BOOST_COROUTINE_BASE_RESUME_VALS(n) ) ); \
         holder< Result > * hldr_from = ( holder< Result > *) context::jump_fcontext( \
             hldr_to.ctx, \
             static_cast< D * >( this)->callee_, \

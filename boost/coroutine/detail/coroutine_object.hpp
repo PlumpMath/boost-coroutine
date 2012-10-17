@@ -313,7 +313,7 @@ public:
             Fn, StackAllocator, Allocator, Signature, void, 1, Caller
         >
     >::other                                            allocator_t;
-    typedef typename arg< Signature >::type_t           arg_type;
+    typedef typename arg< Signature >::type             arg_type;
 
 private:
     typedef coroutine_base< Signature, void, 1 >        base_type;
@@ -492,8 +492,8 @@ public:
         coroutine_object<
             Fn, StackAllocator, Allocator, Signature, Result, 1, Caller
         >
-    >::other                                            allocator_t;
-    typedef typename arg< Signature >::type_t           arg_type;
+    >::other                                          allocator_t;
+    typedef typename arg< Signature >::type           arg_type;
 
 private:
     typedef coroutine_base< Signature, Result, 1 >    base_type;
@@ -675,7 +675,7 @@ public:
             Fn, StackAllocator, Allocator, Signature, void, arity, Caller
         >
     >::other                                            allocator_t;
-    typedef typename arg< Signature >::type_t           arg_type;
+    typedef typename arg< Signature >::type             arg_type;
 
 private:
     typedef coroutine_base< Signature, void, arity >    base_type;
@@ -855,10 +855,10 @@ public:
             Fn, StackAllocator, Allocator, Signature, Result, arity, Caller
         >
     >::other                                            allocator_t;
-    typedef typename arg< Signature >::type_t           arg_type;
+    typedef typename arg< Signature >::type             arg_type;
 
 private:
-    typedef coroutine_base< Signature, Result, arity >    base_type;
+    typedef coroutine_base< Signature, Result, arity >  base_type;
 
     Fn              fn_;
     StackAllocator  stack_alloc_;

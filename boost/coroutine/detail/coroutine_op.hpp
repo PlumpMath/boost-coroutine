@@ -213,7 +213,7 @@ struct coroutine_op< Signature, D, Result, 0 >
 template< typename Signature, typename D >
 struct coroutine_op< Signature, D, void, 1 >
 {
-    typedef typename arg< Signature >::type_t   arg_t;
+    typedef typename arg< Signature >::type   arg_type;
 
     class iterator : public std::iterator< std::output_iterator_tag, void, void, void, void >
     {
@@ -229,7 +229,7 @@ struct coroutine_op< Signature, D, void, 1 >
             dp_( dp)
         {}
 
-        iterator & operator=( arg_t a1)
+        iterator & operator=( arg_type a1)
         {
             BOOST_ASSERT( dp_);
             if ( ! ( * dp_)( a1) ) dp_ = 0;
@@ -251,7 +251,7 @@ struct coroutine_op< Signature, D, void, 1 >
 
     struct const_iterator;
 
-    D & operator()( arg_t a1)
+    D & operator()( arg_type a1)
     {
         BOOST_ASSERT( static_cast< D * >( this)->impl_);
         BOOST_ASSERT( ! static_cast< D * >( this)->impl_->is_complete() );
@@ -265,9 +265,9 @@ struct coroutine_op< Signature, D, void, 1 >
 template< typename Signature, typename D, typename Result >
 struct coroutine_op< Signature, D, Result, 1 >
 {
-    typedef typename arg< Signature >::type_t   arg_t;
+    typedef typename arg< Signature >::type   arg_type;
 
-    D & operator()( arg_t a1)
+    D & operator()( arg_type a1)
     {
         BOOST_ASSERT( static_cast< D * >( this)->impl_);
         BOOST_ASSERT( ! static_cast< D * >( this)->impl_->is_complete() );
