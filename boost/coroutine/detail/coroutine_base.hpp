@@ -62,6 +62,7 @@ private:
     std::size_t             use_count_;
     std::size_t             size_;
     void                *   sp_;
+    context::fcontext_t     caller_;
     context::fcontext_t *   callee_;
     int                     flags_;
     exception_ptr           except_;
@@ -88,6 +89,7 @@ public:
         use_count_( 0),
         size_( attr.size),
         sp_( alloc.allocate( size_) ),
+        caller_(),
         callee_( context::make_fcontext( sp_, size_, fn) ),
         flags_( stack_unwind == attr.do_unwind
             ? flag_force_unwind
@@ -105,6 +107,7 @@ public:
         use_count_( 0),
         size_( 0),
         sp_( 0),
+        caller_(),
         callee_( callee),
         flags_( flag_dont_force_unwind),
         except_(),
@@ -128,11 +131,11 @@ public:
         BOOST_ASSERT( ! is_complete() );
 
         flags_ |= flag_unwind_stack;
-        context::fcontext_t caller;
-        holder< void > hldr( & caller, true);
+        holder< void > hldr( & caller_, true);
         context::jump_fcontext(
             hldr.ctx, callee_,
-            ( intptr_t) & hldr, fpu_preserved == preserve_fpu_);
+            reinterpret_cast< intptr_t >( & hldr),
+            fpu_preserved == preserve_fpu_);
         flags_ &= ~flag_unwind_stack;
 
         BOOST_ASSERT( is_complete() );
@@ -165,6 +168,7 @@ private:
     std::size_t             use_count_;
     std::size_t             size_;
     void                *   sp_;
+    context::fcontext_t     caller_;
     context::fcontext_t *   callee_;
     int                     flags_;
     exception_ptr           except_;
@@ -191,6 +195,7 @@ public:
         use_count_( 0),
         size_( attr.size),
         sp_( alloc.allocate( size_) ),
+        caller_(),
         callee_( context::make_fcontext( sp_, size_, fn) ),
         flags_( stack_unwind == attr.do_unwind
             ? flag_force_unwind
@@ -208,6 +213,7 @@ public:
         use_count_( 0),
         size_( 0),
         sp_( 0),
+        caller_(),
         callee_( callee),
         flags_( flag_dont_force_unwind),
         except_(),
@@ -231,11 +237,11 @@ public:
         BOOST_ASSERT( ! is_complete() );
 
         flags_ |= flag_unwind_stack;
-        context::fcontext_t caller;
-        holder< void > hldr( & caller, true);
+        holder< void > hldr( & caller_, true);
         context::jump_fcontext(
             hldr.ctx, callee_,
-            ( intptr_t) & hldr, fpu_preserved == preserve_fpu_);
+            reinterpret_cast< intptr_t >( & hldr),
+            fpu_preserved == preserve_fpu_);
         flags_ &= ~flag_unwind_stack;
 
         BOOST_ASSERT( is_complete() );
@@ -269,6 +275,7 @@ private:
     std::size_t             use_count_;
     std::size_t             size_;
     void                *   sp_;
+    context::fcontext_t     caller_;
     context::fcontext_t *   callee_;
     int                     flags_;
     exception_ptr           except_;
@@ -295,6 +302,7 @@ public:
         use_count_( 0),
         size_( attr.size),
         sp_( alloc.allocate( size_) ),
+        caller_(),
         callee_( context::make_fcontext( sp_, size_, fn) ),
         flags_( stack_unwind == attr.do_unwind
             ? flag_force_unwind
@@ -312,6 +320,7 @@ public:
         use_count_( 0),
         size_( 0),
         sp_( 0),
+        caller_(),
         callee_( callee),
         flags_( flag_dont_force_unwind),
         except_(),
@@ -335,11 +344,11 @@ public:
         BOOST_ASSERT( ! is_complete() );
 
         flags_ |= flag_unwind_stack;
-        context::fcontext_t caller;
-        holder< arg_type > hldr( & caller, true);
+        holder< arg_type > hldr( & caller_, true);
         context::jump_fcontext(
             hldr.ctx, callee_,
-            ( intptr_t) & hldr, fpu_preserved == preserve_fpu_);
+            reinterpret_cast< intptr_t >( & hldr),
+            fpu_preserved == preserve_fpu_);
         flags_ &= ~flag_unwind_stack;
 
         BOOST_ASSERT( is_complete() );
@@ -374,6 +383,7 @@ private:
     std::size_t             use_count_;
     std::size_t             size_;
     void                *   sp_;
+    context::fcontext_t     caller_;
     context::fcontext_t *   callee_;
     int                     flags_;
     exception_ptr           except_;
@@ -400,6 +410,7 @@ public:
         use_count_( 0),
         size_( attr.size),
         sp_( alloc.allocate( size_) ),
+        caller_(),
         callee_( context::make_fcontext( sp_, size_, fn) ),
         flags_( stack_unwind == attr.do_unwind
             ? flag_force_unwind
@@ -417,6 +428,7 @@ public:
         use_count_( 0),
         size_( 0),
         sp_( 0),
+        caller_(),
         callee_( callee),
         flags_( flag_dont_force_unwind),
         except_(),
@@ -440,11 +452,11 @@ public:
         BOOST_ASSERT( ! is_complete() );
 
         flags_ |= flag_unwind_stack;
-        context::fcontext_t caller;
-        holder< arg_type > hldr( & caller, true);
+        holder< arg_type > hldr( & caller_, true);
         context::jump_fcontext(
             hldr.ctx, callee_,
-            ( intptr_t) & hldr, fpu_preserved == preserve_fpu_);
+            reinterpret_cast< intptr_t >( & hldr),
+            fpu_preserved == preserve_fpu_);
         flags_ &= ~flag_unwind_stack;
 
         BOOST_ASSERT( is_complete() );

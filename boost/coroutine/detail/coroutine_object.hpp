@@ -36,7 +36,8 @@ void trampoline1( intptr_t vp)
 {
     BOOST_ASSERT( vp);
 
-    holder< Context * > * hldr( reinterpret_cast< holder< Context * > * >( vp) );
+    holder< Context * > * hldr(
+        reinterpret_cast< holder< Context * > * >( vp) );
     Context * ctx( hldr->data.get() );
 
     ctx->run( hldr->ctx);
@@ -93,15 +94,14 @@ private:
 
     void enter_()
     {
-        context::fcontext_t caller;
-        holder< coroutine_object * > hldr_to( & caller, this);
+        holder< coroutine_object * > hldr_to( & this->caller_, this);
         holder< void > * hldr_from(
-            ( holder< void > *) context::jump_fcontext(
-                hldr_to.ctx, base_type::callee_,
-                ( intptr_t) & hldr_to,
-                fpu_preserved == base_type::preserve_fpu_) );
-        base_type::callee_ = hldr_from->ctx;
-        if ( base_type::except_) rethrow_exception( base_type::except_);
+            reinterpret_cast< holder< void > * >( context::jump_fcontext(
+                hldr_to.ctx, this->callee_,
+                reinterpret_cast< intptr_t >( & hldr_to),
+                fpu_preserved == this->preserve_fpu_) ) );
+        this->callee_ = hldr_from->ctx;
+        if ( this->except_) rethrow_exception( this->except_);
     }
 
 public:
@@ -145,34 +145,33 @@ public:
 
     void run( context::fcontext_t * callee)
     {
-        Caller c( callee, base_type::preserve_fpu_, alloc_);
+        Caller c( callee, this->preserve_fpu_, alloc_);
+        context::fcontext_t caller;
         try
         {
-            context::fcontext_t caller;
             fn_( c);
-            base_type::flags_ |= flag_complete;
+            this->flags_ |= flag_complete;
             callee = c.impl_->callee_;
             BOOST_ASSERT( callee);
             holder< void > hldr_to( & caller);
             context::jump_fcontext(
                 hldr_to.ctx, callee,
-                ( intptr_t) & hldr_to,
-                fpu_preserved == base_type::preserve_fpu_);
+                reinterpret_cast< intptr_t >( & hldr_to),
+                fpu_preserved == this->preserve_fpu_);
             BOOST_ASSERT_MSG( false, "coroutine is complete");
         }
         catch ( forced_unwind const&)
         {}
         catch (...)
-        { base_type::except_ = current_exception(); }
+        { this->except_ = current_exception(); }
 
-        base_type::flags_ |= flag_complete;
+        this->flags_ |= flag_complete;
         callee = c.impl_->callee_;
         BOOST_ASSERT( callee);
-        context::fcontext_t caller;
         context::jump_fcontext(
             & caller, callee,
-            ( intptr_t) & caller,
-            fpu_preserved == base_type::preserve_fpu_);
+            reinterpret_cast< intptr_t >( & caller),
+            fpu_preserved == this->preserve_fpu_);
         BOOST_ASSERT_MSG( false, "coroutine is complete");
     }
 
@@ -212,16 +211,15 @@ private:
 
     void enter_()
     {
-        context::fcontext_t caller;
-        holder< coroutine_object * > hldr_to( & caller, this);
+        holder< coroutine_object * > hldr_to( & this->caller_, this);
         holder< Result > * hldr_from(
-            ( holder< Result > *) context::jump_fcontext(
-                hldr_to.ctx, base_type::callee_,
-                ( intptr_t) & hldr_to,
-                fpu_preserved == base_type::preserve_fpu_) );
-        base_type::callee_ = hldr_from->ctx;
-        base_type::result_ = hldr_from->data;
-        if ( base_type::except_) rethrow_exception( base_type::except_);
+            reinterpret_cast< holder< Result > * >( context::jump_fcontext(
+                hldr_to.ctx, this->callee_,
+                reinterpret_cast< intptr_t >( & hldr_to),
+                fpu_preserved == this->preserve_fpu_) ) );
+        this->callee_ = hldr_from->ctx;
+        this->result_ = hldr_from->data;
+        if ( this->except_) rethrow_exception( this->except_);
     }
 
 public:
@@ -265,34 +263,33 @@ public:
 
     void run( context::fcontext_t * callee)
     {
-        Caller c( callee, base_type::preserve_fpu_, alloc_);
+        Caller c( callee, this->preserve_fpu_, alloc_);
+        context::fcontext_t caller;
         try
         {
-            context::fcontext_t caller;
             fn_( c);
             holder< Result > hldr_to( & caller);
-            base_type::flags_ |= flag_complete;
+            this->flags_ |= flag_complete;
             callee = c.impl_->callee_;
             BOOST_ASSERT( callee);
             context::jump_fcontext(
                 hldr_to.ctx, callee,
-                ( intptr_t) & hldr_to,
-                fpu_preserved == base_type::preserve_fpu_);
+                reinterpret_cast< intptr_t >( & hldr_to),
+                fpu_preserved == this->preserve_fpu_);
             BOOST_ASSERT_MSG( false, "coroutine is complete");
         }
         catch ( forced_unwind const&)
         {}
         catch (...)
-        { base_type::except_ = current_exception(); }
+        { this->except_ = current_exception(); }
 
-        base_type::flags_ |= flag_complete;
+        this->flags_ |= flag_complete;
         callee = c.impl_->callee_;
         BOOST_ASSERT( callee);
-        context::fcontext_t caller;
         context::jump_fcontext(
             & caller, callee,
-            ( intptr_t) & caller,
-            fpu_preserved == base_type::preserve_fpu_);
+            reinterpret_cast< intptr_t >( & caller),
+            fpu_preserved == this->preserve_fpu_);
         BOOST_ASSERT_MSG( false, "coroutine is complete");
     }
 
@@ -333,61 +330,58 @@ private:
 
     void enter_()
     {
-        context::fcontext_t caller;
-        holder< coroutine_object * > hldr_to( & caller, this);
+        holder< coroutine_object * > hldr_to( & this->caller_, this);
         holder< void > * hldr_from(
-            ( holder< void > *) context::jump_fcontext(
-                hldr_to.ctx, base_type::callee_,
-                ( intptr_t) & hldr_to,
-                fpu_preserved == base_type::preserve_fpu_) );
-        base_type::callee_ = hldr_from->ctx;
-        if ( base_type::except_) rethrow_exception( base_type::except_);
+            reinterpret_cast< holder< void > * >( context::jump_fcontext(
+                hldr_to.ctx, this->callee_,
+                reinterpret_cast< intptr_t >( & hldr_to),
+                fpu_preserved == this->preserve_fpu_) ) );
+        this->callee_ = hldr_from->ctx;
+        if ( this->except_) rethrow_exception( this->except_);
     }
 
     void enter_( typename detail::param< arg_type >::type arg)
     {
-        context::fcontext_t caller;
         holder< tuple< coroutine_object *, typename detail::param< arg_type >::type > > hldr_to(
-            & caller, tuple< coroutine_object *, typename detail::param< arg_type >::type >( this, arg) );
+            & this->caller_, tuple< coroutine_object *, typename detail::param< arg_type >::type >( this, arg) );
         holder< void > * hldr_from(
-            ( holder< void > *) context::jump_fcontext(
-                hldr_to.ctx, base_type::callee_,
-                ( intptr_t) & hldr_to,
-                fpu_preserved == base_type::preserve_fpu_) );
-        base_type::callee_ = hldr_from->ctx;
-        if ( base_type::except_) rethrow_exception( base_type::except_);
+            reinterpret_cast< holder< void > * >( context::jump_fcontext(
+                hldr_to.ctx, this->callee_,
+                reinterpret_cast< intptr_t >( & hldr_to),
+                fpu_preserved == this->preserve_fpu_) ) );
+        this->callee_ = hldr_from->ctx;
+        if ( this->except_) rethrow_exception( this->except_);
     }
 
     void run_( Caller & c)
     {
         context::fcontext_t * callee( 0);
+        context::fcontext_t caller;
         try
         {
-            context::fcontext_t caller;
             fn_( c);
-            base_type::flags_ |= flag_complete;
+            this->flags_ |= flag_complete;
             callee = c.impl_->callee_;
             BOOST_ASSERT( callee);
             holder< void > hldr( & caller);
             context::jump_fcontext(
                 hldr.ctx, callee,
                 ( intptr_t) & hldr,
-                fpu_preserved == base_type::preserve_fpu_);
+                fpu_preserved == this->preserve_fpu_);
             BOOST_ASSERT_MSG( false, "coroutine is complete");
         }
         catch ( forced_unwind const&)
         {}
         catch (...)
-        { base_type::except_ = current_exception(); }
+        { this->except_ = current_exception(); }
 
-        base_type::flags_ |= flag_complete;
+        this->flags_ |= flag_complete;
         callee = c.impl_->callee_;
         BOOST_ASSERT( callee);
-        context::fcontext_t caller;
         context::jump_fcontext(
             & caller, callee,
-            ( intptr_t) & caller,
-            fpu_preserved == base_type::preserve_fpu_);
+            reinterpret_cast< intptr_t >( & caller),
+            fpu_preserved == this->preserve_fpu_);
         BOOST_ASSERT_MSG( false, "coroutine is complete");
     }
 
@@ -465,13 +459,13 @@ public:
 
     void run( context::fcontext_t * callee)
     {
-        Caller c( callee, base_type::preserve_fpu_, alloc_);
+        Caller c( callee, this->preserve_fpu_, alloc_);
         run_( c);
     }
 
     void run( context::fcontext_t * callee, typename detail::param< arg_type >::type arg)
     {
-        Caller c( callee, base_type::preserve_fpu_, alloc_);
+        Caller c( callee, this->preserve_fpu_, alloc_);
         c.impl_->result_ = arg;
         run_( c);
     }
@@ -513,63 +507,64 @@ private:
 
     void enter_()
     {
-        context::fcontext_t caller;
-        holder< Result > * hldr_from( 0);
-        holder< coroutine_object * > hldr_to( & caller, this);
-        hldr_from = ( holder< Result > *) context::jump_fcontext(
-            hldr_to.ctx, base_type::callee_,
-            ( intptr_t) & hldr_to,
-            fpu_preserved == base_type::preserve_fpu_);
-        base_type::callee_ = hldr_from->ctx;
-        base_type::result_ = hldr_from->data;
-        if ( base_type::except_) rethrow_exception( base_type::except_);
+        holder< coroutine_object * > hldr_to( & this->caller_, this);
+        holder< Result > * hldr_from(
+            reinterpret_cast< holder< Result > * >( context::jump_fcontext(
+                hldr_to.ctx, this->callee_,
+                reinterpret_cast< intptr_t >( & hldr_to),
+                fpu_preserved == this->preserve_fpu_) ) );
+        this->callee_ = hldr_from->ctx;
+        this->result_ = hldr_from->data;
+        if ( this->except_) rethrow_exception( this->except_);
     }
 
     void enter_( typename detail::param< arg_type >::type arg)
     {
-        context::fcontext_t caller;
-        holder< Result > * hldr_from( 0);
-        holder< tuple< coroutine_object *, typename detail::param< arg_type >::type > > hldr_to(
-            & caller, tuple< coroutine_object *, typename detail::param< arg_type >::type >( this, arg) );
-        hldr_from = ( holder< Result > *) context::jump_fcontext(
-            hldr_to.ctx, base_type::callee_,
-            ( intptr_t) & hldr_to,
-            fpu_preserved == base_type::preserve_fpu_);
-        base_type::callee_ = hldr_from->ctx;
-        base_type::result_ = hldr_from->data;
-        if ( base_type::except_) rethrow_exception( base_type::except_);
+        holder<
+            tuple< coroutine_object *,
+            typename detail::param< arg_type >::type >
+        > hldr_to(
+            & this->caller_, tuple< coroutine_object *,
+            typename detail::param< arg_type >::type >( this, arg) );
+        holder< Result > * hldr_from(
+            reinterpret_cast< holder< Result > * >( context::jump_fcontext(
+                hldr_to.ctx, this->callee_,
+                reinterpret_cast< intptr_t >( & hldr_to),
+                fpu_preserved == this->preserve_fpu_) ) );
+        this->callee_ = hldr_from->ctx;
+        this->result_ = hldr_from->data;
+        if ( this->except_) rethrow_exception( this->except_);
     }
 
     void run_( Caller & c)
     {
         context::fcontext_t * callee( 0);
+        context::fcontext_t caller;
         try
         {
-            context::fcontext_t caller;
             fn_( c);
-            base_type::flags_ |= flag_complete;
+            this->flags_ |= flag_complete;
             callee = c.impl_->callee_;
             BOOST_ASSERT( callee);
             holder< Result > hldr_to( & caller);
             context::jump_fcontext(
                 hldr_to.ctx, callee,
-                ( intptr_t) & hldr_to,
-                fpu_preserved == base_type::preserve_fpu_);
+                reinterpret_cast< intptr_t >( & hldr_to),
+                fpu_preserved == this->preserve_fpu_);
             BOOST_ASSERT_MSG( false, "coroutine is complete");
         }
         catch ( forced_unwind const&)
         {}
         catch (...)
-        { base_type::except_ = current_exception(); }
+        { this->except_ = current_exception(); }
 
-        base_type::flags_ |= flag_complete;
+        this->flags_ |= flag_complete;
         callee = c.impl_->callee_;
         BOOST_ASSERT( callee);
-        context::fcontext_t caller;
         context::jump_fcontext(
             & caller, callee,
-            ( intptr_t) & caller,
-            fpu_preserved == base_type::preserve_fpu_);
+            reinterpret_cast< intptr_t >( & caller),
+            fpu_preserved == this->preserve_fpu_);
         BOOST_ASSERT_MSG( false, "coroutine is complete");
     }
 
@@ -647,13 +642,13 @@ public:
 
     void run( context::fcontext_t * callee)
     {
-        Caller c( callee, base_type::preserve_fpu_, alloc_);
+        Caller c( callee, this->preserve_fpu_, alloc_);
         run_( c);
     }
 
     void run( context::fcontext_t * callee, typename detail::param< arg_type >::type arg)
     {
-        Caller c( callee, base_type::preserve_fpu_, alloc_);
+        Caller c( callee, this->preserve_fpu_, alloc_);
         c.impl_->result_ = arg;
         run_( c);
     }
@@ -695,61 +690,62 @@ private:
 
     void enter_()
     {
-        context::fcontext_t caller;
-        holder< coroutine_object * > hldr_to( & caller, this);
+        holder< coroutine_object * > hldr_to( & this->caller_, this);
         holder< void > * hldr_from(
-            ( holder< void > *) context::jump_fcontext(
-                hldr_to.ctx, base_type::callee_,
-                ( intptr_t) & hldr_to,
-                fpu_preserved == base_type::preserve_fpu_) );
-        base_type::callee_ = hldr_from->ctx;
-        if ( base_type::except_) rethrow_exception( base_type::except_);
+            reinterpret_cast< holder< void > * >( context::jump_fcontext(
+                hldr_to.ctx, this->callee_,
+                reinterpret_cast< intptr_t >( & hldr_to),
+                fpu_preserved == this->preserve_fpu_) ) );
+        this->callee_ = hldr_from->ctx;
+        if ( this->except_) rethrow_exception( this->except_);
     }
 
     void enter_( typename detail::param< arg_type >::type arg)
     {
-        context::fcontext_t caller;
-        holder< tuple< coroutine_object *, typename detail::param< arg_type >::type > > hldr_to(
-            & caller, tuple< coroutine_object *, typename detail::param< arg_type >::type >( this, arg) );
+        holder<
+            tuple< coroutine_object *,
+            typename detail::param< arg_type >::type >
+        > hldr_to(
+            & this->caller_, tuple< coroutine_object *,
+            typename detail::param< arg_type >::type >( this, arg) );
         holder< void > * hldr_from(
-            ( holder< void > *) context::jump_fcontext(
-                hldr_to.ctx, base_type::callee_,
-                ( intptr_t) & hldr_to,
-                fpu_preserved == base_type::preserve_fpu_) );
-        base_type::callee_ = hldr_from->ctx;
-        if ( base_type::except_) rethrow_exception( base_type::except_);
+            reinterpret_cast< holder< void > * >( context::jump_fcontext(
+                hldr_to.ctx, this->callee_,
+                reinterpret_cast< intptr_t >( & hldr_to),
+                fpu_preserved == this->preserve_fpu_) ) );
+        this->callee_ = hldr_from->ctx;
+        if ( this->except_) rethrow_exception( this->except_);
     }
 
     void run_( Caller & c)
     {
         context::fcontext_t * callee( 0);
+        context::fcontext_t caller;
         try
         {
-            context::fcontext_t caller;
             fn_( c);
-            base_type::flags_ |= flag_complete;
+            this->flags_ |= flag_complete;
             callee = c.impl_->callee_;
             BOOST_ASSERT( callee);
             holder< void > hldr( & caller);
             context::jump_fcontext(
                 hldr.ctx, callee,
                 ( intptr_t) & hldr,
-                fpu_preserved == base_type::preserve_fpu_);
+                fpu_preserved == this->preserve_fpu_);
             BOOST_ASSERT_MSG( false, "coroutine is complete");
         }
         catch ( forced_unwind const&)
         {}
         catch (...)
-        { base_type::except_ = current_exception(); }
+        { this->except_ = current_exception(); }
 
-        base_type::flags_ |= flag_complete;
+        this->flags_ |= flag_complete;
         callee = c.impl_->callee_;
         BOOST_ASSERT( callee);
-        context::fcontext_t caller;
         context::jump_fcontext(
             & caller, callee,
-            ( intptr_t) & caller,
-            fpu_preserved == base_type::preserve_fpu_);
+            reinterpret_cast< intptr_t >( & caller),
+            fpu_preserved == this->preserve_fpu_);
         BOOST_ASSERT_MSG( false, "coroutine is complete");
     }
 
@@ -827,13 +823,13 @@ public:
 
     void run( context::fcontext_t * callee)
     {
-        Caller c( callee, base_type::preserve_fpu_, alloc_);
+        Caller c( callee, this->preserve_fpu_, alloc_);
         run_( c);
     }
 
     void run( context::fcontext_t * callee, typename detail::param< arg_type >::type arg)
     {
-        Caller c( callee, base_type::preserve_fpu_, alloc_);
+        Caller c( callee, this->preserve_fpu_, alloc_);
         c.impl_->result_ = arg;
         run_( c);
     }
@@ -875,63 +871,64 @@ private:
 
     void enter_()
     {
-        context::fcontext_t caller;
-        holder< coroutine_object * > hldr_to( & caller, this);
+        holder< coroutine_object * > hldr_to( & this->caller_, this);
         holder< Result > * hldr_from(
-            ( holder< Result > *) context::jump_fcontext(
-                hldr_to.ctx, base_type::callee_,
-                ( intptr_t) & hldr_to,
-                fpu_preserved == base_type::preserve_fpu_) );
-        base_type::callee_ = hldr_from->ctx;
-        base_type::result_ = hldr_from->data;
-        if ( base_type::except_) rethrow_exception( base_type::except_);
+            reinterpret_cast< holder< Result > * >( context::jump_fcontext(
+                hldr_to.ctx, this->callee_,
+                reinterpret_cast< intptr_t >( & hldr_to),
+                fpu_preserved == this->preserve_fpu_) ) );
+        this->callee_ = hldr_from->ctx;
+        this->result_ = hldr_from->data;
+        if ( this->except_) rethrow_exception( this->except_);
     }
 
     void enter_( typename detail::param< arg_type >::type arg)
     {
-        context::fcontext_t caller;
-        holder< tuple< coroutine_object *, typename detail::param< arg_type >::type > > hldr_to(
-            & caller, tuple< coroutine_object *, typename detail::param< arg_type >::type >( this, arg) );
+        holder<
+            tuple< coroutine_object *,
+            typename detail::param< arg_type >::type >
+        > hldr_to(
+            & this->caller_, tuple< coroutine_object *,
+            typename detail::param< arg_type >::type >( this, arg) );
         holder< Result > * hldr_from(
-            ( holder< Result > *) context::jump_fcontext(
-                hldr_to.ctx, base_type::callee_,
-                ( intptr_t) & hldr_to,
-                fpu_preserved == base_type::preserve_fpu_) );
-        base_type::callee_ = hldr_from->ctx;
-        base_type::result_ = hldr_from->data;
-        if ( base_type::except_) rethrow_exception( base_type::except_);
+            reinterpret_cast< holder< Result > * >( context::jump_fcontext(
+                hldr_to.ctx, this->callee_,
+                reinterpret_cast< intptr_t >( & hldr_to),
+                fpu_preserved == this->preserve_fpu_) ) );
+        this->callee_ = hldr_from->ctx;
+        this->result_ = hldr_from->data;
+        if ( this->except_) rethrow_exception( this->except_);
     }
 
     void run_( Caller & c)
     {
         context::fcontext_t * callee( 0);
+        context::fcontext_t caller;
         try
         {
-            context::fcontext_t caller;
             fn_( c);
-            base_type::flags_ |= flag_complete;
+            this->flags_ |= flag_complete;
             callee = c.impl_->callee_;
             BOOST_ASSERT( callee);
             holder< Result > hldr_to( & caller);
             context::jump_fcontext(
                 hldr_to.ctx, callee,
-                ( intptr_t) & hldr_to,
-                fpu_preserved == base_type::preserve_fpu_);
+                reinterpret_cast< intptr_t >( & hldr_to),
+                fpu_preserved == this->preserve_fpu_);
             BOOST_ASSERT_MSG( false, "coroutine is complete");
         }
         catch ( forced_unwind const&)
         {}
         catch (...)
-        { base_type::except_ = current_exception(); }
+        { this->except_ = current_exception(); }
 
-        base_type::flags_ |= flag_complete;
+        this->flags_ |= flag_complete;
         callee = c.impl_->callee_;
         BOOST_ASSERT( callee);
-        context::fcontext_t caller;
         context::jump_fcontext(
             & caller, callee,
-            ( intptr_t) & caller,
-            fpu_preserved == base_type::preserve_fpu_);
+            reinterpret_cast< intptr_t >( & caller),
+            fpu_preserved == this->preserve_fpu_);
         BOOST_ASSERT_MSG( false, "coroutine is complete");
     }
 
@@ -1009,13 +1006,13 @@ public:
 
     void run( context::fcontext_t * callee)
     {
-        Caller c( callee, base_type::preserve_fpu_, alloc_);
+        Caller c( callee, this->preserve_fpu_, alloc_);
         run_( c);
     }
 
     void run( context::fcontext_t * callee, typename detail::param< arg_type >::type arg)
     {
-        Caller c( callee, base_type::preserve_fpu_, alloc_);
+        Caller c( callee, this->preserve_fpu_, alloc_);
         c.impl_->result_ = arg;
         run_( c);
     }
