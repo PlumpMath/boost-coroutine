@@ -40,7 +40,7 @@ typedef coro::coroutine< double(double,double) > coro_double;
 typedef coro::coroutine< int(int,int) > coro_int;
 typedef coro::coroutine< int(int) > coro_int_int;
 typedef coro::coroutine< int*(int*) > coro_ptr;
-typedef coro::coroutine< int&(int&) > coro_ref;
+typedef coro::coroutine< int const&(int const&) > coro_ref;
 typedef coro::coroutine< boost::tuple<int&,int&>(int&,int&) > coro_tuple;
 
 struct X : private boost::noncopyable
@@ -327,7 +327,7 @@ void test_ref()
     int a = 3;
     coro_ref coro( f10, a);
     BOOST_CHECK( coro);
-    int & res = coro.get();
+    int const& res = coro.get();
     BOOST_CHECK( coro);
     BOOST_CHECK_EQUAL( & a, & res);
     coro( a);

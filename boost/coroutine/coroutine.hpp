@@ -28,7 +28,7 @@
 #include <boost/coroutine/detail/coroutine_get.hpp>
 #include <boost/coroutine/detail/coroutine_object.hpp>
 #include <boost/coroutine/detail/coroutine_op.hpp>
-#include <boost/coroutine/detail/coroutine_self.hpp>
+#include <boost/coroutine/detail/coroutine_caller.hpp>
 #include <boost/coroutine/flags.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
@@ -137,7 +137,7 @@ public:
         >(),
         impl_()
     {
-        typedef detail::coroutine_self<
+        typedef detail::coroutine_caller<
                 Allocator,
                 Signature,
                 typename function_traits< Signature >::result_type,
@@ -570,7 +570,7 @@ public:
         >(),
         impl_()
     {
-        typedef detail::coroutine_self<
+        typedef detail::coroutine_caller<
                 Allocator,
                 Signature,
                 typename function_traits< Signature >::result_type,

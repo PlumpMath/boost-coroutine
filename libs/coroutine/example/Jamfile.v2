@@ -48,6 +48,10 @@ project boost/coroutine/example
       <link>static
     ;
 
+exe fibonacci
+    : fibonacci.cpp
+    ;
+
 exe echo
     : echo.cpp
     ;
@@ -60,8 +64,8 @@ exe parallel
     : parallel.cpp
     ;
 
-exe tree
-    : tree.cpp
+exe same_fringe
+    : same_fringe.cpp
     ;
 
 exe asio/stream_client

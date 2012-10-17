@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_CORO_DETAIL_PARAM_TYPE_H
-#define BOOST_CORO_DETAIL_PARAM_TYPE_H
+#ifndef BOOST_CORO_DETAIL_PARAM_H
+#define BOOST_CORO_DETAIL_PARAM_H
 
 #include <boost/config.hpp>
 #include <boost/mpl/eval_if.hpp>
@@ -25,7 +25,7 @@ namespace coro {
 namespace detail {
 
 template< typename T >
-struct param_type : 
+struct param : 
     public mpl::eval_if<
         mpl::or_<
             is_scalar< T >,
@@ -43,4 +43,4 @@ struct param_type :
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_CORO_DETAIL_PARAM_TYPE_H
+#endif // BOOST_CORO_DETAIL_PARAM_H

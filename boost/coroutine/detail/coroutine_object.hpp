@@ -21,7 +21,7 @@
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_base.hpp>
-#include <boost/coroutine/detail/param_type.hpp>
+#include <boost/coroutine/detail/param.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -30,15 +30,6 @@
 namespace boost {
 namespace coro {
 namespace detail {
-
-template< typename T >
-struct arg_pointer_type :
-    public mpl::eval_if<
-        is_pointer< T >,
-        mpl::identity< T >,
-        add_pointer< typename remove_reference< T >::type >
-    >
-{};
 
 template< typename Context >
 void trampoline1( intptr_t vp)
@@ -102,8 +93,6 @@ private:
 
     void enter_()
     {
-        base_type::callee_ = context::make_fcontext(
-            base_type::sp_, base_type::size_, trampoline1< coroutine_object >);
         context::fcontext_t caller;
         holder< coroutine_object * > hldr_to( & caller, this);
         holder< void > * hldr_from(
@@ -120,7 +109,9 @@ public:
     coroutine_object( Fn && fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( static_cast< Fn && >( fn) ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -129,7 +120,9 @@ public:
     coroutine_object( Fn fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -138,7 +131,9 @@ public:
     coroutine_object( BOOST_RV_REF( Fn) fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -217,8 +212,6 @@ private:
 
     void enter_()
     {
-        base_type::callee_ = context::make_fcontext(
-            base_type::sp_, base_type::size_, trampoline1< coroutine_object >);
         context::fcontext_t caller;
         holder< coroutine_object * > hldr_to( & caller, this);
         holder< Result > * hldr_from(
@@ -236,7 +229,9 @@ public:
     coroutine_object( Fn && fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( static_cast< Fn && >( fn) ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -245,7 +240,9 @@ public:
     coroutine_object( Fn fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -254,7 +251,9 @@ public:
     coroutine_object( BOOST_RV_REF( Fn) fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -335,8 +334,6 @@ private:
     void enter_()
     {
         context::fcontext_t caller;
-        base_type::callee_ = context::make_fcontext(
-            base_type::sp_, base_type::size_, trampoline1< coroutine_object >);
         holder< coroutine_object * > hldr_to( & caller, this);
         holder< void > * hldr_from(
             ( holder< void > *) context::jump_fcontext(
@@ -347,14 +344,11 @@ private:
         if ( base_type::except_) rethrow_exception( base_type::except_);
     }
 
-    void enter_( arg_type arg)
+    void enter_( typename detail::param< arg_type >::type arg)
     {
         context::fcontext_t caller;
-        base_type::callee_ = context::make_fcontext(
-            base_type::sp_, base_type::size_,
-            trampoline2< coroutine_object, arg_type >);
-        holder< tuple< coroutine_object *, arg_type > > hldr_to(
-            & caller, tuple< coroutine_object *, arg_type >( this, arg) );
+        holder< tuple< coroutine_object *, typename detail::param< arg_type >::type > > hldr_to(
+            & caller, tuple< coroutine_object *, typename detail::param< arg_type >::type >( this, arg) );
         holder< void > * hldr_from(
             ( holder< void > *) context::jump_fcontext(
                 hldr_to.ctx, base_type::callee_,
@@ -402,16 +396,20 @@ public:
     coroutine_object( Fn && fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( static_cast< Fn && >( fn) ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
 
-    coroutine_object( Fn && fn, arg_type arg, attributes const& attr,
+    coroutine_object( Fn && fn, typename detail::param< arg_type >::type arg, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            attr, stack_alloc),
         fn_( static_cast< Fn && >( fn) ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -420,16 +418,20 @@ public:
     coroutine_object( Fn fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
 
-    coroutine_object( Fn fn, arg_type arg, attributes const& attr,
+    coroutine_object( Fn fn, typename detail::param< arg_type >::type arg, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -438,16 +440,20 @@ public:
     coroutine_object( BOOST_RV_REF( Fn) fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
 
-    coroutine_object( BOOST_RV_REF( Fn) fn, arg_type arg, attributes const& attr,
+    coroutine_object( BOOST_RV_REF( Fn) fn, typename detail::param< arg_type >::type arg, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -463,7 +469,7 @@ public:
         run_( c);
     }
 
-    void run( context::fcontext_t * callee, arg_type arg)
+    void run( context::fcontext_t * callee, typename detail::param< arg_type >::type arg)
     {
         Caller c( callee, base_type::preserve_fpu_, alloc_);
         c.impl_->result_ = arg;
@@ -509,8 +515,6 @@ private:
     {
         context::fcontext_t caller;
         holder< Result > * hldr_from( 0);
-        base_type::callee_ = context::make_fcontext(
-            base_type::sp_, base_type::size_, trampoline1< coroutine_object >);
         holder< coroutine_object * > hldr_to( & caller, this);
         hldr_from = ( holder< Result > *) context::jump_fcontext(
             hldr_to.ctx, base_type::callee_,
@@ -521,15 +525,12 @@ private:
         if ( base_type::except_) rethrow_exception( base_type::except_);
     }
 
-    void enter_( arg_type arg)
+    void enter_( typename detail::param< arg_type >::type arg)
     {
         context::fcontext_t caller;
         holder< Result > * hldr_from( 0);
-        base_type::callee_ = context::make_fcontext(
-            base_type::sp_, base_type::size_,
-            trampoline2< coroutine_object, arg_type >);
-        holder< tuple< coroutine_object *, arg_type > > hldr_to(
-            & caller, tuple< coroutine_object *, arg_type >( this, arg) );
+        holder< tuple< coroutine_object *, typename detail::param< arg_type >::type > > hldr_to(
+            & caller, tuple< coroutine_object *, typename detail::param< arg_type >::type >( this, arg) );
         hldr_from = ( holder< Result > *) context::jump_fcontext(
             hldr_to.ctx, base_type::callee_,
             ( intptr_t) & hldr_to,
@@ -577,16 +578,20 @@ public:
     coroutine_object( Fn && fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( static_cast< Fn && >( fn) ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
 
-    coroutine_object( Fn && fn, arg_type arg, attributes const& attr,
+    coroutine_object( Fn && fn, typename detail::param< arg_type >::type arg, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            attr, stack_alloc),
         fn_( static_cast< Fn && >( fn) ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -595,16 +600,20 @@ public:
     coroutine_object( Fn fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
 
-    coroutine_object( Fn fn, arg_type arg, attributes const& attr,
+    coroutine_object( Fn fn, typename detail::param< arg_type >::type arg, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -613,16 +622,20 @@ public:
     coroutine_object( BOOST_RV_REF( Fn) fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
 
-    coroutine_object( BOOST_RV_REF( Fn) fn, arg_type arg, attributes const& attr,
+    coroutine_object( BOOST_RV_REF( Fn) fn, typename detail::param< arg_type >::type arg, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -638,7 +651,7 @@ public:
         run_( c);
     }
 
-    void run( context::fcontext_t * callee, arg_type arg)
+    void run( context::fcontext_t * callee, typename detail::param< arg_type >::type arg)
     {
         Caller c( callee, base_type::preserve_fpu_, alloc_);
         c.impl_->result_ = arg;
@@ -683,8 +696,6 @@ private:
     void enter_()
     {
         context::fcontext_t caller;
-        base_type::callee_ = context::make_fcontext(
-            base_type::sp_, base_type::size_, trampoline1< coroutine_object >);
         holder< coroutine_object * > hldr_to( & caller, this);
         holder< void > * hldr_from(
             ( holder< void > *) context::jump_fcontext(
@@ -695,14 +706,11 @@ private:
         if ( base_type::except_) rethrow_exception( base_type::except_);
     }
 
-    void enter_( arg_type arg)
+    void enter_( typename detail::param< arg_type >::type arg)
     {
         context::fcontext_t caller;
-        base_type::callee_ = context::make_fcontext(
-            base_type::sp_, base_type::size_,
-            trampoline2< coroutine_object, arg_type >);
-        holder< tuple< coroutine_object *, arg_type > > hldr_to(
-            & caller, tuple< coroutine_object *, arg_type >( this, arg) );
+        holder< tuple< coroutine_object *, typename detail::param< arg_type >::type > > hldr_to(
+            & caller, tuple< coroutine_object *, typename detail::param< arg_type >::type >( this, arg) );
         holder< void > * hldr_from(
             ( holder< void > *) context::jump_fcontext(
                 hldr_to.ctx, base_type::callee_,
@@ -750,16 +758,20 @@ public:
     coroutine_object( Fn && fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( static_cast< Fn && >( fn) ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
 
-    coroutine_object( Fn && fn, arg_type arg, attributes const& attr,
+    coroutine_object( Fn && fn, typename detail::param< arg_type >::type arg, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            attr, stack_alloc),
         fn_( static_cast< Fn && >( fn) ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -768,16 +780,20 @@ public:
     coroutine_object( Fn fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
 
-    coroutine_object( Fn fn, arg_type arg, attributes const& attr,
+    coroutine_object( Fn fn, typename detail::param< arg_type >::type arg, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -786,16 +802,20 @@ public:
     coroutine_object( BOOST_RV_REF( Fn) fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
 
-    coroutine_object( BOOST_RV_REF( Fn) fn, arg_type arg, attributes const& attr,
+    coroutine_object( BOOST_RV_REF( Fn) fn, typename detail::param< arg_type >::type arg, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -811,7 +831,7 @@ public:
         run_( c);
     }
 
-    void run( context::fcontext_t * callee, arg_type arg)
+    void run( context::fcontext_t * callee, typename detail::param< arg_type >::type arg)
     {
         Caller c( callee, base_type::preserve_fpu_, alloc_);
         c.impl_->result_ = arg;
@@ -856,8 +876,6 @@ private:
     void enter_()
     {
         context::fcontext_t caller;
-        base_type::callee_ = context::make_fcontext(
-            base_type::sp_, base_type::size_, trampoline1< coroutine_object >);
         holder< coroutine_object * > hldr_to( & caller, this);
         holder< Result > * hldr_from(
             ( holder< Result > *) context::jump_fcontext(
@@ -869,14 +887,11 @@ private:
         if ( base_type::except_) rethrow_exception( base_type::except_);
     }
 
-    void enter_( arg_type arg)
+    void enter_( typename detail::param< arg_type >::type arg)
     {
         context::fcontext_t caller;
-        base_type::callee_ = context::make_fcontext(
-            base_type::sp_, base_type::size_,
-            trampoline2< coroutine_object, arg_type >);
-        holder< tuple< coroutine_object *, arg_type > > hldr_to(
-            & caller, tuple< coroutine_object *, arg_type >( this, arg) );
+        holder< tuple< coroutine_object *, typename detail::param< arg_type >::type > > hldr_to(
+            & caller, tuple< coroutine_object *, typename detail::param< arg_type >::type >( this, arg) );
         holder< Result > * hldr_from(
             ( holder< Result > *) context::jump_fcontext(
                 hldr_to.ctx, base_type::callee_,
@@ -925,16 +940,20 @@ public:
     coroutine_object( Fn && fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( static_cast< Fn && >( fn) ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
 
-    coroutine_object( Fn && fn, arg_type arg, attributes const& attr,
+    coroutine_object( Fn && fn, typename detail::param< arg_type >::type arg, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            attr, stack_alloc),
         fn_( static_cast< Fn && >( fn) ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -943,16 +962,20 @@ public:
     coroutine_object( Fn fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
 
-    coroutine_object( Fn fn, arg_type arg, attributes const& attr,
+    coroutine_object( Fn fn, typename detail::param< arg_type >::type arg, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -961,16 +984,20 @@ public:
     coroutine_object( BOOST_RV_REF( Fn) fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline1< coroutine_object >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
 
-    coroutine_object( BOOST_RV_REF( Fn) fn, arg_type arg, attributes const& attr,
+    coroutine_object( BOOST_RV_REF( Fn) fn, typename detail::param< arg_type >::type arg, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type( attr, stack_alloc),
+        base_type(
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            attr, stack_alloc),
         fn_( fn),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
@@ -986,7 +1013,7 @@ public:
         run_( c);
     }
 
-    void run( context::fcontext_t * callee, arg_type arg)
+    void run( context::fcontext_t * callee, typename detail::param< arg_type >::type arg)
     {
         Caller c( callee, base_type::preserve_fpu_, alloc_);
         c.impl_->result_ = arg;

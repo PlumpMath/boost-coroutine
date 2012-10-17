@@ -11,7 +11,7 @@
 #include <boost/config.hpp>
 
 #include <boost/coroutine/detail/config.hpp>
-#include <boost/coroutine/detail/param_type.hpp>
+#include <boost/coroutine/detail/param.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -27,7 +27,7 @@ struct coroutine_get
     bool has_result() const
     { return static_cast< D const* >( this)->impl_->result_; }
 
-    typename param_type< Result >::type get() const
+    typename param< Result >::type get() const
     {
         BOOST_ASSERT( static_cast< D const* >( this)->impl_->result_);
         return static_cast< D const* >( this)->impl_->result_.get();

@@ -7,6 +7,10 @@
 #ifndef BOOST_CORO_DETAIL_COROUTINE_BASE_H
 #define BOOST_CORO_DETAIL_COROUTINE_BASE_H
 
+#if defined(__PGI)
+#include <stdint.h>
+#endif
+
 #include <cstddef>
 #include <utility>
 
@@ -75,7 +79,7 @@ protected:
 
 public:
     template< typename StackAllocator >
-    coroutine_base( attributes const& attr, StackAllocator const& alloc) :
+    coroutine_base( void ( * fn)( intptr_t), attributes const& attr, StackAllocator const& alloc) :
         coroutine_base_resume<
             Signature,
             coroutine_base< Signature, void, 0 >,
@@ -84,7 +88,7 @@ public:
         use_count_( 0),
         size_( attr.size),
         sp_( alloc.allocate( size_) ),
-        callee_( 0),
+        callee_( context::make_fcontext( sp_, size_, fn) ),
         flags_( stack_unwind == attr.do_unwind
             ? flag_force_unwind
             : flag_dont_force_unwind),
@@ -178,7 +182,7 @@ protected:
 
 public:
     template< typename StackAllocator >
-    coroutine_base( attributes const& attr, StackAllocator const& alloc) :
+    coroutine_base( void ( * fn)( intptr_t), attributes const& attr, StackAllocator const& alloc) :
         coroutine_base_resume<
             Signature,
             coroutine_base< Signature, Result, 0 >,
@@ -187,7 +191,7 @@ public:
         use_count_( 0),
         size_( attr.size),
         sp_( alloc.allocate( size_) ),
-        callee_( 0),
+        callee_( context::make_fcontext( sp_, size_, fn) ),
         flags_( stack_unwind == attr.do_unwind
             ? flag_force_unwind
             : flag_dont_force_unwind),
@@ -282,7 +286,7 @@ protected:
 
 public:
     template< typename StackAllocator >
-    coroutine_base( attributes const& attr, StackAllocator const& alloc) :
+    coroutine_base( void ( * fn)( intptr_t), attributes const& attr, StackAllocator const& alloc) :
         coroutine_base_resume<
             Signature,
             coroutine_base< Signature, void, arity >,
@@ -291,7 +295,7 @@ public:
         use_count_( 0),
         size_( attr.size),
         sp_( alloc.allocate( size_) ),
-        callee_( 0),
+        callee_( context::make_fcontext( sp_, size_, fn) ),
         flags_( stack_unwind == attr.do_unwind
             ? flag_force_unwind
             : flag_dont_force_unwind),
@@ -387,7 +391,7 @@ protected:
 
 public:
     template< typename StackAllocator >
-    coroutine_base( attributes const& attr, StackAllocator const& alloc) :
+    coroutine_base( void ( * fn)( intptr_t), attributes const& attr, StackAllocator const& alloc) :
         coroutine_base_resume<
             Signature,
             coroutine_base< Signature, Result, arity >,
@@ -396,7 +400,7 @@ public:
         use_count_( 0),
         size_( attr.size),
         sp_( alloc.allocate( size_) ),
-        callee_( 0),
+        callee_( context::make_fcontext( sp_, size_, fn) ),
         flags_( stack_unwind == attr.do_unwind
             ? flag_force_unwind
             : flag_dont_force_unwind),
