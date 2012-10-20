@@ -51,7 +51,7 @@ struct coroutine_base_resume< Signature, D, void, 0 >
             hldr_to.ctx,
             static_cast< D * >( this)->callee_,
             reinterpret_cast< intptr_t >( & hldr_to),
-            fpu_preserved == static_cast< D * >( this)->preserve_fpu_) ) );
+            static_cast< D * >( this)->preserve_fpu() ) ) );
         static_cast< D * >( this)->callee_ = hldr_from->ctx;
         if ( hldr_from->force_unwind) throw forced_unwind();
         if ( static_cast< D * >( this)->except_)
@@ -75,7 +75,7 @@ public:
             hldr_to.ctx,
             static_cast< D * >( this)->callee_,
             reinterpret_cast< intptr_t >( & hldr_to),
-            fpu_preserved == static_cast< D * >( this)->preserve_fpu_) ) );
+            static_cast< D * >( this)->preserve_fpu() ) ) );
         static_cast< D * >( this)->callee_ = hldr_from->ctx;
         result_ = hldr_from->data;
         if ( hldr_from->force_unwind) throw forced_unwind();
@@ -107,7 +107,7 @@ struct coroutine_base_resume< Signature, D, void, 1 >
             hldr_to.ctx,
             static_cast< D * >( this)->callee_,
             reinterpret_cast< intptr_t >( & hldr_to),
-            fpu_preserved == static_cast< D * >( this)->preserve_fpu_) ) );
+            static_cast< D * >( this)->preserve_fpu() ) ) );
         static_cast< D * >( this)->callee_ = hldr_from->ctx;
         if ( hldr_from->force_unwind) throw forced_unwind();
         if ( static_cast< D * >( this)->except_)
@@ -134,7 +134,7 @@ public:
             hldr_to.ctx,
             static_cast< D * >( this)->callee_,
             reinterpret_cast< intptr_t >( & hldr_to),
-            fpu_preserved == static_cast< D * >( this)->preserve_fpu_) ) );
+            static_cast< D * >( this)->preserve_fpu() ) ) );
         static_cast< D * >( this)->callee_ = hldr_from->ctx;
         result_ = hldr_from->data;
         if ( hldr_from->force_unwind) throw forced_unwind();
@@ -176,7 +176,7 @@ struct coroutine_base_resume< Signature, D, void, n > \
                 hldr_to.ctx, \
                 static_cast< D * >( this)->callee_, \
                 reinterpret_cast< intptr_t >( & hldr_to), \
-                fpu_preserved == static_cast< D * >( this)->preserve_fpu_) ) ); \
+                static_cast< D * >( this)->preserve_fpu() ) ) ); \
         static_cast< D * >( this)->callee_ = hldr_from->ctx; \
         if ( hldr_from->force_unwind) throw forced_unwind(); \
         if ( static_cast< D * >( this)->except_) \
@@ -204,7 +204,7 @@ public: \
                 hldr_to.ctx, \
                 static_cast< D * >( this)->callee_, \
                 reinterpret_cast< intptr_t >( & hldr_to), \
-                fpu_preserved == static_cast< D * >( this)->preserve_fpu_) ) ); \
+                static_cast< D * >( this)->preserve_fpu() ) ) ); \
         static_cast< D * >( this)->callee_ = hldr_from->ctx; \
         result_ = hldr_from->data; \
         if ( hldr_from->force_unwind) throw forced_unwind(); \

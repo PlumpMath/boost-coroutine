@@ -19,10 +19,10 @@ namespace detail {
 
 enum flag_t
 {
-    flag_complete               = 1 << 1,
-    flag_unwind_stack           = 1 << 2,
-    flag_force_unwind           = 1 << 3,
-    flag_dont_force_unwind      = 1 << 4
+    flag_complete       = 1 << 1,
+    flag_unwind_stack   = 1 << 2,
+    flag_force_unwind   = 1 << 3,
+    flag_preserve_fpu   = 1 << 4
 };
 
 }}}

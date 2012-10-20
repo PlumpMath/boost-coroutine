@@ -66,7 +66,6 @@ private:
     context::fcontext_t *   callee_;
     int                     flags_;
     exception_ptr           except_;
-    bool                    preserve_fpu_;
 
 protected:
     virtual void deallocate_object() = 0;
@@ -84,12 +83,12 @@ public:
         sp_( alloc.allocate( size_) ),
         caller_(),
         callee_( context::make_fcontext( sp_, size_, fn) ),
-        flags_( stack_unwind == attr.do_unwind
-            ? flag_force_unwind
-            : flag_dont_force_unwind),
-        except_(),
-        preserve_fpu_( attr.preserve_fpu)
-    {}
+        flags_( 0),
+        except_()
+    {
+        if ( stack_unwind == attr.do_unwind) flags_ |= flag_force_unwind;
+        if ( attr.preserve_fpu) flags_ |= flag_preserve_fpu;
+    }
 
     coroutine_base( context::fcontext_t * callee, bool preserve_fpu) :
         coroutine_base_resume<
@@ -102,10 +101,9 @@ public:
         sp_( 0),
         caller_(),
         callee_( callee),
-        flags_( flag_dont_force_unwind),
-        except_(),
-        preserve_fpu_( preserve_fpu)
-    {}
+        flags_( 0),
+        except_()
+    { if ( preserve_fpu) flags_ |= flag_preserve_fpu; }
 
     virtual ~coroutine_base()
     {}
@@ -115,6 +113,9 @@ public:
 
     bool unwind_requested() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_unwind_stack); }
+
+    bool preserve_fpu() const BOOST_NOEXCEPT
+    { return 0 != ( flags_ & flag_preserve_fpu); }
 
     bool is_complete() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_complete); }
@@ -128,7 +129,7 @@ public:
         context::jump_fcontext(
             hldr.ctx, callee_,
             reinterpret_cast< intptr_t >( & hldr),
-            fpu_preserved == preserve_fpu_);
+            preserve_fpu() );
         flags_ &= ~flag_unwind_stack;
 
         BOOST_ASSERT( is_complete() );
@@ -165,7 +166,6 @@ private:
     context::fcontext_t *   callee_;
     int                     flags_;
     exception_ptr           except_;
-    bool                    preserve_fpu_;
 
 protected:
     virtual void deallocate_object() = 0;
@@ -183,12 +183,12 @@ public:
         sp_( alloc.allocate( size_) ),
         caller_(),
         callee_( context::make_fcontext( sp_, size_, fn) ),
-        flags_( stack_unwind == attr.do_unwind
-            ? flag_force_unwind
-            : flag_dont_force_unwind),
-        except_(),
-        preserve_fpu_( attr.preserve_fpu)
-    {}
+        flags_( 0),
+        except_()
+    {
+        if ( stack_unwind == attr.do_unwind) flags_ |= flag_force_unwind;
+        if ( attr.preserve_fpu) flags_ |= flag_preserve_fpu;
+    }
 
     coroutine_base( context::fcontext_t * callee, bool preserve_fpu) :
         coroutine_base_resume<
@@ -201,10 +201,9 @@ public:
         sp_( 0),
         caller_(),
         callee_( callee),
-        flags_( flag_dont_force_unwind),
-        except_(),
-        preserve_fpu_( preserve_fpu)
-    {}
+        flags_( 0),
+        except_()
+    { if ( preserve_fpu) flags_ |= flag_preserve_fpu; }
 
     virtual ~coroutine_base()
     {}
@@ -214,6 +213,9 @@ public:
 
     bool unwind_requested() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_unwind_stack); }
+
+    bool preserve_fpu() const BOOST_NOEXCEPT
+    { return 0 != ( flags_ & flag_preserve_fpu); }
 
     bool is_complete() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_complete); }
@@ -227,7 +229,7 @@ public:
         context::jump_fcontext(
             hldr.ctx, callee_,
             reinterpret_cast< intptr_t >( & hldr),
-            fpu_preserved == preserve_fpu_);
+            preserve_fpu() );
         flags_ &= ~flag_unwind_stack;
 
         BOOST_ASSERT( is_complete() );
@@ -265,7 +267,6 @@ private:
     context::fcontext_t *   callee_;
     int                     flags_;
     exception_ptr           except_;
-    bool                    preserve_fpu_;
 
 protected:
     virtual void deallocate_object() = 0;
@@ -283,12 +284,12 @@ public:
         sp_( alloc.allocate( size_) ),
         caller_(),
         callee_( context::make_fcontext( sp_, size_, fn) ),
-        flags_( stack_unwind == attr.do_unwind
-            ? flag_force_unwind
-            : flag_dont_force_unwind),
-        except_(),
-        preserve_fpu_( attr.preserve_fpu)
-    {}
+        flags_( 0),
+        except_()
+    {
+        if ( stack_unwind == attr.do_unwind) flags_ |= flag_force_unwind;
+        if ( attr.preserve_fpu) flags_ |= flag_preserve_fpu;
+    }
 
     coroutine_base( context::fcontext_t * callee, bool preserve_fpu) :
         coroutine_base_resume<
@@ -301,10 +302,9 @@ public:
         sp_( 0),
         caller_(),
         callee_( callee),
-        flags_( flag_dont_force_unwind),
-        except_(),
-        preserve_fpu_( preserve_fpu)
-    {}
+        flags_( 0),
+        except_()
+    { if ( preserve_fpu) flags_ |= flag_preserve_fpu; }
 
     virtual ~coroutine_base()
     {}
@@ -314,6 +314,9 @@ public:
 
     bool unwind_requested() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_unwind_stack); }
+
+    bool preserve_fpu() const BOOST_NOEXCEPT
+    { return 0 != ( flags_ & flag_preserve_fpu); }
 
     bool is_complete() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_complete); }
@@ -327,7 +330,7 @@ public:
         context::jump_fcontext(
             hldr.ctx, callee_,
             reinterpret_cast< intptr_t >( & hldr),
-            fpu_preserved == preserve_fpu_);
+            preserve_fpu() );
         flags_ &= ~flag_unwind_stack;
 
         BOOST_ASSERT( is_complete() );
@@ -366,7 +369,6 @@ private:
     context::fcontext_t *   callee_;
     int                     flags_;
     exception_ptr           except_;
-    bool                    preserve_fpu_;
 
 protected:
     virtual void deallocate_object() = 0;
@@ -384,12 +386,12 @@ public:
         sp_( alloc.allocate( size_) ),
         caller_(),
         callee_( context::make_fcontext( sp_, size_, fn) ),
-        flags_( stack_unwind == attr.do_unwind
-            ? flag_force_unwind
-            : flag_dont_force_unwind),
-        except_(),
-        preserve_fpu_( attr.preserve_fpu)
-    {}
+        flags_( 0),
+        except_()
+    {
+        if ( stack_unwind == attr.do_unwind) flags_ |= flag_force_unwind;
+        if ( attr.preserve_fpu) flags_ |= flag_preserve_fpu;
+    }
 
     coroutine_base( context::fcontext_t * callee, bool preserve_fpu) :
         coroutine_base_resume<
@@ -402,10 +404,9 @@ public:
         sp_( 0),
         caller_(),
         callee_( callee),
-        flags_( flag_dont_force_unwind),
-        except_(),
-        preserve_fpu_( preserve_fpu)
-    {}
+        flags_( 0),
+        except_()
+    { if ( preserve_fpu) flags_ |= flag_preserve_fpu; }
 
     virtual ~coroutine_base()
     {}
@@ -415,6 +416,9 @@ public:
 
     bool unwind_requested() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_unwind_stack); }
+
+    bool preserve_fpu() const BOOST_NOEXCEPT
+    { return 0 != ( flags_ & flag_preserve_fpu); }
 
     bool is_complete() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_complete); }
@@ -428,7 +432,7 @@ public:
         context::jump_fcontext(
             hldr.ctx, callee_,
             reinterpret_cast< intptr_t >( & hldr),
-            fpu_preserved == preserve_fpu_);
+            preserve_fpu() );
         flags_ &= ~flag_unwind_stack;
 
         BOOST_ASSERT( is_complete() );
