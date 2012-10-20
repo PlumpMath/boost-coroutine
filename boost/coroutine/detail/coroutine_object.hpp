@@ -141,7 +141,10 @@ public:
 #endif
 
     ~coroutine_object()
-    { deallocate_stack( stack_alloc_); }
+    {
+        if ( ! this->is_complete() && this->unwind_forced() ) this->unwind_stack();
+        stack_alloc_.deallocate( this->sp_, this->size_);
+    }
 
     void run( context::fcontext_t * callee)
     {
@@ -259,7 +262,10 @@ public:
 #endif
 
     ~coroutine_object()
-    { deallocate_stack( stack_alloc_); }
+    {
+        if ( ! this->is_complete() && this->unwind_forced() ) this->unwind_stack();
+        stack_alloc_.deallocate( this->sp_, this->size_);
+    }
 
     void run( context::fcontext_t * callee)
     {
@@ -455,7 +461,10 @@ public:
 #endif
 
     ~coroutine_object()
-    { deallocate_stack( stack_alloc_); }
+    {
+        if ( ! this->is_complete() && this->unwind_forced() ) this->unwind_stack();
+        stack_alloc_.deallocate( this->sp_, this->size_);
+    }
 
     void run( context::fcontext_t * callee)
     {
@@ -638,7 +647,10 @@ public:
 #endif
 
     ~coroutine_object()
-    { deallocate_stack( stack_alloc_); }
+    {
+        if ( ! this->is_complete() && this->unwind_forced() ) this->unwind_stack();
+        stack_alloc_.deallocate( this->sp_, this->size_);
+    }
 
     void run( context::fcontext_t * callee)
     {
@@ -819,7 +831,10 @@ public:
 #endif
 
     ~coroutine_object()
-    { deallocate_stack( stack_alloc_); }
+    {
+        if ( ! this->is_complete() && this->unwind_forced() ) this->unwind_stack();
+        stack_alloc_.deallocate( this->sp_, this->size_);
+    }
 
     void run( context::fcontext_t * callee)
     {
@@ -1002,7 +1017,10 @@ public:
 #endif
 
     ~coroutine_object()
-    { deallocate_stack( stack_alloc_); }
+    {
+        if ( ! this->is_complete() && this->unwind_forced() ) this->unwind_stack();
+        stack_alloc_.deallocate( this->sp_, this->size_);
+    }
 
     void run( context::fcontext_t * callee)
     {

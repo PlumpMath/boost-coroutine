@@ -69,13 +69,6 @@ private:
     bool                    preserve_fpu_;
 
 protected:
-    template< typename StackAllocator >
-    void deallocate_stack( StackAllocator & alloc) BOOST_NOEXCEPT
-    {
-        if ( ! is_complete() && unwind_forced() ) unwind_stack();
-        if ( sp_) alloc.deallocate( sp_, size_);
-    }
-
     virtual void deallocate_object() = 0;
 
 public:
@@ -175,13 +168,6 @@ private:
     bool                    preserve_fpu_;
 
 protected:
-    template< typename StackAllocator >
-    void deallocate_stack( StackAllocator & alloc) BOOST_NOEXCEPT
-    {
-        if ( ! is_complete() && unwind_forced() ) unwind_stack();
-        if ( sp_) alloc.deallocate( sp_, size_);
-    }
-
     virtual void deallocate_object() = 0;
 
 public:
@@ -282,13 +268,6 @@ private:
     bool                    preserve_fpu_;
 
 protected:
-    template< typename StackAllocator >
-    void deallocate_stack( StackAllocator & alloc) BOOST_NOEXCEPT
-    {
-        if ( ! is_complete() && unwind_forced() ) unwind_stack();
-        if ( sp_) alloc.deallocate( sp_, size_);
-    }
-
     virtual void deallocate_object() = 0;
 
 public:
@@ -390,13 +369,6 @@ private:
     bool                    preserve_fpu_;
 
 protected:
-    template< typename StackAllocator >
-    void deallocate_stack( StackAllocator & alloc) BOOST_NOEXCEPT
-    {
-        if ( ! is_complete() && unwind_forced() ) unwind_stack();
-        if ( sp_) alloc.deallocate( sp_, size_);
-    }
-
     virtual void deallocate_object() = 0;
 
 public:
