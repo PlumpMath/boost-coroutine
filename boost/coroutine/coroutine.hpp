@@ -65,15 +65,15 @@ class coroutine;
 
 template< typename Signature >
 class coroutine< Signature, 0 > : public detail::coroutine_op<
-                        Signature, coroutine< Signature >,
-                        typename function_traits< Signature >::result_type,
-                        0
-                  >,
-                  public detail::coroutine_get<
-                        Signature, coroutine< Signature >,
-                        typename function_traits< Signature >::result_type,
-                        0
-                  >
+                                        Signature, coroutine< Signature >,
+                                        typename function_traits< Signature >::result_type,
+                                        0
+                                  >,
+                                  public detail::coroutine_get<
+                                        Signature, coroutine< Signature >,
+                                        typename function_traits< Signature >::result_type,
+                                        0
+                                  >
 {
 private:
     typedef detail::coroutine_base<
