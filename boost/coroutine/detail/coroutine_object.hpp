@@ -9,6 +9,7 @@
 
 #include <cstddef>
 
+#include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include <boost/context/fcontext.hpp>
 #include <boost/move/move.hpp>
@@ -74,16 +75,15 @@ public:
         coroutine_object<
             Fn, StackAllocator, Allocator, Signature, void, 0, Caller
         >
-    >::other                                            allocator_t;
+    >::other                                        allocator_t;
 
 private:
     typedef coroutine_base< Signature, void, 0 >    base_type;
 
-    Fn              fn_;
-    std::size_t     size_;
-    void        *   sp_;
-    StackAllocator  stack_alloc_;
-    allocator_t     alloc_;
+    Fn                  fn_;
+    context::stack_t    stack_;
+    StackAllocator      stack_alloc_;
+    allocator_t         alloc_;
 
     static void destroy_( allocator_t & alloc, coroutine_object * p)
     {
@@ -133,8 +133,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -149,8 +148,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -165,8 +163,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -175,7 +172,7 @@ public:
     ~coroutine_object()
     {
         if ( ! this->is_complete() && this->force_unwind() ) unwind_stack_();
-        stack_alloc_.deallocate( this->sp_, this->size_);
+        stack_alloc_.deallocate( stack_.sp, stack_.size);
     }
 
     void run( context::fcontext_t * callee)
@@ -231,11 +228,10 @@ public:
 private:
     typedef coroutine_base< Signature, Result, 0 >  base_type;
 
-    Fn              fn_;
-    std::size_t     size_;
-    void        *   sp_;
-    StackAllocator  stack_alloc_;
-    allocator_t     alloc_;
+    Fn                  fn_;
+    context::stack_t    stack_;
+    StackAllocator      stack_alloc_;
+    allocator_t         alloc_;
 
     static void destroy_( allocator_t & alloc, coroutine_object * p)
     {
@@ -286,8 +282,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -302,8 +297,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -318,8 +312,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -328,7 +321,7 @@ public:
     ~coroutine_object()
     {
         if ( ! this->is_complete() && this->force_unwind() ) unwind_stack_();
-        stack_alloc_.deallocate( this->sp_, this->size_);
+        stack_alloc_.deallocate( stack_.sp, stack_.size);
     }
 
     void run( context::fcontext_t * callee)
@@ -385,11 +378,10 @@ public:
 private:
     typedef coroutine_base< Signature, void, 1 >        base_type;
 
-    Fn              fn_;
-    std::size_t     size_;
-    void        *   sp_;
-    StackAllocator  stack_alloc_;
-    allocator_t     alloc_;
+    Fn                  fn_;
+    context::stack_t    stack_;
+    StackAllocator      stack_alloc_;
+    allocator_t         alloc_;
 
     static void destroy_( allocator_t & alloc, coroutine_object * p)
     {
@@ -484,8 +476,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -503,8 +494,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -519,8 +509,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -535,8 +524,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -551,8 +539,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -567,8 +554,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -577,7 +563,7 @@ public:
     ~coroutine_object()
     {
         if ( ! this->is_complete() && this->force_unwind() ) unwind_stack_();
-        stack_alloc_.deallocate( this->sp_, this->size_);
+        stack_alloc_.deallocate( stack_.sp, stack_.size);
     }
 
     void run( context::fcontext_t * callee)
@@ -615,11 +601,10 @@ public:
 private:
     typedef coroutine_base< Signature, Result, 1 >    base_type;
 
-    Fn              fn_;
-    std::size_t     size_;
-    void        *   sp_;
-    StackAllocator  stack_alloc_;
-    allocator_t     alloc_;
+    Fn                  fn_;
+    context::stack_t    stack_;
+    StackAllocator      stack_alloc_;
+    allocator_t         alloc_;
 
     static void destroy_( allocator_t & alloc, coroutine_object * p)
     {
@@ -720,8 +705,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -736,8 +720,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -752,8 +735,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -768,8 +750,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -784,8 +765,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -800,8 +780,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -810,7 +789,7 @@ public:
     ~coroutine_object()
     {
         if ( ! this->is_complete() && this->force_unwind() ) unwind_stack_();
-        stack_alloc_.deallocate( this->sp_, this->size_);
+        stack_alloc_.deallocate( stack_.sp, stack_.size);
     }
 
     void run( context::fcontext_t * callee)
@@ -848,11 +827,10 @@ public:
 private:
     typedef coroutine_base< Signature, void, arity >    base_type;
 
-    Fn              fn_;
-    std::size_t     size_;
-    void        *   sp_;
-    StackAllocator  stack_alloc_;
-    allocator_t     alloc_;
+    Fn                  fn_;
+    context::stack_t    stack_;
+    StackAllocator      stack_alloc_;
+    allocator_t         alloc_;
 
     static void destroy_( allocator_t & alloc, coroutine_object * p)
     {
@@ -951,8 +929,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -967,8 +944,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -983,8 +959,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -999,8 +974,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -1015,8 +989,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -1031,8 +1004,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -1041,7 +1013,7 @@ public:
     ~coroutine_object()
     {
         if ( ! this->is_complete() && this->force_unwind() ) unwind_stack_();
-        stack_alloc_.deallocate( this->sp_, this->size_);
+        stack_alloc_.deallocate( stack_.sp, stack_.size);
     }
 
     void run( context::fcontext_t * callee)
@@ -1079,11 +1051,10 @@ public:
 private:
     typedef coroutine_base< Signature, Result, arity >  base_type;
 
-    Fn              fn_;
-    std::size_t     size_;
-    void        *   sp_;
-    StackAllocator  stack_alloc_;
-    allocator_t     alloc_;
+    Fn                  fn_;
+    context::stack_t    stack_;
+    StackAllocator      stack_alloc_;
+    allocator_t         alloc_;
 
     static void destroy_( allocator_t & alloc, coroutine_object * p)
     {
@@ -1184,8 +1155,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -1200,8 +1170,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -1216,8 +1185,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -1232,8 +1200,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -1248,8 +1215,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -1264,8 +1230,7 @@ public:
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        size_( base_type::callee_->fc_stack.size),
-        sp_( base_type::callee_->fc_stack.sp),
+        stack_( base_type::callee_->fc_stack),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -1274,7 +1239,7 @@ public:
     ~coroutine_object()
     {
         if ( ! this->is_complete() && this->force_unwind() ) unwind_stack_();
-        stack_alloc_.deallocate( this->sp_, this->size_);
+        stack_alloc_.deallocate( stack_.sp, stack_.size);
     }
 
     void run( context::fcontext_t * callee)
