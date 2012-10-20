@@ -99,28 +99,6 @@ private:
 
     BOOST_MOVABLE_BUT_NOT_COPYABLE( coroutine);
 
-public:
-    typedef typename detail::caller<
-        coroutine,
-        Signature,
-        typename function_traits< Signature >::result_type,
-        0
-    >::type                                                     caller_type;
-
-    coroutine() BOOST_NOEXCEPT :
-        detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
-        >(),
-        detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
-        >(),
-        impl_()
-    {}
-
     template< typename Allocator >
     coroutine( context::fcontext_t * callee,
                bool preserve_fpu,
@@ -149,6 +127,28 @@ public:
             ::new( a.allocate( 1) ) self_t(
                 callee, preserve_fpu, a) );
     }
+
+public:
+    typedef typename detail::caller<
+        coroutine,
+        Signature,
+        typename function_traits< Signature >::result_type,
+        0
+    >::type                                                     caller_type;
+
+    coroutine() BOOST_NOEXCEPT :
+        detail::coroutine_op<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            0
+        >(),
+        detail::coroutine_get<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            0
+        >(),
+        impl_()
+    {}
 
 #ifndef BOOST_NO_RVALUE_REFERENCES
     template< typename Fn >
@@ -531,29 +531,6 @@ private:
 
     BOOST_MOVABLE_BUT_NOT_COPYABLE( coroutine);
 
-public:
-    typedef typename detail::caller<
-        coroutine,
-        Signature,
-        typename function_traits< Signature >::result_type,
-        function_traits< Signature >::arity
-    >::type                                                     caller_type;
-    typedef typename detail::arg< Signature >::type             arguments;
-
-    coroutine() BOOST_NOEXCEPT :
-        detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
-        >(),
-        detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
-        >(),
-        impl_()
-    {}
-
     template< typename Allocator >
     coroutine( context::fcontext_t * callee,
                bool preserve_fpu,
@@ -582,6 +559,29 @@ public:
             ::new( a.allocate( 1) ) self_t(
                 callee, preserve_fpu, a) );
     }
+
+public:
+    typedef typename detail::caller<
+        coroutine,
+        Signature,
+        typename function_traits< Signature >::result_type,
+        function_traits< Signature >::arity
+    >::type                                                     caller_type;
+    typedef typename detail::arg< Signature >::type             arguments;
+
+    coroutine() BOOST_NOEXCEPT :
+        detail::coroutine_op<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        detail::coroutine_get<
+            Signature, coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        impl_()
+    {}
 
 #ifndef BOOST_NO_RVALUE_REFERENCES
     template< typename Fn >
