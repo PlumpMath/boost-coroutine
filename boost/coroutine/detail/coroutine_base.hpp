@@ -120,21 +120,6 @@ public:
     bool is_complete() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_complete); }
 
-    void unwind_stack() BOOST_NOEXCEPT
-    {
-        BOOST_ASSERT( ! is_complete() );
-
-        flags_ |= flag_unwind_stack;
-        holder< void > hldr( & caller_, true);
-        context::jump_fcontext(
-            hldr.ctx, callee_,
-            reinterpret_cast< intptr_t >( & hldr),
-            preserve_fpu() );
-        flags_ &= ~flag_unwind_stack;
-
-        BOOST_ASSERT( is_complete() );
-    }
-
     friend inline void intrusive_ptr_add_ref( coroutine_base * p) BOOST_NOEXCEPT
     { ++p->use_count_; }
 
@@ -219,21 +204,6 @@ public:
 
     bool is_complete() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_complete); }
-
-    void unwind_stack() BOOST_NOEXCEPT
-    {
-        BOOST_ASSERT( ! is_complete() );
-
-        flags_ |= flag_unwind_stack;
-        holder< void > hldr( & caller_, true);
-        context::jump_fcontext(
-            hldr.ctx, callee_,
-            reinterpret_cast< intptr_t >( & hldr),
-            preserve_fpu() );
-        flags_ &= ~flag_unwind_stack;
-
-        BOOST_ASSERT( is_complete() );
-    }
 
     friend inline void intrusive_ptr_add_ref( coroutine_base * p) BOOST_NOEXCEPT
     { ++p->use_count_; }
@@ -321,21 +291,6 @@ public:
     bool is_complete() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_complete); }
 
-    void unwind_stack() BOOST_NOEXCEPT
-    {
-        BOOST_ASSERT( ! is_complete() );
-
-        flags_ |= flag_unwind_stack;
-        holder< arg_type > hldr( & caller_, true);
-        context::jump_fcontext(
-            hldr.ctx, callee_,
-            reinterpret_cast< intptr_t >( & hldr),
-            preserve_fpu() );
-        flags_ &= ~flag_unwind_stack;
-
-        BOOST_ASSERT( is_complete() );
-    }
-
     friend inline void intrusive_ptr_add_ref( coroutine_base * p) BOOST_NOEXCEPT
     { ++p->use_count_; }
 
@@ -422,21 +377,6 @@ public:
 
     bool is_complete() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_complete); }
-
-    void unwind_stack() BOOST_NOEXCEPT
-    {
-        BOOST_ASSERT( ! is_complete() );
-
-        flags_ |= flag_unwind_stack;
-        holder< arg_type > hldr( & caller_, true);
-        context::jump_fcontext(
-            hldr.ctx, callee_,
-            reinterpret_cast< intptr_t >( & hldr),
-            preserve_fpu() );
-        flags_ &= ~flag_unwind_stack;
-
-        BOOST_ASSERT( is_complete() );
-    }
 
     friend inline void intrusive_ptr_add_ref( coroutine_base * p) BOOST_NOEXCEPT
     { ++p->use_count_; }

@@ -104,6 +104,21 @@ private:
         if ( this->except_) rethrow_exception( this->except_);
     }
 
+    void unwind_stack_() BOOST_NOEXCEPT
+    {
+        BOOST_ASSERT( ! this->is_complete() );
+
+        this->flags_ |= flag_unwind_stack;
+        holder< void > hldr( & this->caller_, true);
+        context::jump_fcontext(
+            hldr.ctx, this->callee_,
+            reinterpret_cast< intptr_t >( & hldr),
+            this->preserve_fpu() );
+        this->flags_ &= ~flag_unwind_stack;
+
+        BOOST_ASSERT( this->is_complete() );
+    }
+
 public:
 #ifndef BOOST_NO_RVALUE_REFERENCES
     coroutine_object( Fn && fn, attributes const& attr,
@@ -142,7 +157,7 @@ public:
 
     ~coroutine_object()
     {
-        if ( ! this->is_complete() && this->unwind_forced() ) this->unwind_stack();
+        if ( ! this->is_complete() && this->unwind_forced() ) unwind_stack_();
         stack_alloc_.deallocate( this->sp_, this->size_);
     }
 
@@ -225,6 +240,21 @@ private:
         if ( this->except_) rethrow_exception( this->except_);
     }
 
+    void unwind_stack_() BOOST_NOEXCEPT
+    {
+        BOOST_ASSERT( ! this->is_complete() );
+
+        this->flags_ |= flag_unwind_stack;
+        holder< void > hldr( & this->caller_, true);
+        context::jump_fcontext(
+            hldr.ctx, this->callee_,
+            reinterpret_cast< intptr_t >( & hldr),
+            this->preserve_fpu() );
+        this->flags_ &= ~flag_unwind_stack;
+
+        BOOST_ASSERT( this->is_complete() );
+    }
+
 public:
 #ifndef BOOST_NO_RVALUE_REFERENCES
     coroutine_object( Fn && fn, attributes const& attr,
@@ -263,7 +293,7 @@ public:
 
     ~coroutine_object()
     {
-        if ( ! this->is_complete() && this->unwind_forced() ) this->unwind_stack();
+        if ( ! this->is_complete() && this->unwind_forced() ) unwind_stack_();
         stack_alloc_.deallocate( this->sp_, this->size_);
     }
 
@@ -391,6 +421,21 @@ private:
         BOOST_ASSERT_MSG( false, "coroutine is complete");
     }
 
+    void unwind_stack_() BOOST_NOEXCEPT
+    {
+        BOOST_ASSERT( ! this->is_complete() );
+
+        this->flags_ |= flag_unwind_stack;
+        holder< void > hldr( & this->caller_, true);
+        context::jump_fcontext(
+            hldr.ctx, this->callee_,
+            reinterpret_cast< intptr_t >( & hldr),
+            this->preserve_fpu() );
+        this->flags_ &= ~flag_unwind_stack;
+
+        BOOST_ASSERT( this->is_complete() );
+    }
+
 public:
 #ifndef BOOST_NO_RVALUE_REFERENCES
     coroutine_object( Fn && fn, attributes const& attr,
@@ -462,7 +507,7 @@ public:
 
     ~coroutine_object()
     {
-        if ( ! this->is_complete() && this->unwind_forced() ) this->unwind_stack();
+        if ( ! this->is_complete() && this->unwind_forced() ) unwind_stack_();
         stack_alloc_.deallocate( this->sp_, this->size_);
     }
 
@@ -577,6 +622,21 @@ private:
         BOOST_ASSERT_MSG( false, "coroutine is complete");
     }
 
+    void unwind_stack_() BOOST_NOEXCEPT
+    {
+        BOOST_ASSERT( ! this->is_complete() );
+
+        this->flags_ |= flag_unwind_stack;
+        holder< void > hldr( & this->caller_, true);
+        context::jump_fcontext(
+            hldr.ctx, this->callee_,
+            reinterpret_cast< intptr_t >( & hldr),
+            this->preserve_fpu() );
+        this->flags_ &= ~flag_unwind_stack;
+
+        BOOST_ASSERT( this->is_complete() );
+    }
+
 public:
 #ifndef BOOST_NO_RVALUE_REFERENCES
     coroutine_object( Fn && fn, attributes const& attr,
@@ -648,7 +708,7 @@ public:
 
     ~coroutine_object()
     {
-        if ( ! this->is_complete() && this->unwind_forced() ) this->unwind_stack();
+        if ( ! this->is_complete() && this->unwind_forced() ) unwind_stack_();
         stack_alloc_.deallocate( this->sp_, this->size_);
     }
 
@@ -761,6 +821,21 @@ private:
         BOOST_ASSERT_MSG( false, "coroutine is complete");
     }
 
+    void unwind_stack_() BOOST_NOEXCEPT
+    {
+        BOOST_ASSERT( ! this->is_complete() );
+
+        this->flags_ |= flag_unwind_stack;
+        holder< void > hldr( & this->caller_, true);
+        context::jump_fcontext(
+            hldr.ctx, this->callee_,
+            reinterpret_cast< intptr_t >( & hldr),
+            this->preserve_fpu() );
+        this->flags_ &= ~flag_unwind_stack;
+
+        BOOST_ASSERT( this->is_complete() );
+    }
+
 public:
 #ifndef BOOST_NO_RVALUE_REFERENCES
     coroutine_object( Fn && fn, attributes const& attr,
@@ -832,7 +907,7 @@ public:
 
     ~coroutine_object()
     {
-        if ( ! this->is_complete() && this->unwind_forced() ) this->unwind_stack();
+        if ( ! this->is_complete() && this->unwind_forced() ) unwind_stack_();
         stack_alloc_.deallocate( this->sp_, this->size_);
     }
 
@@ -947,6 +1022,21 @@ private:
         BOOST_ASSERT_MSG( false, "coroutine is complete");
     }
 
+    void unwind_stack_() BOOST_NOEXCEPT
+    {
+        BOOST_ASSERT( ! this->is_complete() );
+
+        this->flags_ |= flag_unwind_stack;
+        holder< void > hldr( & this->caller_, true);
+        context::jump_fcontext(
+            hldr.ctx, this->callee_,
+            reinterpret_cast< intptr_t >( & hldr),
+            this->preserve_fpu() );
+        this->flags_ &= ~flag_unwind_stack;
+
+        BOOST_ASSERT( this->is_complete() );
+    }
+
 public:
 #ifndef BOOST_NO_RVALUE_REFERENCES
     coroutine_object( Fn && fn, attributes const& attr,
@@ -1018,7 +1108,7 @@ public:
 
     ~coroutine_object()
     {
-        if ( ! this->is_complete() && this->unwind_forced() ) this->unwind_stack();
+        if ( ! this->is_complete() && this->unwind_forced() ) unwind_stack_();
         stack_alloc_.deallocate( this->sp_, this->size_);
     }
 
