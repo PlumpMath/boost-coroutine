@@ -101,7 +101,7 @@ private:
 
     template< typename Allocator >
     coroutine( context::fcontext_t * callee,
-               bool preserve_fpu,
+               bool unwind, bool preserve_fpu,
                Allocator const& alloc) :
         detail::coroutine_op<
             Signature, coroutine< Signature >,
@@ -125,7 +125,7 @@ private:
         impl_ = ptr_t(
             // placement new
             ::new( a.allocate( 1) ) self_t(
-                callee, preserve_fpu, a) );
+                callee, unwind, preserve_fpu, a) );
     }
 
 public:
@@ -533,7 +533,7 @@ private:
 
     template< typename Allocator >
     coroutine( context::fcontext_t * callee,
-               bool preserve_fpu,
+               bool unwind, bool preserve_fpu,
                Allocator const& alloc) :
         detail::coroutine_op<
             Signature, coroutine< Signature >,
@@ -557,7 +557,7 @@ private:
         impl_ = ptr_t(
             // placement new
             ::new( a.allocate( 1) ) self_t(
-                callee, preserve_fpu, a) );
+                callee, unwind, preserve_fpu, a) );
     }
 
 public:

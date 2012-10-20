@@ -29,7 +29,6 @@
 #include <boost/coroutine/detail/exceptions.hpp>
 #include <boost/coroutine/detail/flags.hpp>
 #include <boost/coroutine/detail/holder.hpp>
-#include <boost/coroutine/flags.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -58,8 +57,6 @@ private:
     friend class coroutine_object;
 
     std::size_t             use_count_;
-    std::size_t             size_;
-    void                *   sp_;
     context::fcontext_t     caller_;
     context::fcontext_t *   callee_;
     int                     flags_;
@@ -69,39 +66,21 @@ protected:
     virtual void deallocate_object() = 0;
 
 public:
-    template< typename StackAllocator >
-    coroutine_base( void ( * fn)( intptr_t), attributes const& attr, StackAllocator const& alloc) :
+    coroutine_base( context::fcontext_t * callee, bool unwind, bool preserve_fpu) :
         coroutine_base_resume<
             Signature,
             coroutine_base< Signature, Result, arity >,
             Result, arity
         >(),
         use_count_( 0),
-        size_( attr.size),
-        sp_( alloc.allocate( size_) ),
-        caller_(),
-        callee_( context::make_fcontext( sp_, size_, fn) ),
-        flags_( 0),
-        except_()
-    {
-        if ( stack_unwind == attr.do_unwind) flags_ |= flag_force_unwind;
-        if ( attr.preserve_fpu) flags_ |= flag_preserve_fpu;
-    }
-
-    coroutine_base( context::fcontext_t * callee, bool preserve_fpu) :
-        coroutine_base_resume<
-            Signature,
-            coroutine_base< Signature, Result, arity >,
-            Result, arity
-        >(),
-        use_count_( 0),
-        size_( 0),
-        sp_( 0),
         caller_(),
         callee_( callee),
         flags_( 0),
         except_()
-    { if ( preserve_fpu) flags_ |= flag_preserve_fpu; }
+    {
+        if ( unwind) flags_ |= flag_force_unwind;
+        if ( preserve_fpu) flags_ |= flag_preserve_fpu;
+    }
 
     virtual ~coroutine_base()
     {}

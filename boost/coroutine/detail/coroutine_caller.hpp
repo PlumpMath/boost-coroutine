@@ -36,9 +36,9 @@ public:
         >
     >::other   allocator_t;
 
-    coroutine_caller( context::fcontext_t * callee, bool preserve_fpu,
+    coroutine_caller( context::fcontext_t * callee, bool unwind, bool preserve_fpu,
                     allocator_t const& alloc) BOOST_NOEXCEPT :
-        coroutine_base< Signature, Result, arity >( callee, preserve_fpu),
+        coroutine_base< Signature, Result, arity >( callee, unwind, preserve_fpu),
         alloc_( alloc)
     {}
 

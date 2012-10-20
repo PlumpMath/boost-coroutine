@@ -80,6 +80,8 @@ private:
     typedef coroutine_base< Signature, void, 0 >    base_type;
 
     Fn              fn_;
+    std::size_t     size_;
+    void        *   sp_;
     StackAllocator  stack_alloc_;
     allocator_t     alloc_;
 
@@ -125,9 +127,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -136,9 +143,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -147,9 +159,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -163,7 +180,7 @@ public:
 
     void run( context::fcontext_t * callee)
     {
-        Caller c( callee, this->preserve_fpu(), alloc_);
+        Caller c( callee, false, this->preserve_fpu(), alloc_);
         context::fcontext_t caller;
         try
         {
@@ -215,6 +232,8 @@ private:
     typedef coroutine_base< Signature, Result, 0 >  base_type;
 
     Fn              fn_;
+    std::size_t     size_;
+    void        *   sp_;
     StackAllocator  stack_alloc_;
     allocator_t     alloc_;
 
@@ -261,9 +280,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -272,9 +296,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -283,9 +312,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -299,7 +333,7 @@ public:
 
     void run( context::fcontext_t * callee)
     {
-        Caller c( callee, this->preserve_fpu(), alloc_);
+        Caller c( callee, false, this->preserve_fpu(), alloc_);
         context::fcontext_t caller;
         try
         {
@@ -352,6 +386,8 @@ private:
     typedef coroutine_base< Signature, void, 1 >        base_type;
 
     Fn              fn_;
+    std::size_t     size_;
+    void        *   sp_;
     StackAllocator  stack_alloc_;
     allocator_t     alloc_;
 
@@ -442,9 +478,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -455,7 +496,15 @@ public:
         base_type(
             trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
             attr, stack_alloc),
+        base_type(
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -464,9 +513,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -475,9 +529,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -486,9 +545,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -497,9 +561,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -513,13 +582,13 @@ public:
 
     void run( context::fcontext_t * callee)
     {
-        Caller c( callee, this->preserve_fpu(), alloc_);
+        Caller c( callee, false, this->preserve_fpu(), alloc_);
         run_( c);
     }
 
     void run( context::fcontext_t * callee, typename detail::param< arg_type >::type arg)
     {
-        Caller c( callee, this->preserve_fpu(), alloc_);
+        Caller c( callee, false, this->preserve_fpu(), alloc_);
         c.impl_->result_ = arg;
         run_( c);
     }
@@ -547,6 +616,8 @@ private:
     typedef coroutine_base< Signature, Result, 1 >    base_type;
 
     Fn              fn_;
+    std::size_t     size_;
+    void        *   sp_;
     StackAllocator  stack_alloc_;
     allocator_t     alloc_;
 
@@ -643,9 +714,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -654,9 +730,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -665,9 +746,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -676,9 +762,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -687,9 +778,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -698,9 +794,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -714,13 +815,13 @@ public:
 
     void run( context::fcontext_t * callee)
     {
-        Caller c( callee, this->preserve_fpu(), alloc_);
+        Caller c( callee, false, this->preserve_fpu(), alloc_);
         run_( c);
     }
 
     void run( context::fcontext_t * callee, typename detail::param< arg_type >::type arg)
     {
-        Caller c( callee, this->preserve_fpu(), alloc_);
+        Caller c( callee, false, this->preserve_fpu(), alloc_);
         c.impl_->result_ = arg;
         run_( c);
     }
@@ -748,6 +849,8 @@ private:
     typedef coroutine_base< Signature, void, arity >    base_type;
 
     Fn              fn_;
+    std::size_t     size_;
+    void        *   sp_;
     StackAllocator  stack_alloc_;
     allocator_t     alloc_;
 
@@ -842,9 +945,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -853,9 +961,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -864,9 +977,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -875,9 +993,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -886,9 +1009,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -897,9 +1025,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -913,13 +1046,13 @@ public:
 
     void run( context::fcontext_t * callee)
     {
-        Caller c( callee, this->preserve_fpu(), alloc_);
+        Caller c( callee, false, this->preserve_fpu(), alloc_);
         run_( c);
     }
 
     void run( context::fcontext_t * callee, typename detail::param< arg_type >::type arg)
     {
-        Caller c( callee, this->preserve_fpu(), alloc_);
+        Caller c( callee, false, this->preserve_fpu(), alloc_);
         c.impl_->result_ = arg;
         run_( c);
     }
@@ -947,6 +1080,8 @@ private:
     typedef coroutine_base< Signature, Result, arity >  base_type;
 
     Fn              fn_;
+    std::size_t     size_;
+    void        *   sp_;
     StackAllocator  stack_alloc_;
     allocator_t     alloc_;
 
@@ -1043,9 +1178,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -1054,9 +1194,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( static_cast< Fn && >( fn) ),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -1065,9 +1210,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -1076,9 +1226,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -1087,9 +1242,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline1< coroutine_object >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline1< coroutine_object >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -1098,9 +1258,14 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
-            attr, stack_alloc),
+            context::make_fcontext(
+                stack_alloc.allocate( attr.size), attr.size,
+                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            stack_unwind == attr.do_unwind,
+            fpu_preserved == attr.preserve_fpu),
         fn_( fn),
+        size_( base_type::callee_->fc_stack.size),
+        sp_( base_type::callee_->fc_stack.sp),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -1114,13 +1279,13 @@ public:
 
     void run( context::fcontext_t * callee)
     {
-        Caller c( callee, this->preserve_fpu(), alloc_);
+        Caller c( callee, false, this->preserve_fpu(), alloc_);
         run_( c);
     }
 
     void run( context::fcontext_t * callee, typename detail::param< arg_type >::type arg)
     {
-        Caller c( callee, this->preserve_fpu(), alloc_);
+        Caller c( callee, false, this->preserve_fpu(), alloc_);
         c.impl_->result_ = arg;
         run_( c);
     }
