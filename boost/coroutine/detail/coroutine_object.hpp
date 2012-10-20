@@ -157,7 +157,7 @@ public:
 
     ~coroutine_object()
     {
-        if ( ! this->is_complete() && this->unwind_forced() ) unwind_stack_();
+        if ( ! this->is_complete() && this->force_unwind() ) unwind_stack_();
         stack_alloc_.deallocate( this->sp_, this->size_);
     }
 
@@ -293,7 +293,7 @@ public:
 
     ~coroutine_object()
     {
-        if ( ! this->is_complete() && this->unwind_forced() ) unwind_stack_();
+        if ( ! this->is_complete() && this->force_unwind() ) unwind_stack_();
         stack_alloc_.deallocate( this->sp_, this->size_);
     }
 
@@ -507,7 +507,7 @@ public:
 
     ~coroutine_object()
     {
-        if ( ! this->is_complete() && this->unwind_forced() ) unwind_stack_();
+        if ( ! this->is_complete() && this->force_unwind() ) unwind_stack_();
         stack_alloc_.deallocate( this->sp_, this->size_);
     }
 
@@ -708,7 +708,7 @@ public:
 
     ~coroutine_object()
     {
-        if ( ! this->is_complete() && this->unwind_forced() ) unwind_stack_();
+        if ( ! this->is_complete() && this->force_unwind() ) unwind_stack_();
         stack_alloc_.deallocate( this->sp_, this->size_);
     }
 
@@ -907,7 +907,7 @@ public:
 
     ~coroutine_object()
     {
-        if ( ! this->is_complete() && this->unwind_forced() ) unwind_stack_();
+        if ( ! this->is_complete() && this->force_unwind() ) unwind_stack_();
         stack_alloc_.deallocate( this->sp_, this->size_);
     }
 
@@ -1108,7 +1108,7 @@ public:
 
     ~coroutine_object()
     {
-        if ( ! this->is_complete() && this->unwind_forced() ) unwind_stack_();
+        if ( ! this->is_complete() && this->force_unwind() ) unwind_stack_();
         stack_alloc_.deallocate( this->sp_, this->size_);
     }
 

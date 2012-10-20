@@ -108,7 +108,7 @@ public:
     virtual ~coroutine_base()
     {}
 
-    bool unwind_forced() const BOOST_NOEXCEPT
+    bool force_unwind() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_force_unwind); }
 
     bool unwind_requested() const BOOST_NOEXCEPT
@@ -193,11 +193,8 @@ public:
     virtual ~coroutine_base()
     {}
 
-    bool unwind_forced() const BOOST_NOEXCEPT
+    bool force_unwind() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_force_unwind); }
-
-    bool unwind_requested() const BOOST_NOEXCEPT
-    { return 0 != ( flags_ & flag_unwind_stack); }
 
     bool preserve_fpu() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_preserve_fpu); }
@@ -279,7 +276,7 @@ public:
     virtual ~coroutine_base()
     {}
 
-    bool unwind_forced() const BOOST_NOEXCEPT
+    bool force_unwind() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_force_unwind); }
 
     bool unwind_requested() const BOOST_NOEXCEPT
@@ -366,7 +363,7 @@ public:
     virtual ~coroutine_base()
     {}
 
-    bool unwind_forced() const BOOST_NOEXCEPT
+    bool force_unwind() const BOOST_NOEXCEPT
     { return 0 != ( flags_ & flag_force_unwind); }
 
     bool unwind_requested() const BOOST_NOEXCEPT
