@@ -14,7 +14,6 @@
 #include <boost/config.hpp>
 #include <boost/context/fcontext.hpp>
 #include <boost/context/guarded_stack_allocator.hpp>
-#include <boost/cstdint.hpp>
 #include <boost/move/move.hpp>
 #include <boost/range.hpp>
 #include <boost/static_assert.hpp>
@@ -29,7 +28,6 @@
 #include <boost/coroutine/detail/coroutine_object.hpp>
 #include <boost/coroutine/detail/coroutine_op.hpp>
 #include <boost/coroutine/detail/coroutine_caller.hpp>
-#include <boost/coroutine/flags.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX

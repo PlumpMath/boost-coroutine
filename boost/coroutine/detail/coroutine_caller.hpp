@@ -9,14 +9,9 @@
 
 #include <boost/config.hpp>
 #include <boost/context/fcontext.hpp>
-#include <boost/mpl/assert.hpp>
-#include <boost/mpl/equal_to.hpp>
-#include <boost/mpl/int.hpp>
 
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_base.hpp>
-#include <boost/coroutine/detail/exceptions.hpp>
-#include <boost/coroutine/detail/param.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX

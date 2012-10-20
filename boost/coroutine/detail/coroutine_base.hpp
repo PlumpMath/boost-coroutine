@@ -7,28 +7,16 @@
 #ifndef BOOST_CORO_DETAIL_COROUTINE_BASE_H
 #define BOOST_CORO_DETAIL_COROUTINE_BASE_H
 
-#if defined(__PGI)
-#include <stdint.h>
-#endif
-
-#include <cstddef>
-#include <utility>
-
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include <boost/context/fcontext.hpp>
-#include <boost/cstdint.hpp>
 #include <boost/exception_ptr.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <boost/utility.hpp>
 
-#include <boost/coroutine/attributes.hpp>
-#include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_base_resume.hpp>
-#include <boost/coroutine/detail/exceptions.hpp>
 #include <boost/coroutine/detail/flags.hpp>
-#include <boost/coroutine/detail/holder.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -56,7 +44,7 @@ private:
     template< typename X, typename Y, typename Z, typename A, typename B, int, typename C >
     friend class coroutine_object;
 
-    std::size_t             use_count_;
+    unsigned int            use_count_;
     context::fcontext_t     caller_;
     context::fcontext_t *   callee_;
     int                     flags_;

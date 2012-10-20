@@ -11,7 +11,6 @@
 
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
-#include <boost/exception_ptr.hpp>
 #include <boost/context/fcontext.hpp>
 #include <boost/optional.hpp>
 #include <boost/preprocessor/arithmetic/add.hpp>
@@ -19,15 +18,11 @@
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/punctuation/comma_if.hpp>
 #include <boost/preprocessor/repetition/repeat_from_to.hpp>
-#include <boost/range.hpp>
 #include <boost/type_traits/function_traits.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 
 #include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
-#include <boost/coroutine/detail/coroutine_base.hpp>
-#include <boost/coroutine/detail/flags.hpp>
-#include <boost/coroutine/detail/holder.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX

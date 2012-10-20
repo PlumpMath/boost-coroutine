@@ -25,7 +25,6 @@
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/exceptions.hpp>
 #include <boost/coroutine/detail/holder.hpp>
-#include <boost/coroutine/flags.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX

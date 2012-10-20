@@ -7,22 +7,22 @@
 #ifndef BOOST_CORO_DETAIL_COROUTINE_OBJECT_H
 #define BOOST_CORO_DETAIL_COROUTINE_OBJECT_H
 
-#include <cstddef>
-
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
-#include <boost/context/fcontext.hpp>
+#include <boost/cstdint.hpp>
+#include <boost/exception_ptr.hpp>
 #include <boost/move/move.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <boost/type_traits/add_pointer.hpp>
-#include <boost/type_traits/remove_reference.hpp>
-#include <boost/type_traits/is_reference.hpp>
-#include <boost/utility.hpp>
 
 #include <boost/coroutine/attributes.hpp>
+#include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_base.hpp>
+#include <boost/coroutine/detail/exceptions.hpp>
+#include <boost/coroutine/detail/flags.hpp>
+#include <boost/coroutine/detail/holder.hpp>
 #include <boost/coroutine/detail/param.hpp>
+#include <boost/coroutine/flags.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
