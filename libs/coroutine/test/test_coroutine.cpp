@@ -25,7 +25,7 @@
 
 #include <boost/coroutine/all.hpp>
 
-namespace coro = boost::coro;
+namespace coro = boost::coroutines;
 namespace ctx = boost::context;
 
 int value1 = 0;

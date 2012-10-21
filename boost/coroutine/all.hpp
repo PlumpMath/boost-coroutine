@@ -4,11 +4,11 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_CORO_ALL_H
-#define BOOST_CORO_ALL_H
+#ifndef BOOST_COROUTINES_ALL_H
+#define BOOST_COROUTINES_ALL_H
 
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/coroutine.hpp>
 #include <boost/coroutine/flags.hpp>
 
-#endif // BOOST_CORO_ALL_H
+#endif // BOOST_COROUTINES_ALL_H

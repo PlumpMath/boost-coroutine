@@ -24,7 +24,7 @@
 #include "zeit.hpp"
 #endif
 
-namespace coro = boost::coro;
+namespace coro = boost::coroutines;
 namespace ctx = boost::context;
 
 typedef coro::coroutine< void() >   coro_t;

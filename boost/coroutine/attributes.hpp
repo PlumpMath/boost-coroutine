@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_CORO_ATTRIBUTES_H
-#define BOOST_CORO_ATTRIBUTES_H
+#ifndef BOOST_COROUTINES_ATTRIBUTES_H
+#define BOOST_COROUTINES_ATTRIBUTES_H
 
 #include <cstddef>
 
@@ -19,7 +19,7 @@
 #endif
 
 namespace boost {
-namespace coro {
+namespace coroutines {
 
 struct attributes
 {
@@ -82,4 +82,4 @@ struct attributes
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_CORO_ATTRIBUTES_H
+#endif // BOOST_COROUTINES_ATTRIBUTES_H

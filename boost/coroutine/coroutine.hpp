@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_CORO_COROUTINE_H
-#define BOOST_CORO_COROUTINE_H
+#ifndef BOOST_COROUTINES_COROUTINE_H
+#define BOOST_COROUTINES_COROUTINE_H
 
 #include <cstddef>
 #include <memory>
@@ -34,7 +34,7 @@
 #endif
 
 namespace boost {
-namespace coro {
+namespace coroutines {
 namespace detail {
 
 template< template< class, int > class C, typename Signature, typename Result, int arity >
@@ -1097,12 +1097,12 @@ range_end( coroutine< Signature > const& c)
 }
 
 template< typename Signature >
-struct range_mutable_iterator< coro::coroutine< Signature > >
-{ typedef typename coro::coroutine< Signature >::iterator type; };
+struct range_mutable_iterator< coroutines::coroutine< Signature > >
+{ typedef typename coroutines::coroutine< Signature >::iterator type; };
 
 template< typename Signature >
-struct range_const_iterator< coro::coroutine< Signature > >
-{ typedef typename coro::coroutine< Signature >::const_iterator type; };
+struct range_const_iterator< coroutines::coroutine< Signature > >
+{ typedef typename coroutines::coroutine< Signature >::const_iterator type; };
 
 }
 
@@ -1110,4 +1110,4 @@ struct range_const_iterator< coro::coroutine< Signature > >
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_CORO_COROUTINE_H
+#endif // BOOST_COROUTINES_COROUTINE_H

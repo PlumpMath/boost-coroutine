@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_CORO_DETAIL_PARAM_H
-#define BOOST_CORO_DETAIL_PARAM_H
+#ifndef BOOST_COROUTINES_DETAIL_PARAM_H
+#define BOOST_COROUTINES_DETAIL_PARAM_H
 
 #include <boost/config.hpp>
 #include <boost/mpl/eval_if.hpp>
@@ -21,7 +21,7 @@
 #endif
 
 namespace boost {
-namespace coro {
+namespace coroutines {
 namespace detail {
 
 template< typename T >
@@ -43,4 +43,4 @@ struct param :
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_CORO_DETAIL_PARAM_H
+#endif // BOOST_COROUTINES_DETAIL_PARAM_H

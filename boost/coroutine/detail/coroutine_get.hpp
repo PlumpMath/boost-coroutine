@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_CORO_DETAIL_COROUTINE_GET_H
-#define BOOST_CORO_DETAIL_COROUTINE_GET_H
+#ifndef BOOST_COROUTINES_DETAIL_COROUTINE_GET_H
+#define BOOST_COROUTINES_DETAIL_COROUTINE_GET_H
 
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
@@ -18,7 +18,7 @@
 #endif
 
 namespace boost {
-namespace coro {
+namespace coroutines {
 namespace detail {
 
 template< typename Signature, typename D, typename Result, int arity >
@@ -44,4 +44,4 @@ struct coroutine_get< Signature, D, void, arity >
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_CORO_DETAIL_COROUTINE_GET_H
+#endif // BOOST_COROUTINES_DETAIL_COROUTINE_GET_H

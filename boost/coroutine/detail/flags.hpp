@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_CORO_DETAIL_FLAGS_H
-#define BOOST_CORO_DETAIL_FLAGS_H
+#ifndef BOOST_COROUTINES_DETAIL_FLAGS_H
+#define BOOST_COROUTINES_DETAIL_FLAGS_H
 
 #include <boost/config.hpp>
 
@@ -14,7 +14,7 @@
 #endif
 
 namespace boost {
-namespace coro {
+namespace coroutines {
 namespace detail {
 
 enum flag_t
@@ -31,4 +31,4 @@ enum flag_t
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_CORO_DETAIL_FLAGS_H
+#endif // BOOST_COROUTINES_DETAIL_FLAGS_H

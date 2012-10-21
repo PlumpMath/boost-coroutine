@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_CORO_DETAIL_HOLDER_H
-#define BOOST_CORO_DETAIL_HOLDER_H
+#ifndef BOOST_COROUTINES_DETAIL_HOLDER_H
+#define BOOST_COROUTINES_DETAIL_HOLDER_H
 
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
@@ -16,7 +16,7 @@
 #endif
 
 namespace boost {
-namespace coro {
+namespace coroutines {
 namespace detail {
 
 template< typename Data >
@@ -85,4 +85,4 @@ struct holder< void >
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_CORO_DETAIL_HOLDER_H
+#endif // BOOST_COROUTINES_DETAIL_HOLDER_H

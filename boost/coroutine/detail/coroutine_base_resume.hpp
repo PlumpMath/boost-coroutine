@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_CORO_DETAIL_COROUTINE_BASE_RESUME_H
-#define BOOST_CORO_DETAIL_COROUTINE_BASE_RESUME_H
+#ifndef BOOST_COROUTINES_DETAIL_COROUTINE_BASE_RESUME_H
+#define BOOST_COROUTINES_DETAIL_COROUTINE_BASE_RESUME_H
 
 #include <iterator>
 
@@ -31,7 +31,7 @@
 #endif
 
 namespace boost {
-namespace coro {
+namespace coroutines {
 namespace detail {
 
 template< typename Signature, typename D, typename Result, int arity >
@@ -232,4 +232,4 @@ BOOST_PP_REPEAT_FROM_TO(2,11,BOOST_COROUTINE_BASE_RESUME,~)
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_CORO_DETAIL_coroutine_base_resume_H
+#endif // BOOST_COROUTINES_DETAIL_coroutine_base_resume_H

@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_CORO_DETAIL_EXCEPTIONs_H
-#define BOOST_CORO_DETAIL_EXCEPTIONs_H
+#ifndef BOOST_COROUTINES_DETAIL_EXCEPTIONs_H
+#define BOOST_COROUTINES_DETAIL_EXCEPTIONs_H
 
 #include <boost/config.hpp>
 
@@ -14,7 +14,7 @@
 #endif
 
 namespace boost {
-namespace coro {
+namespace coroutines {
 namespace detail {
 
 struct forced_unwind {};
@@ -25,4 +25,4 @@ struct forced_unwind {};
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_CORO_DETAIL_EXCEPTIONs_H
+#endif // BOOST_COROUTINES_DETAIL_EXCEPTIONs_H
