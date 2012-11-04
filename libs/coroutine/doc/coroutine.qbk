@@ -7,32 +7,81 @@
 
 [section:coroutine Coroutine]
 
-Each instance of __coro__ represents a context (CPU registers and stack
-space) of execution or __not_a_coro__. Objects of type __coro__ are
-moveable but not copyable and can be returned by a function.
+Each instance of __coro__ has its own context of execution (CPU registers and
+stack space) or represents __not_a_coro__ (similiar to __thread__).
+Objects of type __coro__ are moveable but not copyable and can be returned by a
+function.
 
         boost::coro::coroutine< void() > f();
 
-        void f()
+        void g()
         {
             boost::coro::coroutine< void() > c( f() );
             c();
         }
 
-[warning If __coro__ is used in a multithreaded application, it can
-migrate between threads, but must not reference __tls__.]
-
-[warning If __fls__ is used on Windows, the user is responsible for calling 
-__fls_alloc__, __fls_free__.]
-
 [note __boost_move__ is used to emulate rvalue references.]
 
 
-[heading Executing a coroutine]
+[heading Creating a coroutine]
 
-A new __coro__ is created from a callable object (known as the
-__coro_fn__). The stack size, stack unwinding and floating-point
-preserving behavior are determined by additional arguments.
+A new __coro__ is created from a __coro_fn__ (function or functor) which will be
+executed in a new __ctx__ (CPU registers and stack space).
+
+[note __coro_fn__ is required to return ['void] and accept a reference of type
+__coro_caller__.]
+
+The template argument __signature__ determines the data-types transfered to
+__coro_fn__ and from __coro_fn__ by calling __coro_op__ and __coro_get___.
+
+        typedef boost::coro::coroutine< int( std::string const&) > coro_t;
+
+        void f( coro_t::caller_type & ca)
+        {
+            ...
+            std::string str( ca.get() ); // argument
+            ...
+            ca( 7);
+            ...
+        }
+
+        std::string str;
+        ...
+        coro_t c( f);
+        c( str); // argument
+        int res = c.get(); // returned value
+
+
+The __coro_fn__ is started at __coro__ construction (similiar to __thread__)
+in a newly created __coro__ complete with registers, flags, stack and
+instruction pointer.
+If __coro_fn__ requires some parameters (types defined by __signature__)
+on startup those parameters must be applied to the __coro__ constructor.
+
+        typedef boost::coro::coroutine< int( std::string const&) > coro_t;
+
+        void f( coro_t::caller_type & ca);
+
+        std::string str;
+        coro_t c( f, str);
+
+
+(multiple arguments)
+
+        typedef boost::coro::coroutine< int( int, std::string const&) > coro_t;
+
+        void f( coro_t::caller_type & ca);
+
+        std::string str("abc");
+        coro_t c( f, coro_t::arguments( 7, str) );
+
+
+[note The maximum number of arguments of __coro_fn__ is limited to 10 (limit
+defined by __boost_tuple__).]
+
+__attrs__, an additional constructor argument of __coro__, defines the stack
+size, stack unwinding and floating-point preserving behavior used for __ctx__
+construction.
 
 The __coro__ constructor uses the __stack_allocator_concept__ from
 __boost_context__ to allocate an associated stack, and the destructor uses the
@@ -41,30 +90,11 @@ __stack_allocator_concept__ is __stack_allocator__ (see documentation of
 __boost_context__), but a custom stack-allocator can be passed to the
 constructor.
 
-The first argument of __coro_fn__  must be a reference of type __coro_self__,
-used for yielding the active coroutine.
 
-        typedef boost::coro::coroutine< void(int) > coro_t;
+[heading Calling a coroutine]
 
-        void f( coro_t::caller_type & self, int i)
-        {
-            ...
-            self.yield();
-            ...
-        }
-
-        coro_t c( boost::bind( f, _1) );
-        c( 7);
-
-The __coro_fn__, as well as its arguments, if any, are copied into the
-coroutine's state.  If a reference is required, use boost::ref.
-
-[note The maximum number of arguments of __coro_fn__ is 10.]
-
-The first invocation of __coro_op__ invokes the __coro_fn__ in a newly created
-coroutine complete with registers, flags, stack and instruction pointer. When 
-control should be returned to the original calling routine, call __coro_yield__
-or __coro_yield_break__.
+When control should be returned to the original calling routine, call __coro_op__
+of __coro_fn__ only argument.
 The current coroutine information (registers, flags, and stack and instruction
 pointer) is saved and the original context information is restored. Calling
 __coro_op__ resumes execution in the coroutine after saving the new state of the
@@ -72,7 +102,7 @@ original routine.
 
         typedef boost::coro::coroutine< void() > coro_t;
 
-        void fn( coro_t::caller_type & self, int j)
+        void fn( coro_t::caller_type & ca, int j)
         {
             for( int i = 0; i < j; ++i)
             {
@@ -81,10 +111,10 @@ original routine.
                 // save current coroutine
                 // value of local variable is preserved
                 // transfer execution control back to main()
-                self.yield();
+                ca();
 
                 // coroutine<>::operator()() was called
-                // execution control transfered back from main()    
+                // execution control transfered back from main()
             }
         }
 
@@ -94,13 +124,11 @@ original routine.
 
             std::cout << "main() starts coroutine c" << std::endl;
 
-            while ( ! c.is_complete() )
+            while ( c)
             {
                 std::cout << "main() calls coroutine c" << std::endl;
                 // execution control is transfered to c
                 c();
-
-                // yield() was called within fn()
             }
 
             std::cout << "Done" << std::endl;
@@ -128,10 +156,6 @@ original routine.
 
 [warning Calling __coro_op__ from inside the same coroutine results in
 undefined behaviour.]
-
-[note In contrast to threads, which are preemptive, __coro__ switches are
-cooperative (programmer controls when a switch will happen). The kernel is not
-involved in the coroutine switches.]
 
 
 [heading Transfer of data]
