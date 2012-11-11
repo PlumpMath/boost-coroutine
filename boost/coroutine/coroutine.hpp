@@ -128,7 +128,7 @@ private:
 
 public:
     typedef typename detail::caller<
-        coroutine,
+        boost::coroutines::coroutine,
         Signature,
         typename function_traits< Signature >::result_type,
         0
@@ -560,7 +560,7 @@ private:
 
 public:
     typedef typename detail::caller<
-        coroutine,
+        boost::coroutines::coroutine,
         Signature,
         typename function_traits< Signature >::result_type,
         function_traits< Signature >::arity
