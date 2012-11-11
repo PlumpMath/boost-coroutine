@@ -35,11 +35,12 @@ namespace coroutines {
 namespace detail {
 
 template< typename Signature, typename D, typename Result, int arity >
-struct coroutine_base_resume;
+class coroutine_base_resume;
 
 template< typename Signature, typename D >
-struct coroutine_base_resume< Signature, D, void, 0 >
+class coroutine_base_resume< Signature, D, void, 0 >
 {
+public:
     void resume()
     {
         BOOST_ASSERT( static_cast< D * >( this)->callee_);
@@ -90,8 +91,9 @@ protected:
 };
 
 template< typename Signature, typename D >
-struct coroutine_base_resume< Signature, D, void, 1 >
+class coroutine_base_resume< Signature, D, void, 1 >
 {
+public:
     typedef typename arg< Signature >::type     arg_type;
 
     void resume( arg_type a1)
@@ -157,8 +159,9 @@ protected:
 #define BOOST_COROUTINE_BASE_RESUME_ARGS(n) BOOST_PP_REPEAT_FROM_TO(1,BOOST_PP_ADD(n,1),BOOST_COROUTINE_BASE_RESUME_ARG,~)
 #define BOOST_COROUTINE_BASE_RESUME(z,n,unused) \
 template< typename Signature, typename D > \
-struct coroutine_base_resume< Signature, D, void, n > \
+class coroutine_base_resume< Signature, D, void, n > \
 { \
+public: \
     typedef typename arg< Signature >::type     arg_type; \
 \
     void resume( BOOST_COROUTINE_BASE_RESUME_ARGS(n)) \
