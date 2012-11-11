@@ -10,7 +10,7 @@
 #include <boost/bind.hpp>
 #include <boost/coroutine/all.hpp>
 
-typedef boost::coro::coroutine< void() > coroutine_t;
+typedef boost::coroutines::coroutine< void() > coroutine_t;
 
 void first( coroutine_t::caller_type & self)
 {

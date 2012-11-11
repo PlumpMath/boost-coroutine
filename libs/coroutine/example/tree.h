@@ -91,7 +91,7 @@ inline
 bool operator!=( leaf const& l, leaf  const& r)
 { return l.value != r.value; }
 
-typedef boost::coro::coroutine< leaf&() > coro_t;
+typedef boost::coroutines::coroutine< leaf&() > coro_t;
 
 class tree_visitor : public visitor
 {

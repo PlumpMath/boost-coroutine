@@ -19,7 +19,7 @@
 #include <boost/utility.hpp>
 
 typedef boost::tuple< boost::system::error_code, std::size_t >                      tuple_t;
-typedef boost::coro::coroutine< void( boost::system::error_code, std::size_t) >     coro_t;
+typedef boost::coroutines::coroutine< void( boost::system::error_code, std::size_t) >     coro_t;
 
 class inbuf : public std::streambuf,
               private boost::noncopyable

@@ -11,7 +11,7 @@
 #include <boost/range.hpp>
 #include <boost/coroutine/all.hpp>
 
-typedef boost::coro::coroutine< int() >         coro_t;
+typedef boost::coroutines::coroutine< int() >         coro_t;
 typedef boost::range_iterator< coro_t >::type   iterator_t;
 
 void fibonacci( coro_t::caller_type & c)

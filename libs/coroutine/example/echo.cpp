@@ -10,15 +10,15 @@
 #include <boost/bind.hpp>
 #include <boost/coroutine/all.hpp>
 
-typedef boost::coro::coroutine< void() >   coro_t;
+typedef boost::coroutines::coroutine< void() >   coro_t;
 
-void echo( coro_t & self, int i)
+void echo( coro_t & ca, int i)
 {
     std::cout << i; 
-    self();
+    ca();
 }
 
-void runit( coro_t & self)
+void runit( coro_t & ca)
 {
     std::cout << "started! ";
     for ( int i = 0; i < 10; ++i)
@@ -26,7 +26,7 @@ void runit( coro_t & self)
         coro_t c( boost::bind( echo, _1, i) );
         while ( c)
             c();
-        self();
+        ca();
     }
 }
 

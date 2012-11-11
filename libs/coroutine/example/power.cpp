@@ -12,8 +12,8 @@
 #include <boost/range.hpp>
 #include <boost/coroutine/all.hpp>
 
-typedef boost::coro::coroutine< int() >             coro1_t;
-typedef boost::coro::coroutine< void( int) >        coro2_t;
+typedef boost::coroutines::coroutine< int() >             coro1_t;
+typedef boost::coroutines::coroutine< void( int) >        coro2_t;
 typedef boost::range_iterator< coro1_t >::type      iterator_t;
 
 void power( coro2_t & c, int number, int exponent)
