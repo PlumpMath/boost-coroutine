@@ -30,7 +30,7 @@ private:
     enum
     { bf_size = 16 };
 
-    std::size_t fetch_()
+    int fetch_()
     {
         std::streamsize num = std::min(
             static_cast< std::streamsize >( gptr() - eback() ), pb_size);
