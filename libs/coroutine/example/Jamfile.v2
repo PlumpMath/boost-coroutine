@@ -64,6 +64,10 @@ exe parallel
     : parallel.cpp
     ;
 
+exe unwind
+    : unwind.cpp
+    ;
+
 exe same_fringe
     : same_fringe.cpp
     ;
