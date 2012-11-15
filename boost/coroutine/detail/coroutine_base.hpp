@@ -40,7 +40,7 @@ public:
 
 private:
     template< typename X, typename Y, typename Z, int >
-    friend struct coroutine_base_resume;
+    friend class coroutine_base_resume;
     template< typename X, typename Y, typename Z, typename A, typename B, int, typename C >
     friend class coroutine_object;
 
