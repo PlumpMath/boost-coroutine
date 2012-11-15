@@ -13,7 +13,6 @@
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include <boost/context/fcontext.hpp>
-#include <boost/context/guarded_stack_allocator.hpp>
 #include <boost/move/move.hpp>
 #include <boost/range.hpp>
 #include <boost/static_assert.hpp>
@@ -28,6 +27,7 @@
 #include <boost/coroutine/detail/coroutine_object.hpp>
 #include <boost/coroutine/detail/coroutine_op.hpp>
 #include <boost/coroutine/detail/coroutine_caller.hpp>
+#include <boost/coroutine/stack_allocator.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -151,8 +151,8 @@ public:
 #ifndef BOOST_NO_RVALUE_REFERENCES
     template< typename Fn >
     coroutine( Fn && fn, attributes const& attr = attributes(),
-            context::guarded_stack_allocator const& stack_alloc =
-                context::guarded_stack_allocator(),
+            stack_allocator const& stack_alloc =
+                stack_allocator(),
             std::allocator< coroutine > const& alloc =
                 std::allocator< coroutine >() ) :
         detail::coroutine_op<
@@ -171,7 +171,7 @@ public:
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
                 Fn,
-                context::guarded_stack_allocator,
+                stack_allocator,
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,
@@ -256,8 +256,8 @@ public:
 #else
     template< typename Fn >
     coroutine( Fn fn, attributes const& attr = attributes(),
-               context::guarded_stack_allocator const& stack_alloc =
-                    context::guarded_stack_allocator(),
+               stack_allocator const& stack_alloc =
+                    stack_allocator(),
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >() ) :
         detail::coroutine_op<
@@ -276,7 +276,7 @@ public:
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
                 Fn,
-                context::guarded_stack_allocator,
+                stack_allocator,
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,
@@ -358,8 +358,8 @@ public:
 
     template< typename Fn >
     coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr = attributes(),
-               context::guarded_stack_allocator const& stack_alloc =
-                    context::guarded_stack_allocator(),
+               stack_allocator const& stack_alloc =
+                    stack_allocator(),
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >() ) :
         detail::coroutine_op<
@@ -378,7 +378,7 @@ public:
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
                 Fn,
-                context::guarded_stack_allocator,
+                stack_allocator,
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,
@@ -584,8 +584,8 @@ public:
 #ifndef BOOST_NO_RVALUE_REFERENCES
     template< typename Fn >
     coroutine( Fn && fn, attributes const& attr = attributes(),
-            context::guarded_stack_allocator const& stack_alloc =
-                context::guarded_stack_allocator(),
+            stack_allocator const& stack_alloc =
+                stack_allocator(),
             std::allocator< coroutine > const& alloc =
                 std::allocator< coroutine >() ) :
         detail::coroutine_op<
@@ -604,7 +604,7 @@ public:
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
                 Fn,
-                context::guarded_stack_allocator,
+                stack_allocator,
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,
@@ -620,8 +620,8 @@ public:
 
     template< typename Fn >
     coroutine( Fn && fn, arguments arg, attributes const& attr = attributes(),
-            context::guarded_stack_allocator const& stack_alloc =
-                context::guarded_stack_allocator(),
+            stack_allocator const& stack_alloc =
+                stack_allocator(),
             std::allocator< coroutine > const& alloc =
                 std::allocator< coroutine >() ) :
         detail::coroutine_op<
@@ -640,7 +640,7 @@ public:
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
                 Fn,
-                context::guarded_stack_allocator,
+                stack_allocator,
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,
@@ -794,8 +794,8 @@ public:
 #else
     template< typename Fn >
     coroutine( Fn fn, attributes const& attr = attributes(),
-               context::guarded_stack_allocator const& stack_alloc =
-                    context::guarded_stack_allocator(),
+               stack_allocator const& stack_alloc =
+                    stack_allocator(),
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >() ) :
         detail::coroutine_op<
@@ -814,7 +814,7 @@ public:
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
                 Fn,
-                context::guarded_stack_allocator,
+                stack_allocator,
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,
@@ -829,8 +829,8 @@ public:
 
     template< typename Fn >
     coroutine( Fn fn, arguments arg, attributes const& attr = attributes(),
-               context::guarded_stack_allocator const& stack_alloc =
-                    context::guarded_stack_allocator(),
+               stack_allocator const& stack_alloc =
+                    stack_allocator(),
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >() ) :
         detail::coroutine_op<
@@ -849,7 +849,7 @@ public:
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
                 Fn,
-                context::guarded_stack_allocator,
+                stack_allocator,
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,
@@ -931,8 +931,8 @@ public:
 
     template< typename Fn >
     coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr = attributes(),
-               context::guarded_stack_allocator const& stack_alloc =
-                    context::guarded_stack_allocator(),
+               stack_allocator const& stack_alloc =
+                    stack_allocator(),
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >() ) :
         detail::coroutine_op<
@@ -951,7 +951,7 @@ public:
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
                 Fn,
-                context::guarded_stack_allocator,
+                stack_allocator,
                 std::allocator< coroutine >,
                 Signature,
                 typename function_traits< Signature >::result_type,

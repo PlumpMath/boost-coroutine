@@ -26,7 +26,6 @@
 #include <boost/coroutine/all.hpp>
 
 namespace coro = boost::coroutines;
-namespace ctx = boost::context;
 
 int value1 = 0;
 std::string value2 = "";
@@ -371,7 +370,7 @@ void test_no_unwind()
             f12,
             coro_int::arguments( 3, 7),
             coro::attributes(
-                ctx::guarded_stack_allocator::default_stacksize(),
+                coro::stack_allocator::default_stacksize(),
                 coro::no_stack_unwind) );
         BOOST_CHECK( coro);
         int res = coro.get();

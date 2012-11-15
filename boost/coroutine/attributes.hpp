@@ -10,9 +10,9 @@
 #include <cstddef>
 
 #include <boost/config.hpp>
-#include <boost/context/guarded_stack_allocator.hpp>
 
 #include <boost/coroutine/flags.hpp>
+#include <boost/coroutine/stack_allocator.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -28,7 +28,7 @@ struct attributes
     flag_fpu_t      preserve_fpu;
 
     attributes() BOOST_NOEXCEPT :
-        size( context::guarded_stack_allocator::default_stacksize() ),
+        size( stack_allocator::default_stacksize() ),
         do_unwind( stack_unwind),
         preserve_fpu( fpu_preserved)
     {}
@@ -40,13 +40,13 @@ struct attributes
     {}
 
     explicit attributes( flag_unwind_t do_unwind_) BOOST_NOEXCEPT :
-        size( context::guarded_stack_allocator::default_stacksize() ),
+        size( stack_allocator::default_stacksize() ),
         do_unwind( do_unwind_),
         preserve_fpu( fpu_preserved)
     {}
 
     explicit attributes( flag_fpu_t preserve_fpu_) BOOST_NOEXCEPT :
-        size( context::guarded_stack_allocator::default_stacksize() ),
+        size( stack_allocator::default_stacksize() ),
         do_unwind( stack_unwind),
         preserve_fpu( preserve_fpu_)
     {}
@@ -70,7 +70,7 @@ struct attributes
     explicit attributes(
             flag_unwind_t do_unwind_,
             flag_fpu_t preserve_fpu_) BOOST_NOEXCEPT :
-        size( context::guarded_stack_allocator::default_stacksize() ),
+        size( stack_allocator::default_stacksize() ),
         do_unwind( do_unwind_),
         preserve_fpu( preserve_fpu_)
     {}
