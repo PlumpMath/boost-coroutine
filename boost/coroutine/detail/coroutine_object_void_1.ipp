@@ -351,9 +351,6 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
-            attr, stack_alloc),
-        base_type(
             context::make_fcontext(
                 stack_alloc.allocate( attr.size), attr.size,
                 trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
@@ -513,9 +510,6 @@ public:
                       typename detail::param< arg_type >::type arg, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        base_type(
-            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
-            attr, stack_alloc),
         base_type(
             context::make_fcontext(
                 stack_alloc.allocate( attr.size), attr.size,
