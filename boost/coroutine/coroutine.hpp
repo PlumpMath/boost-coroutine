@@ -16,8 +16,11 @@
 #include <boost/move/move.hpp>
 #include <boost/range.hpp>
 #include <boost/static_assert.hpp>
+#include <boost/type_traits/decay.hpp>
 #include <boost/type_traits/function_traits.hpp>
+#include <boost/type_traits/is_convertible.hpp>
 #include <boost/type_traits/is_same.hpp>
+#include <boost/utility/enable_if.hpp>
 #include <boost/utility/result_of.hpp>
 
 #include <boost/coroutine/attributes.hpp>
@@ -37,22 +40,42 @@ namespace boost {
 namespace coroutines {
 namespace detail {
 
-template< template< class, int > class C, typename Signature, typename Result, int arity >
+template<
+    typename Signature,
+    template< class, int > class C,
+    typename Result = typename function_traits< Signature >::result_type,
+    int arity = function_traits< Signature >::arity
+>
 struct caller;
 
-template< template< class, int > class C, typename Signature >
-struct caller< C, Signature, void, 0 >
+template<
+    typename Signature,
+    template< class, int > class C
+>
+struct caller< Signature, C, void, 0 >
 { typedef C< void(), 0 > type; };
 
-template< template< class, int > class C, typename Signature, typename Result >
-struct caller< C, Signature, Result, 0 >
+template<
+    typename Signature,
+    template< class, int > class C,
+    typename Result
+>
+struct caller< Signature, C, Result, 0 >
 { typedef C< void( Result), 1 > type; };
 
-template< template< class, int > class C, typename Signature, int arity >
-struct caller< C, Signature, void, arity >
+template<
+    typename Signature,
+    template< class, int > class C,
+    int arity
+>
+struct caller< Signature, C, void, arity >
 { typedef C< typename detail::arg< Signature >::type(), 0 > type; };
 
-template< template< class, int > class C, typename Signature, typename Result, int arity >
+template<
+    typename Signature,
+    template< class, int > class C,
+    typename Result, int arity
+>
 struct caller
 { typedef C< typename detail::arg< Signature >::type( Result), 1 > type; };
 
@@ -63,29 +86,21 @@ class coroutine;
 
 template< typename Signature >
 class coroutine< Signature, 0 > : public detail::coroutine_op<
-                                        Signature, coroutine< Signature >,
-                                        typename function_traits< Signature >::result_type,
-                                        0
+                                        Signature, coroutine< Signature >
                                   >,
                                   public detail::coroutine_get<
-                                        Signature, coroutine< Signature >,
-                                        typename function_traits< Signature >::result_type,
-                                        0
+                                        Signature, coroutine< Signature >
                                   >
 {
 private:
-    typedef detail::coroutine_base<
-        Signature,
-        typename function_traits< Signature >::result_type,
-        0
-     >                                                          base_t;
+    typedef detail::coroutine_base< Signature >                 base_t;
     typedef typename base_t::ptr_t                              ptr_t;
 
     template< typename X, typename Y, typename Z, int >
     friend struct detail::coroutine_get;
     template< typename X, typename Y, typename Z, int >
     friend struct detail::coroutine_op;
-    template< typename X, typename Y, typename Z, typename A, typename B, int, typename C >
+    template< typename X, typename Y, typename Z, typename A, typename B, typename C, int >
     friend class detail::coroutine_object;
 
     struct dummy
@@ -102,23 +117,16 @@ private:
                bool unwind, bool preserve_fpu,
                Allocator const& alloc) :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {
         typedef detail::coroutine_caller<
-                Allocator,
-                Signature,
-                typename function_traits< Signature >::result_type,
-                0
-            >                               self_t;
+                Signature, Allocator
+        >                               self_t;
         typename self_t::allocator_t a( alloc);
         impl_ = ptr_t(
             // placement new
@@ -128,164 +136,134 @@ private:
 
 public:
     typedef typename detail::caller<
-        boost::coroutines::coroutine,
-        Signature,
-        typename function_traits< Signature >::result_type,
-        0
+            Signature,
+            boost::coroutines::coroutine
     >::type                                                     caller_type;
 
     coroutine() BOOST_NOEXCEPT :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {}
 
+#ifndef BOOST_NO_RVALUE_REFERENCES
     template< typename Fn >
-    coroutine( Fn fn, attributes const& attr = attributes(),
+    explicit coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr = attributes(),
                stack_allocator const& stack_alloc =
                     stack_allocator(),
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >(),
                typename disable_if<
-                is_convertible< Fn &, BOOST_RV_REF( Fn) >,
-                dummy* >::type = 0) :
+                   is_same< typename decay< Fn >::type, coroutine >,
+                   dummy *
+               >::type = 0) :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
-                Fn,
-                stack_allocator,
-                std::allocator< coroutine >,
                 Signature,
-                typename function_traits< Signature >::result_type,
-                0,
+                Fn, stack_allocator, std::allocator< coroutine >,
                 caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
             // placement new
-            ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
+            ::new( a.allocate( 1) ) object_t( forward< Fn >( fn), attr, stack_alloc, a) );
     }
 
     template< typename Fn, typename StackAllocator >
-    coroutine( Fn fn, attributes const& attr,
+    explicit coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr,
                StackAllocator const& stack_alloc,
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >(),
                typename disable_if<
-                is_convertible< Fn &, BOOST_RV_REF( Fn) >,
-                dummy* >::type = 0) :
+                   is_same< typename decay< Fn >::type, coroutine >,
+                   dummy *
+               >::type = 0) :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
-                Fn,
-                StackAllocator,
-                std::allocator< coroutine >,
                 Signature,
-                typename function_traits< Signature >::result_type,
-                0,
+                Fn, StackAllocator, std::allocator< coroutine >,
                 caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
             // placement new
-            ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
+            ::new( a.allocate( 1) ) object_t( forward< Fn >( fn), attr, stack_alloc, a) );
     }
 
     template< typename Fn, typename StackAllocator, typename Allocator >
-    coroutine( Fn fn, attributes const& attr,
+    explicit coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr,
                StackAllocator const& stack_alloc,
                Allocator const& alloc,
                typename disable_if<
-                is_convertible< Fn &, BOOST_RV_REF( Fn) >,
-                dummy* >::type = 0) :
+                   is_same< typename decay< Fn >::type, coroutine >,
+                   dummy *
+               >::type = 0) :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
-                Fn,
-                StackAllocator,
-                Allocator,
                 Signature,
-                typename function_traits< Signature >::result_type,
-                0,
+                Fn, StackAllocator, Allocator,
                 caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
             // placement new
-            ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
+            ::new( a.allocate( 1) ) object_t( forward< Fn >( fn), attr, stack_alloc, a) );
     }
-
+#else
     template< typename Fn >
-    coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr = attributes(),
+    explicit coroutine( Fn fn, attributes const& attr = attributes(),
                stack_allocator const& stack_alloc =
                     stack_allocator(),
                std::allocator< coroutine > const& alloc =
-                    std::allocator< coroutine >() ) :
+                    std::allocator< coroutine >(),
+               typename disable_if<
+                   is_convertible< Fn &, BOOST_RV_REF( Fn) >,
+                   dummy *
+               >::type = 0) :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
-                Fn,
-                stack_allocator,
-                std::allocator< coroutine >,
                 Signature,
-                typename function_traits< Signature >::result_type,
-                0,
+                Fn, stack_allocator, std::allocator< coroutine >,
                 caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
@@ -295,31 +273,27 @@ public:
     }
 
     template< typename Fn, typename StackAllocator >
-    coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr,
+    explicit coroutine( Fn fn, attributes const& attr,
                StackAllocator const& stack_alloc,
                std::allocator< coroutine > const& alloc =
-                    std::allocator< coroutine >() ) :
+                    std::allocator< coroutine >(),
+               typename disable_if<
+                   is_convertible< Fn &, BOOST_RV_REF( Fn) >,
+                   dummy *
+               >::type = 0) :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
-                Fn,
-                StackAllocator,
-                std::allocator< coroutine >,
                 Signature,
-                typename function_traits< Signature >::result_type,
-                0,
+                Fn, StackAllocator, std::allocator< coroutine >,
                 caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
@@ -329,30 +303,26 @@ public:
     }
 
     template< typename Fn, typename StackAllocator, typename Allocator >
-    coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr,
+    explicit coroutine( Fn fn, attributes const& attr,
                StackAllocator const& stack_alloc,
-               Allocator const& alloc) :
+               Allocator const& alloc,
+               typename disable_if<
+                   is_convertible< Fn &, BOOST_RV_REF( Fn) >,
+                   dummy *
+               >::type = 0) :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
-                Fn,
-                StackAllocator,
-                Allocator,
                 Signature,
-                typename function_traits< Signature >::result_type,
-                0,
+                Fn, StackAllocator, Allocator,
                 caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
@@ -361,16 +331,103 @@ public:
             ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
     }
 
-    coroutine( BOOST_RV_REF( coroutine) other) BOOST_NOEXCEPT :
+    template< typename Fn >
+    explicit coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr = attributes(),
+               stack_allocator const& stack_alloc =
+                    stack_allocator(),
+               std::allocator< coroutine > const& alloc =
+                    std::allocator< coroutine >(),
+               typename disable_if<
+                   is_same< typename decay< Fn >::type, coroutine >,
+                   dummy *
+               >::type = 0) :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            0
+            Signature, coroutine< Signature >
+        >(),
+        impl_()
+    {
+        BOOST_STATIC_ASSERT((
+            is_same< void, typename result_of< Fn() >::type >::value));
+        typedef detail::coroutine_object<
+                Signature,
+                Fn, stack_allocator, std::allocator< coroutine >,
+                caller_type
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
+    }
+
+    template< typename Fn, typename StackAllocator >
+    explicit coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr,
+               StackAllocator const& stack_alloc,
+               std::allocator< coroutine > const& alloc =
+                    std::allocator< coroutine >(),
+               typename disable_if<
+                   is_same< typename decay< Fn >::type, coroutine >,
+                   dummy *
+               >::type = 0) :
+        detail::coroutine_op<
+            Signature, coroutine< Signature >
+        >(),
+        detail::coroutine_get<
+            Signature, coroutine< Signature >
+        >(),
+        impl_()
+    {
+        BOOST_STATIC_ASSERT((
+            is_same< void, typename result_of< Fn() >::type >::value));
+        typedef detail::coroutine_object<
+                Signature,
+                Fn, StackAllocator, std::allocator< coroutine >,
+                caller_type
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
+    }
+
+    template< typename Fn, typename StackAllocator, typename Allocator >
+    explicit coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr,
+               StackAllocator const& stack_alloc,
+               Allocator const& alloc,
+               typename disable_if<
+                   is_same< typename decay< Fn >::type, coroutine >,
+                   dummy *
+               >::type = 0) :
+        detail::coroutine_op<
+            Signature, coroutine< Signature >
+        >(),
+        detail::coroutine_get<
+            Signature, coroutine< Signature >
+        >(),
+        impl_()
+    {
+        BOOST_STATIC_ASSERT((
+            is_same< void, typename result_of< Fn() >::type >::value));
+        typedef detail::coroutine_object<
+                Signature,
+                Fn, StackAllocator, Allocator,
+                caller_type
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
+    }
+#endif
+
+    coroutine( BOOST_RV_REF( coroutine) other) BOOST_NOEXCEPT :
+        detail::coroutine_op<
+            Signature, coroutine< Signature >
+        >(),
+        detail::coroutine_get<
+            Signature, coroutine< Signature >
         >(),
         impl_()
     { swap( other); }
@@ -397,29 +454,21 @@ public:
 
 template< typename Signature, int arity >
 class coroutine : public detail::coroutine_op<
-                        Signature, coroutine< Signature >,
-                        typename function_traits< Signature >::result_type,
-                        function_traits< Signature >::arity
+                        Signature, coroutine< Signature >
                   >,
                   public detail::coroutine_get<
-                        Signature, coroutine< Signature >,
-                        typename function_traits< Signature >::result_type,
-                        function_traits< Signature >::arity
+                        Signature, coroutine< Signature >
                   >
 {
 private:
-    typedef detail::coroutine_base<
-        Signature,
-        typename function_traits< Signature >::result_type,
-        function_traits< Signature >::arity
-     >                                                          base_t;
+    typedef detail::coroutine_base< Signature >                 base_t;
     typedef typename base_t::ptr_t                              ptr_t;
 
     template< typename X, typename Y, typename Z, int >
     friend struct detail::coroutine_get;
     template< typename X, typename Y, typename Z, int >
     friend struct detail::coroutine_op;
-    template< typename X, typename Y, typename Z, typename A, typename B, int, typename C >
+    template< typename X, typename Y, typename Z, typename A, typename B, typename C, int >
     friend class detail::coroutine_object;
 
     struct dummy
@@ -436,22 +485,15 @@ private:
                bool unwind, bool preserve_fpu,
                Allocator const& alloc) :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {
         typedef detail::coroutine_caller<
-                Allocator,
-                Signature,
-                typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity
+                Signature, Allocator
             >                               self_t;
         typename self_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -462,57 +504,135 @@ private:
 
 public:
     typedef typename detail::caller<
-        boost::coroutines::coroutine,
         Signature,
-        typename function_traits< Signature >::result_type,
-        function_traits< Signature >::arity
+        boost::coroutines::coroutine
     >::type                                                     caller_type;
     typedef typename detail::arg< Signature >::type             arguments;
 
     coroutine() BOOST_NOEXCEPT :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {}
 
+#ifndef BOOST_NO_RVALUE_REFERENCES
     template< typename Fn >
-    coroutine( Fn fn, attributes const& attr = attributes(),
+    explicit coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr = attributes(),
                stack_allocator const& stack_alloc =
                     stack_allocator(),
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >(),
                typename disable_if<
-                is_convertible< Fn &, BOOST_RV_REF( Fn) >,
-                dummy* >::type = 0) :
+                   is_same< typename decay< Fn >::type, coroutine >,
+                   dummy *
+               >::type = 0) :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
-                Fn,
-                stack_allocator,
-                std::allocator< coroutine >,
                 Signature,
-                typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity,
+                Fn, stack_allocator, std::allocator< coroutine >,
+                caller_type
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( forward< Fn >( fn), attr, stack_alloc, a) );
+    }
+
+    template< typename Fn, typename StackAllocator >
+    explicit coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr,
+               StackAllocator const& stack_alloc,
+               std::allocator< coroutine > const& alloc =
+                    std::allocator< coroutine >(),
+               typename disable_if<
+                   is_same< typename decay< Fn >::type, coroutine >,
+                   dummy *
+               >::type = 0) :
+        detail::coroutine_op<
+            Signature, coroutine< Signature >
+        >(),
+        detail::coroutine_get<
+            Signature, coroutine< Signature >
+        >(),
+        impl_()
+    {
+        BOOST_STATIC_ASSERT((
+            is_same< void, typename result_of< Fn() >::type >::value));
+        typedef detail::coroutine_object<
+                Signature,
+                Fn, StackAllocator, std::allocator< coroutine >,
+                caller_type
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( forward< Fn >( fn), attr, stack_alloc, a) );
+    }
+
+    template< typename Fn, typename StackAllocator, typename Allocator >
+    explicit coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr,
+               StackAllocator const& stack_alloc,
+               Allocator const& alloc,
+               typename disable_if<
+                   is_same< typename decay< Fn >::type, coroutine >,
+                   dummy *
+               >::type = 0) :
+        detail::coroutine_op<
+            Signature, coroutine< Signature >
+        >(),
+        detail::coroutine_get<
+            Signature, coroutine< Signature >
+        >(),
+        impl_()
+    {
+        BOOST_STATIC_ASSERT((
+            is_same< void, typename result_of< Fn() >::type >::value));
+        typedef detail::coroutine_object<
+                Signature,
+                Fn, StackAllocator, Allocator,
+                caller_type
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( forward< Fn >( fn), attr, stack_alloc, a) );
+    }
+#else
+    template< typename Fn >
+    explicit coroutine( Fn fn, attributes const& attr = attributes(),
+               stack_allocator const& stack_alloc =
+                    stack_allocator(),
+               std::allocator< coroutine > const& alloc =
+                    std::allocator< coroutine >(),
+               typename disable_if<
+                   is_convertible< Fn &, BOOST_RV_REF( Fn) >,
+                   dummy *
+               >::type = 0) :
+        detail::coroutine_op<
+            Signature, coroutine< Signature >
+        >(),
+        detail::coroutine_get<
+            Signature, coroutine< Signature >
+        >(),
+        impl_()
+    {
+        BOOST_STATIC_ASSERT((
+            is_same< void, typename result_of< Fn() >::type >::value));
+        typedef detail::coroutine_object<
+                Signature,
+                Fn, stack_allocator, std::allocator< coroutine >,
                 caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
@@ -522,35 +642,28 @@ public:
     }
 
     template< typename Fn >
-    coroutine( Fn fn, arguments arg, attributes const& attr = attributes(),
+    explicit coroutine( Fn fn, arguments arg, attributes const& attr = attributes(),
                stack_allocator const& stack_alloc =
                     stack_allocator(),
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >(),
                typename disable_if<
-                is_convertible< Fn &, BOOST_RV_REF( Fn) >,
-                dummy* >::type = 0) :
+                   is_convertible< Fn &, BOOST_RV_REF( Fn) >,
+                   dummy *
+               >::type = 0) :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
-                Fn,
-                stack_allocator,
-                std::allocator< coroutine >,
                 Signature,
-                typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity,
+                Fn, stack_allocator, std::allocator< coroutine >,
                 caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
@@ -560,34 +673,27 @@ public:
     }
 
     template< typename Fn, typename StackAllocator >
-    coroutine( Fn fn, attributes const& attr,
+    explicit coroutine( Fn fn, attributes const& attr,
                StackAllocator const& stack_alloc,
                std::allocator< coroutine > const& alloc =
                     std::allocator< coroutine >(),
                typename disable_if<
-                is_convertible< Fn &, BOOST_RV_REF( Fn) >,
-                dummy* >::type = 0) :
+                   is_convertible< Fn &, BOOST_RV_REF( Fn) >,
+                   dummy *
+               >::type = 0) :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
-                Fn,
-                StackAllocator,
-                std::allocator< coroutine >,
                 Signature,
-                typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity,
+                Fn, StackAllocator, std::allocator< coroutine >,
                 caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
@@ -597,33 +703,26 @@ public:
     }
 
     template< typename Fn, typename StackAllocator, typename Allocator >
-    coroutine( Fn fn, attributes const& attr,
+    explicit coroutine( Fn fn, attributes const& attr,
                StackAllocator const& stack_alloc,
                Allocator const& alloc,
                typename disable_if<
-                is_convertible< Fn &, BOOST_RV_REF( Fn) >,
-                dummy* >::type = 0) :
+                   is_convertible< Fn &, BOOST_RV_REF( Fn) >,
+                   dummy *
+               >::type = 0) :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
-                Fn,
-                StackAllocator,
-                Allocator,
                 Signature,
-                typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity,
+                Fn, StackAllocator, Allocator,
                 caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
@@ -633,32 +732,28 @@ public:
     }
 
     template< typename Fn >
-    coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr = attributes(),
+    explicit coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr = attributes(),
                stack_allocator const& stack_alloc =
                     stack_allocator(),
                std::allocator< coroutine > const& alloc =
-                    std::allocator< coroutine >() ) :
+                    std::allocator< coroutine >(),
+               typename disable_if<
+                   is_same< typename decay< Fn >::type, coroutine >,
+                   dummy *
+               >::type = 0) :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
-                Fn,
-                stack_allocator,
-                std::allocator< coroutine >,
                 Signature,
-                typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity,
+                Fn, stack_allocator, std::allocator< coroutine >,
                 caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
@@ -668,31 +763,27 @@ public:
     }
 
     template< typename Fn, typename StackAllocator >
-    coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr,
+    explicit coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr,
                StackAllocator const& stack_alloc,
                std::allocator< coroutine > const& alloc =
-                    std::allocator< coroutine >() ) :
+                    std::allocator< coroutine >(),
+               typename disable_if<
+                   is_same< typename decay< Fn >::type, coroutine >,
+                   dummy *
+               >::type = 0) :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
-                Fn,
-                StackAllocator,
-                std::allocator< coroutine >,
                 Signature,
-                typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity,
+                Fn, StackAllocator, std::allocator< coroutine >,
                 caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
@@ -702,30 +793,26 @@ public:
     }
 
     template< typename Fn, typename StackAllocator, typename Allocator >
-    coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr,
+    explicit coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr,
                StackAllocator const& stack_alloc,
-               Allocator const& alloc) :
+               Allocator const& alloc,
+               typename disable_if<
+                   is_same< typename decay< Fn >::type, coroutine >,
+                   dummy *
+               >::type = 0) :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         impl_()
     {
         BOOST_STATIC_ASSERT((
             is_same< void, typename result_of< Fn() >::type >::value));
         typedef detail::coroutine_object<
-                Fn,
-                StackAllocator,
-                Allocator,
                 Signature,
-                typename function_traits< Signature >::result_type,
-                function_traits< Signature >::arity,
+                Fn, StackAllocator, Allocator,
                 caller_type
             >                               object_t;
         typename object_t::allocator_t a( alloc);
@@ -733,17 +820,14 @@ public:
             // placement new
             ::new( a.allocate( 1) ) object_t( fn, attr, stack_alloc, a) );
     }
+#endif
 
     coroutine( BOOST_RV_REF( coroutine) other) BOOST_NOEXCEPT :
         detail::coroutine_op<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         detail::coroutine_get<
-            Signature, coroutine< Signature >,
-            typename function_traits< Signature >::result_type,
-            function_traits< Signature >::arity
+            Signature, coroutine< Signature >
         >(),
         impl_()
     { swap( other); }

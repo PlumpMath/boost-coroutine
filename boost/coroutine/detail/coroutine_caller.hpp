@@ -21,19 +21,17 @@ namespace boost {
 namespace coroutines {
 namespace detail {
 
-template< typename Allocator, typename Signature, typename Result, int arity >
-class coroutine_caller : public  coroutine_base< Signature, Result, arity >
+template< typename Signature, typename Allocator >
+class coroutine_caller : public  coroutine_base< Signature >
 {
 public:
     typedef typename Allocator::template rebind<
-        coroutine_caller<
-            Allocator, Signature, Result, arity
-        >
+        coroutine_caller< Signature, Allocator >
     >::other   allocator_t;
 
     coroutine_caller( context::fcontext_t * callee, bool unwind, bool preserve_fpu,
                     allocator_t const& alloc) BOOST_NOEXCEPT :
-        coroutine_base< Signature, Result, arity >( callee, unwind, preserve_fpu),
+        coroutine_base< Signature >( callee, unwind, preserve_fpu),
         alloc_( alloc)
     {}
 

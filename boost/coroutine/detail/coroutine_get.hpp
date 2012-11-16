@@ -9,6 +9,7 @@
 
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
+#include <boost/type_traits/function_traits.hpp>
 
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/param.hpp>
@@ -20,6 +21,18 @@
 namespace boost {
 namespace coroutines {
 namespace detail {
+
+template<
+    typename Signature,
+    typename D,
+    typename Result = typename function_traits< Signature >::result_type,
+    int arity = function_traits< Signature >::arity
+>
+struct coroutine_get;
+
+template< typename Signature, typename D, int arity >
+struct coroutine_get< Signature, D, void, arity >
+{};
 
 template< typename Signature, typename D, typename Result, int arity >
 struct coroutine_get
@@ -33,10 +46,6 @@ struct coroutine_get
         return static_cast< D const* >( this)->impl_->result_.get();
     }
 };
-
-template< typename Signature, typename D, int arity >
-struct coroutine_get< Signature, D, void, arity >
-{};
 
 }}}
 

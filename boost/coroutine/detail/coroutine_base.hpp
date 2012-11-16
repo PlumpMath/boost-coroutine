@@ -26,13 +26,11 @@ namespace boost {
 namespace coroutines {
 namespace detail {
 
-template< typename Signature, typename Result, int arity >
+template< typename Signature >
 class coroutine_base : private noncopyable,
                        public coroutine_base_resume<
                             Signature,
-                            coroutine_base< Signature, Result, arity >,
-                            Result,
-                            arity
+                            coroutine_base< Signature >
                        >
 {
 public:
@@ -41,7 +39,7 @@ public:
 private:
     template< typename X, typename Y, typename Z, int >
     friend class coroutine_base_resume;
-    template< typename X, typename Y, typename Z, typename A, typename B, int, typename C >
+    template< typename X, typename Y, typename Z, typename A, typename B, typename C, int >
     friend class coroutine_object;
 
     unsigned int            use_count_;
@@ -57,8 +55,7 @@ public:
     coroutine_base( context::fcontext_t * callee, bool unwind, bool preserve_fpu) :
         coroutine_base_resume<
             Signature,
-            coroutine_base< Signature, Result, arity >,
-            Result, arity
+            coroutine_base< Signature >
         >(),
         use_count_( 0),
         caller_(),
