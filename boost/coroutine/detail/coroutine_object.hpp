@@ -63,8 +63,7 @@ template<
     typename Signature,
     typename Fn, typename StackAllocator, typename Allocator,
     typename Caller,
-    typename Result = typename function_traits< Signature >::result_type,
-    int arity = function_traits< Signature >::arity
+    typename Result, int arity
 >
 class coroutine_object;
 

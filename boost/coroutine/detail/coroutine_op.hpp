@@ -32,12 +32,7 @@ namespace boost {
 namespace coroutines {
 namespace detail {
 
-template<
-    typename Signature,
-    typename D,
-    typename Result = typename function_traits< Signature >::result_type,
-    int arity = function_traits< Signature >::arity
->
+template< typename Signature, typename D, typename Result, int arity >
 struct coroutine_op;
 
 template< typename Signature, typename D >

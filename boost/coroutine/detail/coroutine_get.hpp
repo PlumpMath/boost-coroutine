@@ -23,18 +23,16 @@ namespace coroutines {
 namespace detail {
 
 template<
-    typename Signature,
     typename D,
-    typename Result = typename function_traits< Signature >::result_type,
-    int arity = function_traits< Signature >::arity
+    typename Result, int arity
 >
 struct coroutine_get;
 
-template< typename Signature, typename D, int arity >
-struct coroutine_get< Signature, D, void, arity >
+template< typename D, int arity >
+struct coroutine_get< D, void, arity >
 {};
 
-template< typename Signature, typename D, typename Result, int arity >
+template< typename D, typename Result, int arity >
 struct coroutine_get
 {
     bool has_result() const

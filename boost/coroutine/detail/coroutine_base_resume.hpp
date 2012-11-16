@@ -19,7 +19,6 @@
 #include <boost/preprocessor/punctuation/comma_if.hpp>
 #include <boost/preprocessor/repetition/repeat_from_to.hpp>
 #include <boost/range.hpp>
-#include <boost/type_traits/function_traits.hpp>
 
 #include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
@@ -34,10 +33,7 @@ namespace boost {
 namespace coroutines {
 namespace detail {
 
-template< typename Signature, typename D,
-    typename Result = typename function_traits< Signature >::result_type,
-    int arity = function_traits< Signature >::arity
->
+template< typename Signature, typename D, typename Result, int arity >
 class coroutine_base_resume;
 
 template< typename Signature, typename D >
@@ -87,7 +83,7 @@ public:
     }
 
 protected:
-    template< typename X, typename Y, typename Z, int >
+    template< typename X, typename Y, int >
     friend struct coroutine_get;
 
     optional< Result >  result_;
@@ -147,7 +143,7 @@ public:
     }
 
 protected:
-    template< typename X, typename Y, typename Z, int >
+    template< typename X, typename Y, int >
     friend struct coroutine_get;
 
     optional< Result >  result_;
@@ -218,7 +214,7 @@ public: \
     } \
 \
 protected: \
-    template< typename X, typename Y, typename Z, int > \
+    template< typename X, typename Y, int > \
     friend struct coroutine_get; \
 \
     optional< Result >  result_; \

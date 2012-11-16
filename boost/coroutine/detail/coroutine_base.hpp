@@ -12,6 +12,7 @@
 #include <boost/context/fcontext.hpp>
 #include <boost/exception_ptr.hpp>
 #include <boost/intrusive_ptr.hpp>
+#include <boost/type_traits/function_traits.hpp>
 #include <boost/utility.hpp>
 
 #include <boost/coroutine/detail/config.hpp>
@@ -30,7 +31,9 @@ template< typename Signature >
 class coroutine_base : private noncopyable,
                        public coroutine_base_resume<
                             Signature,
-                            coroutine_base< Signature >
+                            coroutine_base< Signature >,
+                            typename function_traits< Signature >::result_type,
+                            function_traits< Signature >::arity
                        >
 {
 public:
@@ -55,7 +58,9 @@ public:
     coroutine_base( context::fcontext_t * callee, bool unwind, bool preserve_fpu) :
         coroutine_base_resume<
             Signature,
-            coroutine_base< Signature >
+            coroutine_base< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
         >(),
         use_count_( 0),
         caller_(),
