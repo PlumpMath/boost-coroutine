@@ -8,7 +8,7 @@
 [section:attributes Attributes]
 
 Class `attributes` is used to transfers parameters required to setup a
-corutines's context.
+coroutines's context.
 
         struct attributes
         {
