@@ -167,6 +167,101 @@ public:
     {}
 
 #ifndef BOOST_NO_RVALUE_REFERENCES
+#ifdef BOOST_MSVC
+    typedef void ( * coroutine_fn) ( caller_type &);
+
+    explicit coroutine( coroutine_fn fn, attributes const& attr = attributes(),
+               stack_allocator const& stack_alloc =
+                    stack_allocator(),
+               std::allocator< coroutine > const& alloc =
+                    std::allocator< coroutine >() ) :
+        detail::coroutine_op<
+            Signature,
+            coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        detail::coroutine_get<
+            coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        impl_()
+    {
+        typedef detail::coroutine_object<
+                Signature,
+                coroutine_fn, stack_allocator, std::allocator< coroutine >,
+                caller_type,
+                typename function_traits< Signature >::result_type,
+                function_traits< Signature >::arity
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( forward< coroutine_fn >( fn), attr, stack_alloc, a) );
+    }
+
+    template< typename StackAllocator >
+    explicit coroutine( coroutine_fn fn, attributes const& attr,
+               StackAllocator const& stack_alloc,
+               std::allocator< coroutine > const& alloc =
+                    std::allocator< coroutine >() ) :
+        detail::coroutine_op<
+            Signature,
+            coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        detail::coroutine_get<
+            coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        impl_()
+    {
+       typedef detail::coroutine_object<
+                Signature,
+                coroutine_fn, StackAllocator, std::allocator< coroutine >,
+                caller_type,
+                typename function_traits< Signature >::result_type,
+                function_traits< Signature >::arity
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( forward< coroutine_fn >( fn), attr, stack_alloc, a) );
+    }
+
+    template< typename StackAllocator, typename Allocator >
+    explicit coroutine( coroutine_fn fn, attributes const& attr,
+               StackAllocator const& stack_alloc,
+               Allocator const& alloc) :
+        detail::coroutine_op<
+            Signature,
+            coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        detail::coroutine_get<
+            coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        impl_()
+    {
+        typedef detail::coroutine_object<
+                Signature,
+                coroutine_fn, StackAllocator, Allocator,
+                caller_type,
+                typename function_traits< Signature >::result_type,
+                function_traits< Signature >::arity
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( forward< coroutine_fn >( fn), attr, stack_alloc, a) );
+    }
+#endif
     template< typename Fn >
     explicit coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr = attributes(),
                stack_allocator const& stack_alloc =
@@ -619,6 +714,132 @@ public:
     {}
 
 #ifndef BOOST_NO_RVALUE_REFERENCES
+#ifdef BOOST_MSVC
+    typedef void ( * coroutine_fn) ( caller_type &);
+
+    explicit coroutine( coroutine_fn fn, attributes const& attr = attributes(),
+               stack_allocator const& stack_alloc =
+                    stack_allocator(),
+               std::allocator< coroutine > const& alloc =
+                    std::allocator< coroutine >() ) :
+        detail::coroutine_op<
+            Signature,
+            coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        detail::coroutine_get<
+            coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        impl_()
+    {
+        typedef detail::coroutine_object<
+                Signature,
+                coroutine_fn, stack_allocator, std::allocator< coroutine >,
+                caller_type,
+                typename function_traits< Signature >::result_type,
+                function_traits< Signature >::arity
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( forward< coroutine_fn >( fn), attr, stack_alloc, a) );
+    }
+
+    explicit coroutine( coroutine_fn fn, arguments arg, attributes const& attr = attributes(),
+               stack_allocator const& stack_alloc =
+                    stack_allocator(),
+               std::allocator< coroutine > const& alloc =
+                    std::allocator< coroutine >() ) :
+        detail::coroutine_op<
+            Signature,
+            coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        detail::coroutine_get<
+            coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        impl_()
+    {
+       typedef detail::coroutine_object<
+                Signature,
+                coroutine_fn, stack_allocator, std::allocator< coroutine >,
+                caller_type,
+                typename function_traits< Signature >::result_type,
+                function_traits< Signature >::arity
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( forward< coroutine_fn >( fn), arg, attr, stack_alloc, a) );
+    }
+
+    template< typename StackAllocator >
+    explicit coroutine( coroutine_fn fn, attributes const& attr,
+               StackAllocator const& stack_alloc,
+               std::allocator< coroutine > const& alloc =
+                    std::allocator< coroutine >() ) :
+        detail::coroutine_op<
+            Signature,
+            coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        detail::coroutine_get<
+            coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        impl_()
+    {
+        typedef detail::coroutine_object<
+                Signature,
+                coroutine_fn, StackAllocator, std::allocator< coroutine >,
+                caller_type,
+                typename function_traits< Signature >::result_type,
+                function_traits< Signature >::arity
+            >                               object_t;
+        typename object_t::allocator_t a( alloc);
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( forward< coroutine_fn >( fn), attr, stack_alloc, a) );
+    }
+
+    template< typename StackAllocator, typename Allocator >
+    explicit coroutine( coroutine_fn fn, attributes const& attr,
+               StackAllocator const& stack_alloc,
+               Allocator const& alloc) :
+        detail::coroutine_op<
+            Signature,
+            coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        detail::coroutine_get<
+            coroutine< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        impl_()
+    {
+        typedef detail::coroutine_object<
+                Signature,
+                coroutine_fn, StackAllocator, Allocator,
+                caller_type,
+                typename function_traits< Signature >::result_type,
+                function_traits< Signature >::arity
+        >                               object_t;
+        typename object_t::allocator_t a( alloc);
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) object_t( forward< coroutine_fn >( fn), attr, stack_alloc, a) );
+    }
+#endif
     template< typename Fn >
     explicit coroutine( BOOST_RV_REF( Fn) fn, attributes const& attr = attributes(),
                stack_allocator const& stack_alloc =
