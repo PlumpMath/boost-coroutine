@@ -32,7 +32,7 @@ executed in a new __ctx__ (CPU registers and stack space).
 __coro_caller__.]
 
 The template argument __signature__ determines the data-types transfered to
-__coro_fn__ and from __coro_fn__ by calling __coro_op__ and __coro_get___.
+__coro_fn__ and from __coro_fn__ by calling __coro_op__ and __coro_get__.
 
         typedef boost::coroutines::coroutine< int( std::string const&) > coro_t;
 

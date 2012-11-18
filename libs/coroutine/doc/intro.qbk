@@ -1,0 +1,66 @@
+[/
+          Copyright Oliver Kowalke 2009.
+ Distributed under the Boost Software License, Version 1.0.
+    (See accompanying file LICENSE_1_0.txt or copy at
+          http://www.boost.org/LICENSE_1_0.txt
+]
+
+[section:intro Introduction]
+
+Wenn ein Programm quasi mehrere Dinge gleichzeitig tun soll, kann dies mit Koroutinen häufig sehr viel einfacher und eleganter gelöst werden, als wenn nur ein einziger Kontrollfluß angegeben werden kann. Beispiel: Päckmännchen. 
+
+Problem:
+Wenn Koroutinen wie Prozeduren aufgerufen würden, müßte der Stack bei jedem Aufruf wachsen und nie abgebaut werden. Ein Sprung mitten in eine Koroutine hinein ginge nicht, da die Rücksprungadresse von anderen Stackeinträgen verdeckt worden wäre.
+Lösungsidee:
+
+Jede Koroutine bekommt einen eigenen Stack.
+Vor der Prozessorabgabe müssen die nicht-flüchtigen Register der gerade aktiven Koroutine gesichert werden.
+Die Register der neu aktivierten Koroutine müssen wieder hergestellt werden, bevor diese mit ihrer Arbeit fortfahren kann.
+
+quasi-parallel
+
+function foo() and bar() sollen 'versetzt' ablaufen -> während der Ausführung verlassen und wieder betreten werden können
+
+        void foo()
+        {
+            std::cout << "a ";
+            std::cout << "b ";
+            std::cout << "c ";
+        }
+
+        void bar()
+        {
+            std::cout << "1 ";
+            std::cout << "2 ";
+            std::cout << "3 ";
+        }
+
+        output:
+            a 1 b 2 c 3
+
+        int main()
+        {
+            ?
+        }
+
+routine is sequence of operations
+routine execution forms a parent-child relationship
+child terminates always before parent
+
+coroutine is a generalized routine
+enables explicit suspend and resume via additional
+operations
+cooperative multitasking
+quasi paralelism
+
+continuation is a object representing a suspended execution (registers, stack)
+each coroutine has its own stack and local variables, sub-routine calls
+
+Koroutinen sind (eigentlich) ein Sprachkonzept
+Multitasking auf der Sprachebene
+Kontextwechsel erfordert keine Systemprivilegien
+Voraussetzung für Multitasking ist jedoch: Kooperation
+
+[$foo_bar.jpg]
+
+[endsect]
