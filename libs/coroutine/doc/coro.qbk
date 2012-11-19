@@ -6,7 +6,7 @@
 ]
 
 [article Coroutine
-    [quickbook 1.4]
+    [quickbook 1.5]
     [authors [Kowalke, Oliver]]
     [copyright 2009 Oliver Kowalke]
     [purpose C++ Library providing coroutine facility]

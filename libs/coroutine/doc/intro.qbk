@@ -21,27 +21,7 @@ quasi-parallel
 
 function foo() and bar() sollen 'versetzt' ablaufen -> während der Ausführung verlassen und wieder betreten werden können
 
-        void foo()
-        {
-            std::cout << "a ";
-            std::cout << "b ";
-            std::cout << "c ";
-        }
-
-        void bar()
-        {
-            std::cout << "1 ";
-            std::cout << "2 ";
-            std::cout << "3 ";
-        }
-
-        output:
-            a 1 b 2 c 3
-
-        int main()
-        {
-            ?
-        }
+[$../../../../libs/coroutine/doc/images/foo_bar.png [align center]]
 
 routine is sequence of operations
 routine execution forms a parent-child relationship
