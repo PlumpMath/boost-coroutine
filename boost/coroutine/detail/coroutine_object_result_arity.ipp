@@ -106,7 +106,7 @@ private:
         BOOST_ASSERT( ! this->is_complete() );
 
         this->flags_ |= flag_unwind_stack;
-        holder< void > hldr( & this->caller_, true);
+        holder< arg_type > hldr( & this->caller_, true);
         context::jump_fcontext(
             hldr.ctx, this->callee_,
             reinterpret_cast< intptr_t >( & hldr),
@@ -334,7 +334,7 @@ private:
         BOOST_ASSERT( ! this->is_complete() );
 
         this->flags_ |= flag_unwind_stack;
-        holder< void > hldr( & this->caller_, true);
+        holder< arg_type > hldr( & this->caller_, true);
         context::jump_fcontext(
             hldr.ctx, this->callee_,
             reinterpret_cast< intptr_t >( & hldr),
@@ -500,7 +500,7 @@ private:
         BOOST_ASSERT( ! this->is_complete() );
 
         this->flags_ |= flag_unwind_stack;
-        holder< void > hldr( & this->caller_, true);
+        holder< arg_type > hldr( & this->caller_, true);
         context::jump_fcontext(
             hldr.ctx, this->callee_,
             reinterpret_cast< intptr_t >( & hldr),
