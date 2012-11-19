@@ -7,13 +7,27 @@
 
 [section:intro Introduction]
 
-Wenn ein Programm quasi mehrere Dinge gleichzeitig tun soll, kann dies mit Koroutinen häufig sehr viel einfacher und eleganter gelöst werden, als wenn nur ein einziger Kontrollfluß angegeben werden kann. Beispiel: Päckmännchen. 
+In computer science routines are a sequence of operations. Execution of routiens
+form a parent-child relationship and the child terminates always before
+the parent.
 
-Problem:
-Wenn Koroutinen wie Prozeduren aufgerufen würden, müßte der Stack bei jedem Aufruf wachsen und nie abgebaut werden. Ein Sprung mitten in eine Koroutine hinein ginge nicht, da die Rücksprungadresse von anderen Stackeinträgen verdeckt worden wäre.
-Lösungsidee:
+Coroutines are a generalization of procedures.
+The principal difference between coroutines and procedures is that a coroutine
+enables explicit suspend and resume their progress via additional operations by
+preserving local state.
+A continuation is a object representing a suspended execution (registers, stack)
+each coroutine has its own stack and local variables, sub-routine calls etc.
 
-Jede Koroutine bekommt einen eigenen Stack.
+
+Vorteile sieht man besonders deutlich bei Verwendung von rekursiven Funktion wie beispielsweise bei der Traversierung von Binärbäumen.
+
+When a program is supposed to do several things at the same time, coroutines help to do this much simpler and more elegant than with only a single flow of control.
+
+problem:
+If coroutines would be called such as procedures, the stack would grow with every call and never degraded. A jump into the middle of a coroutine would not be possible, because the return address would have been on top of stack entries.
+
+solution:
+Each coroutine has its own stack.
 Vor der Prozessorabgabe müssen die nicht-flüchtigen Register der gerade aktiven Koroutine gesichert werden.
 Die Register der neu aktivierten Koroutine müssen wieder hergestellt werden, bevor diese mit ihrer Arbeit fortfahren kann.
 
@@ -23,18 +37,10 @@ function foo() and bar() sollen 'versetzt' ablaufen -> während der Ausführung 
 
 [$../../../../libs/coroutine/doc/images/foo_bar.png [align center]]
 
-routine is sequence of operations
-routine execution forms a parent-child relationship
-child terminates always before parent
 
-coroutine is a generalized routine
-enables explicit suspend and resume via additional
-operations
 cooperative multitasking
 quasi paralelism
 
-continuation is a object representing a suspended execution (registers, stack)
-each coroutine has its own stack and local variables, sub-routine calls
 
 Koroutinen sind (eigentlich) ein Sprachkonzept
 Multitasking auf der Sprachebene
