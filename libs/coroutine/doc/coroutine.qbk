@@ -8,7 +8,7 @@
 [section:coroutine Coroutine]
 
 Each instance of __coro__ has its own context of execution (CPU registers and
-stack space) or represents __not_a_coro__ (similiar to __thread__).
+stack space) or represents __not_a_coro__ (similar to __thread__).
 Objects of type __coro__ are moveable but not copyable and can be returned by a
 function.
 
@@ -31,7 +31,7 @@ executed in a new __ctx__ (CPU registers and stack space).
 [note __coro_fn__ is required to return ['void] and accept a reference of type
 __coro_caller__.]
 
-The template argument __signature__ determines the data-types transfered to
+The template argument __signature__ determines the data-types transferred to
 __coro_fn__ and from __coro_fn__ by calling __coro_op__ and __coro_get__.
 
         typedef boost::coroutines::coroutine< int( std::string const&) > coro_t;
@@ -55,11 +55,11 @@ __coro_fn__ and from __coro_fn__ by calling __coro_op__ and __coro_get__.
         int res = c.get();
 
 
-The __coro_fn__ is started at __coro__ construction (similiar to __thread__)
+The __coro_fn__ is started at __coro__ construction (similar to __thread__)
 in a newly created __coro__ complete with registers, flags, stack and
 instruction pointer.
 If __coro_fn__ requires some arguments (types defined by __signature__)
-on startup those parameters must be applied to the __coro__ constructor.
+on start-up those parameters must be applied to the __coro__ constructor.
 A single arguments can be passed as it is:
 
         typedef boost::coroutines::coroutine< int( std::string const&) > coro_t;
@@ -87,7 +87,7 @@ __boost_tuple__).]
 __coro_op__ signature.]
 
 __attrs__, an additional constructor argument of __coro__, defines the stack
-size, stack unwinding and floating-point preserving behavior used for __ctx__
+size, stack unwinding and floating-point preserving behaviour used for __ctx__
 construction.
 
 The __coro__ constructor uses the __stack_allocator_concept__ to allocate an
@@ -99,12 +99,12 @@ constructor.
 
 [heading Calling a coroutine]
 
-The execution control is transfered to __coro__ at construction (__coro_fn__
+The execution control is transferred to __coro__ at construction (__coro_fn__
 entered) - when control should be returned to the original calling routine,
 invoke __coro_op__ on the first argument of type __coro_caller__ inside
 __coro_fn__. __coro_caller__ is a typedef of __coro__ with an inverted
 __signature__. Inverted __signature__ means that the return type becomes an
-argument and vice versa. Multiple argumenets are wrapped into __tuple__.
+argument and vice versa. Multiple arguments are wrapped into __tuple__.
 
         void f( boost::coroutines::coroutine< std::string const&( int) & ca);
         boost::coroutines::coroutine< int( std::string const&) > c1( f);
@@ -133,7 +133,7 @@ original routine.
                 ca();
 
                 // coroutine<>::operator()() was called
-                // execution control transfered back from main()
+                // execution control transferred back from main()
             }
         }
 
@@ -147,7 +147,7 @@ original routine.
             while ( c)
             {
                 std::cout << "main() calls coroutine c" << std::endl;
-                // execution control is transfered to c
+                // execution control is transferred to c
                 c();
             }
 
@@ -180,17 +180,17 @@ undefined behaviour.]
 
 [heading Transfer of data]
 
-__signature__, the template argument of __coro__, defines the types transfered
+__signature__, the template argument of __coro__, defines the types transferred
 to and returned from the __coro_fn__, e.g. it determines the signature of
 __coro_op__ and the return-type of __coro_get__.
 
 [note __coro_caller__ is not part of __signature__ and __coro_fn__ is required
 to return void and accept __coro_caller__ as argument.]
 
-__coro_op__  accepts arguments as defined in __signature__ and returnes a
+__coro_op__  accepts arguments as defined in __signature__ and returns a
 reference to __coro__. The arguments passed to __coro_op__, in one coroutine,
 is returned (as a __tuple__) by __coro_get__ in the other coroutine.
-If __coro__ is constructedand arguments are passed to the constructor, the
+If __coro__ is constructed and arguments are passed to the constructor, the
 __coro_fn__ will be entered and the arguments are accessed thorough __coro_get__
 in __coro_fn__ on entry.
 
@@ -209,7 +209,7 @@ __coro_get__ in the other routine.
             // transfer execution control back to caller
             // pass content of variable 'i' to caller
             // after execution control is returned back coroutine<>::operator()
-            // returns and the transfered integer s accessed via coroutine<>::get()
+            // returns and the transferred integer s accessed via coroutine<>::get()
             i = ca( i).get();
 
             // i == 10 because c( 10) in main()
@@ -223,10 +223,10 @@ __coro_get__ in the other routine.
             coro_t c( fn, 7);
 
             int x = c.get();
-            std::cout << "main(): transfered value: " << x << std::endl;
+            std::cout << "main(): transferred value: " << x << std::endl;
 
             x = c( 10).get();
-            std::cout << "main(): transfered value: " << x << std::endl;
+            std::cout << "main(): transferred value: " << x << std::endl;
 
             std::cout << "Done" << std::endl;
 
@@ -236,18 +236,18 @@ __coro_get__ in the other routine.
         output:
             main(): call coroutine c
             fn(): local variable i == 7
-            main(): transfered value: 7
+            main(): transferred value: 7
             fn(): local variable i == 10
-            main(): transfered value: 10
+            main(): transferred value: 10
             Done
 
 
 [heading __coro_fn__ with multiple arguments]
 
 If __coro_fn__ has more than one argument __coro_op__ has the same size of
-arguments and __coro_get__ from __coro_caller__ returns a __tuple__ coresponding
+arguments and __coro_get__ from __coro_caller__ returns a __tuple__ corresponding
 to the arguments of __signature__. __tie__ helps to access the values stored in
-the __tuple__ returend by __coro_get__.
+the __tuple__ returned by __coro_get__.
 
         typedef boost::coroutines::coroutine< int(int,int) > coro_t;
 
@@ -284,7 +284,7 @@ the __tuple__ returend by __coro_get__.
 
 [heading Transfer of pointers and references]
 
-You can trasfer references and pointers from and to coroutines but as usual
+You can transfer references and pointers from and to coroutines but as usual
 you must take care (scope, no re-assignment of const references etc.).
 In the following code `x` points to `local` which is allocated on stack of
 `c`. When `c` goes out of scope the stack becomes deallocated. Using `x`
@@ -315,7 +315,7 @@ after `c` is gone will fail!
 
 [heading Range iterators]
 
-__boost_coroutine__ provides output- and intput-iterators using __boost_range__.
+__boost_coroutine__ provides output- and input-iterators using __boost_range__.
 `coroutine< T() >` can be used via output-iterators using __begin__ and __end__.
 
         typedef boost::coroutines::coroutine< int() >       coro_t;
@@ -429,8 +429,8 @@ resumed with __coro_op__).]
 
 [heading Exceptions in __coro_fn__]
 
-An exception thrown inside __coro_fn__ will transfered via exception-pointer
-(see __boost_exception__ for details) and re-thrown by consturctor or
+An exception thrown inside __coro_fn__ will transferred via exception-pointer
+(see __boost_exception__ for details) and re-thrown by constructor or
 __coro_op__.
 
         typedef boost::coroutines::coroutine< void() >    coro_t;
@@ -464,7 +464,7 @@ __coro_op__.
 
 [important Code executed by coroutine must not prevent the propagation of the
 __forced_unwind__ exception.  Absorbing that exception will cause stack
-unwinding to fail.  Thus, any code that catches all exceptions must rethrow the
+unwinding to fail.  Thus, any code that catches all exceptions must re-throw the
 pending exception.]
 
         try
@@ -477,7 +477,7 @@ pending exception.]
         }
         catch(...)
         {
-            // possibly not rethrow pending exception
+            // possibly not re-throw pending exception
         }
 
 
@@ -656,7 +656,7 @@ fpu registers for performance reasons.
 [[Preconditions:] [`size` > minimum_stacksize(), `size` < maximum_stacksize()
 when ! is_stack_unbound().]]
 [[Effects:] [Creates a coroutine which will execute `fn`. Argument `attr`
-idetermines stack cleanup and preservinf floating-point registers.
+determines stack clean-up and preserving floating-point registers.
 For allocating/deallocating the stack `stack_alloc` is used and internal
 data are allocated by Allocator.]]
 ]
@@ -667,7 +667,7 @@ data are allocated by Allocator.]]
 [[Preconditions:] [`size` > minimum_stacksize(), `size` < maximum_stacksize()
 when ! is_stack_unbound().]]
 [[Effects:] [Creates a coroutine which will execute `fn`. Argument `attr`
-idetermines stack cleanup and preservinf floating-point registers.
+determines stack clean-up and preserving floating-point registers.
 For allocating/deallocating the stack `stack_alloc` is used and internal
 data are allocated by Allocator.]]
 ]
@@ -710,7 +710,7 @@ Otherwise false.]]
 [heading `coroutine<> & operator()(A0 a0, A9 a9)`]
 [variablelist
 [[Preconditions:] [operator unspecified-bool-type() returns true for `*this`.]
-[[Effects:] [Execution control is transfered to __coro_fn__ and the arguments
+[[Effects:] [Execution control is transferred to __coro_fn__ and the arguments
 `a0`,..., are passed to the coroutine-function.]]
 [[Throws:] [Exceptions thrown inside __coro_fn__.]]
 ]
@@ -718,7 +718,7 @@ Otherwise false.]]
 [heading `R get()()`]
 [variablelist
 [[Preconditions:] [`*this` is not a __not_a_coro__, `! is_complete()`.]]
-[[Returns:] [Returns data transfered from coroutine-function via __coro_op__
+[[Returns:] [Returns data transferred from coroutine-function via __coro_op__
 of __coro_caller__.]]
 [[Throws:] [Nothing.]]
 ]

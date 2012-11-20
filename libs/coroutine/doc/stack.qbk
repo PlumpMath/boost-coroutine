@@ -7,7 +7,7 @@
 
 [section:stack Stack allocation]
 
-A __coro__ uses internaly a __ctx__ which manages a set of registers and a stack.
+A __coro__ uses internally a __ctx__ which manages a set of registers and a stack.
 The memory used by the stack is allocated/deallocated via a __stack_allocator__
 which is required to model a __stack_allocator_concept__.
 
