@@ -19,6 +19,7 @@
 
 #include "bind_processor.hpp"
 #include "cycle.hpp"
+#include "simple_stack_allocator.hpp"
 
 #if _POSIX_C_SOURCE >= 199309L
 #include "zeit.hpp"
