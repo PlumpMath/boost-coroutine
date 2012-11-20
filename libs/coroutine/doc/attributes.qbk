@@ -72,7 +72,7 @@ the stack after coroutine/generator is complete and preserves FPU registers.]]
 [[Throws:] [Nothing.]]
 ]
 
-[heading `attributes( std::size_t `size`)`]
+[heading `attributes( std::size_t size)`]
 [variablelist
 [[Effects:] [Argument `size` defines stack size of the inner `context`.
 Stack unwinding after termination and preserving FPU registers is set by

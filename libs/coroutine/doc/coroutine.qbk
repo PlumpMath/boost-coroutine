@@ -307,6 +307,7 @@ after `c` is gone will fail!
             {
                 coro_t c( fn);
                 x = c.get(); // let x point to X on stack owned by c
+                // stack gets unwound -> X will be destructed
             }
             x->g(); // segmentation fault!
             return EXIT_SUCCESS;
@@ -564,7 +565,7 @@ After unwinding, a __coro__ is complete.
 Some applications do not use floating-point registers and can disable preserving
 fpu registers for performance reasons.
 
-[note According to the ABIs the FPU registers are preserved by default.]
+[note According to the calling convetion the FPU registers are preserved by default.]
 
 
 [section:coroutine Class `coroutine`]
@@ -643,6 +644,16 @@ fpu registers for performance reasons.
 
     template< typename Signature >
     void swap( coroutine< Signature > & l, coroutine< Signature > & r);
+
+    template< typename T >
+    range_iterator< coroutine< T() > >::type begin( coroutine< T() > &);
+    template< typename T >
+    range_iterator< coroutine< void(T) > >::type begin( coroutine< void(T) > &);
+
+    template< typename T >
+    range_iterator< coroutine< T() > >::type end( coroutine< T() > &);
+    template< typename T >
+    range_iterator< coroutine< void(T) > >::type end( coroutine< void(T) > &);
 
 [heading `coroutine()`]
 [variablelist
@@ -745,6 +756,38 @@ the arguments passed to __coro_op__.]]
 
 [variablelist
 [[Effects:] [As if 'l.swap( r)'.]]
+]
+
+[heading Non-member function `begin( coroutine< T() > &)`]
+    template< typename T >
+    range_iterator< coroutine< T() > >::type begin( coroutine< T() > &);
+
+[variablelist
+[[Returns:] [Returns a range-iterator (input-iterator).]]
+]
+
+[heading Non-member function `begin( coroutine< void(T) > &)`]
+    template< typename T >
+    range_iterator< coroutine< void(T) > >::type begin( coroutine< void(T) > &);
+
+[variablelist
+[[Returns:] [Returns a range-iterator (output-iterator).]]
+]
+
+[heading Non-member function `end( coroutine< T() > &)`]
+    template< typename T >
+    range_iterator< coroutine< T() > >::type end( coroutine< T() > &);
+
+[variablelist
+[[Returns:] [Returns a end range-iterator (input-iterator).]]
+]
+
+[heading Non-member function `end( coroutine< void(T) > &)`]
+    template< typename T >
+    range_iterator< coroutine< void(T) > >::type end( coroutine< void(T) > &);
+
+[variablelist
+[[Returns:] [Returns a end range-iterator (output-iterator).]]
 ]
 
 [endsect]
