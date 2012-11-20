@@ -10,5 +10,6 @@
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/coroutine.hpp>
 #include <boost/coroutine/flags.hpp>
+#include <boost/coroutine/stack_allocator.hpp>
 
 #endif // BOOST_COROUTINES_ALL_H
