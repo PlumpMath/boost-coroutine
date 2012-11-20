@@ -42,12 +42,12 @@ private:
         s_.async_read_some(
                 boost::asio::buffer( buffer_ + pb_size, bf_size - pb_size),
                 boost::bind( & coro_t::operator(), & coro_, _1, _2) );
-        self_();
+        ca_();
 
         boost::system::error_code ec;
         std::size_t n = 0;
 
-        boost::tie( ec, n) = self_.get();
+        boost::tie( ec, n) = ca_.get();
         if ( ec)
         {
             setg( 0, 0, 0);
@@ -60,7 +60,7 @@ private:
 
     boost::asio::ip::tcp::socket      &   s_;
     coro_t                            &   coro_;
-    coro_t::caller_type                  &   self_;
+    coro_t::caller_type                  &   ca_;
     char                                  buffer_[bf_size];
 
 protected:
@@ -79,8 +79,8 @@ public:
     inbuf(
             boost::asio::ip::tcp::socket & s,
             coro_t & coro,
-            coro_t::caller_type & self) :
-        s_( s), coro_( coro), self_( self), buffer_()
+            coro_t::caller_type & ca) :
+        s_( s), coro_( coro), ca_( ca), buffer_()
     { setg( buffer_ + 4, buffer_ + 4, buffer_ + 4); }
 };
 const std::streamsize inbuf::pb_size = 4;
@@ -88,20 +88,17 @@ const std::streamsize inbuf::pb_size = 4;
 class session : private boost::noncopyable
 {
 private:
-    void handle_read_( coro_t::caller_type & self)
+    void handle_read_( coro_t::caller_type & ca)
     {
-        if ( ! self.get().get< 0 >() )
-        {
-            inbuf buf( socket_, coro_, self);
-            std::istream s( & buf);
+        inbuf buf( socket_, coro_, ca);
+        std::istream s( & buf);
 
-            std::string line;
-            do
-            {
-                std::getline( s, line);
-                std::cout << line << std::endl; 
-            } while ( line != "exit");
-        }
+        std::string msg;
+        do
+        {
+            std::getline( s, msg);
+            std::cout << msg << std::endl; 
+        } while ( "exit" != msg);
         io_service_.post(
             boost::bind(
                 & session::destroy_, this) );
@@ -116,19 +113,16 @@ private:
 
 public:
     session( boost::asio::io_service & io_service) :
-        coro_( boost::bind( & session::handle_read_, this, _1) ),
+        coro_(),
         io_service_( io_service),
         socket_( io_service_)
-    { std::cout << "serivce(): " << socket_.remote_endpoint() << std::endl; }
-
-    ~session()
-    { std::cout << "~serivce(): " << socket_.remote_endpoint() << std::endl; }
+    {}
 
     boost::asio::ip::tcp::socket & socket()
     { return socket_; }
 
     void start()
-    { coro_( boost::system::error_code(), 0); }
+    { coro_ = coro_t( boost::bind( & session::handle_read_, this, _1) ); }
 };
 
 class server : public boost::enable_shared_from_this< server >
