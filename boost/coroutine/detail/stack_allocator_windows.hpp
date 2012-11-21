@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_COROUTINE_DETAIL_STACK_ALLOCATOR_H
-#define BOOST_COROUTINE_DETAIL_STACK_ALLOCATOR_H
+#ifndef BOOST_COROUTINES_DETAIL_STACK_ALLOCATOR_H
+#define BOOST_COROUTINES_DETAIL_STACK_ALLOCATOR_H
 
 #include <boost/config.hpp>
 
@@ -153,4 +153,4 @@ public:
 
 //#endif
 
-#endif // BOOST_COROUTINE_DETAIL_STACK_ALLOCATOR_H
+#endif // BOOST_COROUTINES_DETAIL_STACK_ALLOCATOR_H
