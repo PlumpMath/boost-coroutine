@@ -618,7 +618,7 @@ public:
         return * this;
     }
 
-    bool empty() const
+    bool empty() const BOOST_NOEXCEPT
     { return ! impl_; }
 
     operator safe_bool() const BOOST_NOEXCEPT
@@ -1345,7 +1345,7 @@ public:
         return * this;
     }
 
-    bool empty() const
+    bool empty() const BOOST_NOEXCEPT
     { return ! impl_; }
 
     operator safe_bool() const BOOST_NOEXCEPT
