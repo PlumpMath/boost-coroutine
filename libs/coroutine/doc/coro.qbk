@@ -59,7 +59,7 @@
 [def __coro_ns__ ['boost::coroutines]]
 [def __coro_op__ ['boost::coroutines::coroutine<>::operator()]]
 [def __end__ ['boost::end()]]
-[def __fcontext__ ['boost::contexts::fcontet_t]]
+[def __fcontext__ ['boost::contexts::fcontext_t]]
 [def __fetch__ ['inbuf::fetch()]]
 [def __forced_unwind__ ['boost::coroutines::detail::forced_unwind]]
 [def __getline__ ['std::getline()]]
