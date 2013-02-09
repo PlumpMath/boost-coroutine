@@ -16,6 +16,7 @@
 #include <boost/utility.hpp>
 
 #include <boost/coroutine/detail/config.hpp>
+#include <boost/coroutine/detail/controll_block.hpp>
 #include <boost/coroutine/detail/coroutine_base_resume.hpp>
 #include <boost/coroutine/detail/flags.hpp>
 
@@ -45,17 +46,35 @@ private:
     template< typename X, typename Y, typename Z, typename A, typename B, typename C, int >
     friend class coroutine_object;
 
-    unsigned int            use_count_;
-    context::fcontext_t     caller_;
-    context::fcontext_t *   callee_;
-    int                     flags_;
-    exception_ptr           except_;
+    unsigned int        use_count_;
+    controll_block      caller_;
+    controll_block      callee_;
+    int                 flags_;
+    exception_ptr       except_;
 
 protected:
     virtual void deallocate_object() = 0;
 
 public:
-    coroutine_base( context::fcontext_t * callee, bool unwind, bool preserve_fpu) :
+    coroutine_base( controll_block::ctx_fn fn, void * sp, std::size_t size,
+                    bool unwind, bool preserve_fpu) :
+        coroutine_base_resume<
+            Signature,
+            coroutine_base< Signature >,
+            typename function_traits< Signature >::result_type,
+            function_traits< Signature >::arity
+        >(),
+        use_count_( 0),
+        caller_(),
+        callee_( fn, sp, size),
+        flags_( 0),
+        except_()
+    {
+        if ( unwind) flags_ |= flag_force_unwind;
+        if ( preserve_fpu) flags_ |= flag_preserve_fpu;
+    }
+
+    coroutine_base( controll_block const& callee, bool unwind, bool preserve_fpu) :
         coroutine_base_resume<
             Signature,
             coroutine_base< Signature >,

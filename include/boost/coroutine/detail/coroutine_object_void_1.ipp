@@ -40,41 +40,42 @@ private:
     void enter_()
     {
         holder< void > * hldr_from(
-            reinterpret_cast< holder< void > * >( context::jump_fcontext(
-                & this->caller_, this->callee_,
-                reinterpret_cast< intptr_t >( this),
-                this->preserve_fpu() ) ) );
-        this->callee_ = hldr_from->ctx;
+            reinterpret_cast< holder< void > * >(
+                this->caller_.jump(
+                    this->callee_,
+                    reinterpret_cast< intptr_t >( this),
+                    this->preserve_fpu() ) ) );
+        this->callee_ = * hldr_from->ctx;
         if ( this->except_) rethrow_exception( this->except_);
     }
 
     void enter_( typename detail::param< arg_type >::type arg)
     {
         tuple< coroutine_object *,
-               typename detail::param< arg_type >::type
+            typename detail::param< arg_type >::type
         > tpl( this, arg);
         holder< void > * hldr_from(
-            reinterpret_cast< holder< void > * >( context::jump_fcontext(
-                & this->caller_, this->callee_,
-                reinterpret_cast< intptr_t >( & tpl),
-                this->preserve_fpu() ) ) );
-        this->callee_ = hldr_from->ctx;
+            reinterpret_cast< holder< void > * >(
+                this->caller_.jump(
+                    this->callee_,
+                    reinterpret_cast< intptr_t >( & tpl),
+                    this->preserve_fpu() ) ) );
+        this->callee_ = * hldr_from->ctx;
         if ( this->except_) rethrow_exception( this->except_);
     }
 
     void run_( Caller & c)
     {
-        context::fcontext_t * callee( 0);
-        context::fcontext_t caller;
+        controll_block callee;
+        controll_block caller;
         try
         {
             fn_( c);
             this->flags_ |= flag_complete;
             callee = c.impl_->callee_;
-            BOOST_ASSERT( callee);
             holder< void > hldr( & caller);
-            context::jump_fcontext(
-                hldr.ctx, callee,
+            hldr.ctx->jump(
+                callee,
                 ( intptr_t) & hldr,
                 this->preserve_fpu() );
             BOOST_ASSERT_MSG( false, "coroutine is complete");
@@ -86,9 +87,8 @@ private:
 
         this->flags_ |= flag_complete;
         callee = c.impl_->callee_;
-        BOOST_ASSERT( callee);
-        context::jump_fcontext(
-            & caller, callee,
+        caller.jump(
+            callee,
             reinterpret_cast< intptr_t >( & caller),
             this->preserve_fpu() );
         BOOST_ASSERT_MSG( false, "coroutine is complete");
@@ -100,8 +100,8 @@ private:
 
         this->flags_ |= flag_unwind_stack;
         holder< arg_type > hldr( & this->caller_, true);
-        context::jump_fcontext(
-            hldr.ctx, this->callee_,
+        hldr.ctx->jump(
+            this->callee_,
             reinterpret_cast< intptr_t >( & hldr),
             this->preserve_fpu() );
         this->flags_ &= ~flag_unwind_stack;
@@ -115,13 +115,12 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            context::make_fcontext(
-                stack_alloc.allocate( attr.size), attr.size,
-                trampoline1< coroutine_object >),
+            trampoline1< coroutine_object >,
+            stack_alloc.allocate( attr.size), attr.size,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( forward< Fn >( fn) ),
-        stack_( base_type::callee_->fc_stack),
+        stack_( base_type::callee_.stack() ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -130,13 +129,12 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            context::make_fcontext(
-                stack_alloc.allocate( attr.size), attr.size,
-                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            stack_alloc.allocate( attr.size), attr.size,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( forward< Fn >( fn) ),
-        stack_( base_type::callee_->fc_stack),
+        stack_( base_type::callee_.stack() ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -145,13 +143,12 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            context::make_fcontext(
-                stack_alloc.allocate( attr.size), attr.size,
-                trampoline1< coroutine_object >),
+            trampoline1< coroutine_object >,
+            stack_alloc.allocate( attr.size), attr.size,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        stack_( base_type::callee_->fc_stack),
+        stack_( base_type::callee_.stack() ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -160,13 +157,12 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            context::make_fcontext(
-                stack_alloc.allocate( attr.size), attr.size,
-                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            stack_alloc.allocate( attr.size), attr.size,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        stack_( base_type::callee_->fc_stack),
+        stack_( base_type::callee_.stack() ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -175,13 +171,12 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            context::make_fcontext(
-                stack_alloc.allocate( attr.size), attr.size,
-                trampoline1< coroutine_object >),
+            trampoline1< coroutine_object >,
+            stack_alloc.allocate( attr.size), attr.size,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        stack_( base_type::callee_->fc_stack),
+        stack_( base_type::callee_.stack() ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -190,13 +185,12 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            context::make_fcontext(
-                stack_alloc.allocate( attr.size), attr.size,
-                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            stack_alloc.allocate( attr.size), attr.size,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        stack_( base_type::callee_->fc_stack),
+        stack_( base_type::callee_.stack() ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -210,13 +204,13 @@ public:
 
     void run()
     {
-        Caller c( & this->caller_, false, this->preserve_fpu(), alloc_);
+        Caller c( this->caller_, false, this->preserve_fpu(), alloc_);
         run_( c);
     }
 
     void run( typename detail::param< arg_type >::type arg)
     {
-        Caller c( & this->caller_, false, this->preserve_fpu(), alloc_);
+        Caller c( this->caller_, false, this->preserve_fpu(), alloc_);
         c.impl_->result_ = arg;
         run_( c);
     }
@@ -261,41 +255,42 @@ private:
     void enter_()
     {
         holder< void > * hldr_from(
-            reinterpret_cast< holder< void > * >( context::jump_fcontext(
-                & this->caller_, this->callee_,
-                reinterpret_cast< intptr_t >( this),
-                this->preserve_fpu() ) ) );
-        this->callee_ = hldr_from->ctx;
+            reinterpret_cast< holder< void > * >(
+                this->caller_.jump(
+                    this->callee_,
+                    reinterpret_cast< intptr_t >( this),
+                    this->preserve_fpu() ) ) );
+        this->callee_ = * hldr_from->ctx;
         if ( this->except_) rethrow_exception( this->except_);
     }
 
     void enter_( typename detail::param< arg_type >::type arg)
     {
         tuple< coroutine_object *,
-               typename detail::param< arg_type >::type
+            typename detail::param< arg_type >::type
         > tpl( this, arg);
         holder< void > * hldr_from(
-            reinterpret_cast< holder< void > * >( context::jump_fcontext(
-                & this->caller_, this->callee_,
-                reinterpret_cast< intptr_t >( & tpl),
-                this->preserve_fpu() ) ) );
-        this->callee_ = hldr_from->ctx;
+            reinterpret_cast< holder< void > * >(
+                this->caller_.jump(
+                    this->callee_,
+                    reinterpret_cast< intptr_t >( & tpl),
+                    this->preserve_fpu() ) ) );
+        this->callee_ = * hldr_from->ctx;
         if ( this->except_) rethrow_exception( this->except_);
     }
 
     void run_( Caller & c)
     {
-        context::fcontext_t * callee( 0);
-        context::fcontext_t caller;
+        controll_block callee;
+        controll_block caller;
         try
         {
             fn_( c);
             this->flags_ |= flag_complete;
             callee = c.impl_->callee_;
-            BOOST_ASSERT( callee);
             holder< void > hldr( & caller);
-            context::jump_fcontext(
-                hldr.ctx, callee,
+            hldr.ctx->jump(
+                callee,
                 ( intptr_t) & hldr,
                 this->preserve_fpu() );
             BOOST_ASSERT_MSG( false, "coroutine is complete");
@@ -307,9 +302,8 @@ private:
 
         this->flags_ |= flag_complete;
         callee = c.impl_->callee_;
-        BOOST_ASSERT( callee);
-        context::jump_fcontext(
-            & caller, callee,
+        caller.jump(
+            callee,
             reinterpret_cast< intptr_t >( & caller),
             this->preserve_fpu() );
         BOOST_ASSERT_MSG( false, "coroutine is complete");
@@ -321,8 +315,8 @@ private:
 
         this->flags_ |= flag_unwind_stack;
         holder< arg_type > hldr( & this->caller_, true);
-        context::jump_fcontext(
-            hldr.ctx, this->callee_,
+        hldr.ctx->jump(
+            this->callee_,
             reinterpret_cast< intptr_t >( & hldr),
             this->preserve_fpu() );
         this->flags_ &= ~flag_unwind_stack;
@@ -335,13 +329,12 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            context::make_fcontext(
-                stack_alloc.allocate( attr.size), attr.size,
-                trampoline1< coroutine_object >),
+            trampoline1< coroutine_object >,
+            stack_alloc.allocate( attr.size), attr.size,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        stack_( base_type::callee_->fc_stack),
+        stack_( base_type::callee_.stack() ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -351,13 +344,12 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            context::make_fcontext(
-                stack_alloc.allocate( attr.size), attr.size,
-                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            stack_alloc.allocate( attr.size), attr.size,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        stack_( base_type::callee_->fc_stack),
+        stack_( base_type::callee_.stack() ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -370,13 +362,13 @@ public:
 
     void run()
     {
-        Caller c( & this->caller_, false, this->preserve_fpu(), alloc_);
+        Caller c( this->caller_, false, this->preserve_fpu(), alloc_);
         run_( c);
     }
 
     void run( typename detail::param< arg_type >::type arg)
     {
-        Caller c( & this->caller_, false, this->preserve_fpu(), alloc_);
+        Caller c( this->caller_, false, this->preserve_fpu(), alloc_);
         c.impl_->result_ = arg;
         run_( c);
     }
@@ -421,41 +413,42 @@ private:
     void enter_()
     {
         holder< void > * hldr_from(
-            reinterpret_cast< holder< void > * >( context::jump_fcontext(
-                & this->caller_, this->callee_,
-                reinterpret_cast< intptr_t >( this),
-                this->preserve_fpu() ) ) );
-        this->callee_ = hldr_from->ctx;
+            reinterpret_cast< holder< void > * >(
+                this->caller_.jump(
+                    this->callee_,
+                    reinterpret_cast< intptr_t >( this),
+                    this->preserve_fpu() ) ) );
+        this->callee_ = * hldr_from->ctx;
         if ( this->except_) rethrow_exception( this->except_);
     }
 
     void enter_( typename detail::param< arg_type >::type arg)
     {
         tuple< coroutine_object *,
-               typename detail::param< arg_type >::type
+            typename detail::param< arg_type >::type
         > tpl( this, arg);
         holder< void > * hldr_from(
-            reinterpret_cast< holder< void > * >( context::jump_fcontext(
-                & this->caller_, this->callee_,
-                reinterpret_cast< intptr_t >( & tpl),
-                this->preserve_fpu() ) ) );
-        this->callee_ = hldr_from->ctx;
+            reinterpret_cast< holder< void > * >(
+                this->caller_.jump(
+                    this->callee_,
+                    reinterpret_cast< intptr_t >( & tpl),
+                    this->preserve_fpu() ) ) );
+        this->callee_ = * hldr_from->ctx;
         if ( this->except_) rethrow_exception( this->except_);
     }
 
     void run_( Caller & c)
     {
-        context::fcontext_t * callee( 0);
-        context::fcontext_t caller;
+        controll_block callee;
+        controll_block caller;
         try
         {
             fn_( c);
             this->flags_ |= flag_complete;
             callee = c.impl_->callee_;
-            BOOST_ASSERT( callee);
             holder< void > hldr( & caller);
-            context::jump_fcontext(
-                hldr.ctx, callee,
+            hldr.ctx->jump(
+                callee,
                 ( intptr_t) & hldr,
                 this->preserve_fpu() );
             BOOST_ASSERT_MSG( false, "coroutine is complete");
@@ -467,9 +460,8 @@ private:
 
         this->flags_ |= flag_complete;
         callee = c.impl_->callee_;
-        BOOST_ASSERT( callee);
-        context::jump_fcontext(
-            & caller, callee,
+        caller.jump(
+            callee,
             reinterpret_cast< intptr_t >( & caller),
             this->preserve_fpu() );
         BOOST_ASSERT_MSG( false, "coroutine is complete");
@@ -481,8 +473,8 @@ private:
 
         this->flags_ |= flag_unwind_stack;
         holder< arg_type > hldr( & this->caller_, true);
-        context::jump_fcontext(
-            hldr.ctx, this->callee_,
+        hldr.ctx->jump(
+            this->callee_,
             reinterpret_cast< intptr_t >( & hldr),
             this->preserve_fpu() );
         this->flags_ &= ~flag_unwind_stack;
@@ -495,13 +487,12 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            context::make_fcontext(
-                stack_alloc.allocate( attr.size), attr.size,
-                trampoline1< coroutine_object >),
+            trampoline1< coroutine_object >,
+            stack_alloc.allocate( attr.size), attr.size,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        stack_( base_type::callee_->fc_stack),
+        stack_( base_type::callee_.stack() ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_(); }
@@ -511,13 +502,12 @@ public:
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         base_type(
-            context::make_fcontext(
-                stack_alloc.allocate( attr.size), attr.size,
-                trampoline2< coroutine_object, typename detail::param< arg_type >::type >),
+            trampoline2< coroutine_object, typename detail::param< arg_type >::type >,
+            stack_alloc.allocate( attr.size), attr.size,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
-        stack_( base_type::callee_->fc_stack),
+        stack_( base_type::callee_.stack() ),
         stack_alloc_( stack_alloc),
         alloc_( alloc)
     { enter_( arg); }
@@ -530,13 +520,13 @@ public:
 
     void run()
     {
-        Caller c( & this->caller_, false, this->preserve_fpu(), alloc_);
+        Caller c( this->caller_, false, this->preserve_fpu(), alloc_);
         run_( c);
     }
 
     void run( typename detail::param< arg_type >::type arg)
     {
-        Caller c( & this->caller_, false, this->preserve_fpu(), alloc_);
+        Caller c( this->caller_, false, this->preserve_fpu(), alloc_);
         c.impl_->result_ = arg;
         run_( c);
     }

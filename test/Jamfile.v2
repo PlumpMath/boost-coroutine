@@ -17,6 +17,7 @@ project boost/coroutine/test
     : requirements
       <library>../../test/build//boost_unit_test_framework
       <library>/boost/context//boost_context
+      <library>/boost/coroutine//boost_coroutine
       <link>static
     ;
 
