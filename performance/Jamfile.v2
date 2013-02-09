@@ -18,7 +18,7 @@ project boost/context/performance
       <library>/boost/context//boost_context
       <link>static
       <linkflags>"-lrt" 
-      <threading>single
+      <threading>multi
     ;
 
 alias sources
