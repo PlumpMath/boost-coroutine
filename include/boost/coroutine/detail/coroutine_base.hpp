@@ -57,6 +57,9 @@ protected:
 
 public:
     coroutine_base( controll_block::ctx_fn fn, void * sp, std::size_t size,
+#if defined(BOOST_USE_SEGMENTED_STACKS)
+                    void ** seg,
+#endif
                     bool unwind, bool preserve_fpu) :
         coroutine_base_resume<
             Signature,
@@ -66,7 +69,11 @@ public:
         >(),
         use_count_( 0),
         caller_(),
+#if defined(BOOST_USE_SEGMENTED_STACKS)
+        callee_( fn, sp, size, seg),
+#else
         callee_( fn, sp, size),
+#endif
         flags_( 0),
         except_()
     {

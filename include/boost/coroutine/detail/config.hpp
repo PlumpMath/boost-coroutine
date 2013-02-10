@@ -39,4 +39,19 @@
 # include <boost/config/auto_link.hpp>
 #endif
 
+// segmented stacks
+#if defined(BOOST_USE_SEGMENTED_STACKS)
+# define BOOST_COROUTINES_SEGMENTS 10
+# if defined(__GNUC__)
+#  if __GNUC__ < 4
+#   error "compiler does not support segmented stacks"
+#  endif
+#  if __GNUC_MINOR__ < 7
+#   error "compiler does not support segmented stacks"
+#  endif
+# else
+#  error "compiler does not support segmented stacks"
+# endif
+#endif
+
 #endif // BOOST_COROUTINES_DETAIL_CONFIG_H
