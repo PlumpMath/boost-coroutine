@@ -8,17 +8,17 @@
 
 #include <boost/assert.hpp>
 #include <boost/coroutine/all.hpp>
+#include <boost/thread.hpp>
 
 typedef boost::coroutines::coroutine< void() >   coro_t;
 
-int count = 100;
+int count = 20;
 
 void access( char *buf) __attribute__ ((noinline));
 void access( char *buf)
 {
   buf[0] = '\0';
 }
-
 void bar( int i)
 {
     char buf[4 * 1024];
@@ -37,6 +37,12 @@ void foo( coro_t & c)
     c();
 }
 
+void thread_fn()
+{
+    coro_t c( foo);
+    c();
+}
+
 int main( int argc, char * argv[])
 {
 #if defined(BOOST_USE_SEGMENTED_STACKS)
@@ -46,14 +52,10 @@ int main( int argc, char * argv[])
 #else
     std::cout << "using standard stacks: allocates " << count << " * 4kB on stack, ";
     std::cout << "initial stack size = " << boost::coroutines::stack_allocator::default_stacksize() / 1024 << "kB" << std::endl;
-    std::cout << "application must fail" << std::endl;
+    std::cout << "application might fail" << std::endl;
 #endif
 
-    {
-        coro_t c( foo);
-        c();
-        int i = 0;
-    }
+    boost::thread( thread_fn).join();
 
     return 0;
 }
