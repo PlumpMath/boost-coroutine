@@ -22,7 +22,7 @@
 
 #include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
-#include <boost/coroutine/detail/controll_block.hpp>
+#include <boost/coroutine/detail/coroutine_context.hpp>
 #include <boost/coroutine/detail/exceptions.hpp>
 #include <boost/coroutine/detail/holder.hpp>
 
@@ -126,7 +126,7 @@ public:
         BOOST_ASSERT( static_cast< D * >( this));
         BOOST_ASSERT( ! static_cast< D * >( this)->is_complete() );
 
-        controll_block caller;
+        coroutine_context caller;
         holder< arg_type > hldr_to( & static_cast< D * >( this)->caller_, a1);
         holder< Result > * hldr_from(
             reinterpret_cast< holder< Result > * >(

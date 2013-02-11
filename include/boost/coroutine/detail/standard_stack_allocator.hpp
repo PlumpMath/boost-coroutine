@@ -21,6 +21,8 @@ namespace boost {
 namespace coroutines {
 namespace detail {
 
+struct stack_context;
+
 class standard_stack_allocator
 {
 public:
@@ -32,9 +34,9 @@ public:
 
     static std::size_t maximum_stacksize();
 
-    void * allocate( std::size_t size) const;
+    void allocate( stack_context &, std::size_t);
 
-    void deallocate( void * vp, std::size_t size) const;
+    void deallocate( stack_context &);
 };
 
 }}}

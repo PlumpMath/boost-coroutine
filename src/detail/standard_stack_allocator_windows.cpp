@@ -24,6 +24,8 @@ extern "C" {
 #include <boost/context/detail/config.hpp>
 #include <boost/context/fcontext.hpp>
 
+#include <boost/coroutine/detail/stack_context.hpp>
+
 # if defined(BOOST_MSVC)
 # pragma warning(push)
 # pragma warning(disable:4244 4267)
@@ -106,8 +108,8 @@ standard_stack_allocator::maximum_stacksize()
     return  1 * 1024 * 1024 * 1024; // 1GB
 }
 
-void *
-standard_stack_allocator::allocate( std::size_t size) const
+void
+standard_stack_allocator::allocate( stack_context & ctx, std::size_t size)
 {
     BOOST_ASSERT( minimum_stacksize() <= size);
     BOOST_ASSERT( is_stack_unbound() || ( maximum_stacksize() >= size) );
@@ -131,20 +133,18 @@ standard_stack_allocator::allocate( std::size_t size) const
     BOOST_ASSERT( FALSE != result);
 #endif
 
-    return static_cast< char * >( limit) + size_;
+    ctx.size = size_;
+    ctx.sp = static_cast< char * >( limit) + ctx.size;
 }
 
 void
-standard_stack_allocator::deallocate( void * vp, std::size_t size) const
+standard_stack_allocator::deallocate( stack_context & ctx)
 {
-    BOOST_ASSERT( vp);
-    BOOST_ASSERT( minimum_stacksize() <= size);
-    BOOST_ASSERT( is_stack_unbound() || ( maximum_stacksize() >= size) );
+    BOOST_ASSERT( ctx.sp);
+    BOOST_ASSERT( minimum_stacksize() <= ctx.size);
+    BOOST_ASSERT( is_stack_unbound() || ( maximum_stacksize() >= ctx.size) );
 
-    const std::size_t pages = detail::page_count( size) + 1;
-    const std::size_t size_ = pages * detail::pagesize();
-    BOOST_ASSERT( 0 < size && 0 < size_);
-    void * limit = static_cast< char * >( vp) - size_;
+    void * limit = static_cast< char * >( ctx.sp) - ctx.size;
     ::VirtualFree( limit, 0, MEM_RELEASE);
 }
 

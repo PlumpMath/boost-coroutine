@@ -46,7 +46,7 @@ int main( int argc, char * argv[])
 #else
     std::cout << "using standard stacks: allocates " << count << " * 4kB on stack, ";
     std::cout << "initial stack size = " << boost::coroutines::stack_allocator::default_stacksize() / 1024 << "kB" << std::endl;
-    std::cout << "application must not fail" << std::endl;
+    std::cout << "application must fail" << std::endl;
 #endif
 
     {

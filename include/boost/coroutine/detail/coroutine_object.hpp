@@ -17,6 +17,7 @@
 #include <boost/ref.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/type_traits/function_traits.hpp>
+#include <boost/utility.hpp>
 
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/arg.hpp>
@@ -26,6 +27,7 @@
 #include <boost/coroutine/detail/flags.hpp>
 #include <boost/coroutine/detail/holder.hpp>
 #include <boost/coroutine/detail/param.hpp>
+#include <boost/coroutine/detail/stack_context.hpp>
 #include <boost/coroutine/flags.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
@@ -57,48 +59,24 @@ void trampoline2( intptr_t vp)
     coro->run( arg);
 }
 
-#if defined(BOOST_USE_SEGMENTED_STACKS)
 template< typename StackAllocator >
-struct stack_data
+struct stack_tuple
 {
-    typedef void *  segmented_stack_context[BOOST_COROUTINES_SEGMENTS];
+    stack_context       stack_ctx;
+    StackAllocator      stack_alloc;
 
-    StackAllocator          stack_alloc;
-    void                *   sp;
-    std::size_t             size;
-    segmented_stack_context seg_stack;
-
-    stack_data( StackAllocator const& stack_alloc_, std::size_t min_size) :
-        stack_alloc( stack_alloc_),
-        sp ( 0),
-        size( 0)
+    stack_tuple( StackAllocator const& stack_alloc_, std::size_t size) :
+        stack_ctx(),
+        stack_alloc( stack_alloc_)
     {
-        sp = stack_alloc.allocate( min_size, & seg[0], & size);
+        stack_alloc.allocate( stack_ctx, size);
     }
 
-    ~stack_data()
+    ~stack_tuple()
     {
-        stack_alloc.deallocate( & seg[0]);
+        stack_alloc.deallocate( stack_ctx);
     }
 };
-#else
-template< typename StackAllocator >
-struct stack_data
-{
-    StackAllocator  stack_alloc;
-    void        *   sp;
-    std::size_t     size;
-
-    stack_data( StackAllocator const& stack_alloc_, std::size_t size_) :
-        stack_alloc( stack_alloc_),
-        sp ( 0),
-        size( size_)
-    { sp = stack_alloc.allocate( size); }
-
-    ~stack_data()
-    { stack_alloc.deallocate( sp, size); }
-};
-#endif
 
 template<
     typename Signature,

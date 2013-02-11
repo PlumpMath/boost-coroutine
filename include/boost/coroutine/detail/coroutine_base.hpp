@@ -16,7 +16,7 @@
 #include <boost/utility.hpp>
 
 #include <boost/coroutine/detail/config.hpp>
-#include <boost/coroutine/detail/controll_block.hpp>
+#include <boost/coroutine/detail/coroutine_context.hpp>
 #include <boost/coroutine/detail/coroutine_base_resume.hpp>
 #include <boost/coroutine/detail/flags.hpp>
 
@@ -27,6 +27,8 @@
 namespace boost {
 namespace coroutines {
 namespace detail {
+
+struct stack_context;
 
 template< typename Signature >
 class coroutine_base : private noncopyable,
@@ -47,8 +49,8 @@ private:
     friend class coroutine_object;
 
     unsigned int        use_count_;
-    controll_block      caller_;
-    controll_block      callee_;
+    coroutine_context   caller_;
+    coroutine_context   callee_;
     int                 flags_;
     exception_ptr       except_;
 
@@ -56,10 +58,7 @@ protected:
     virtual void deallocate_object() = 0;
 
 public:
-    coroutine_base( controll_block::ctx_fn fn, void * sp, std::size_t size,
-#if defined(BOOST_USE_SEGMENTED_STACKS)
-                    void ** seg,
-#endif
+    coroutine_base( coroutine_context::ctx_fn fn, stack_context * stack_ctx,
                     bool unwind, bool preserve_fpu) :
         coroutine_base_resume<
             Signature,
@@ -69,11 +68,7 @@ public:
         >(),
         use_count_( 0),
         caller_(),
-#if defined(BOOST_USE_SEGMENTED_STACKS)
-        callee_( fn, sp, size, seg),
-#else
-        callee_( fn, sp, size),
-#endif
+        callee_( fn, stack_ctx),
         flags_( 0),
         except_()
     {
@@ -81,7 +76,7 @@ public:
         if ( preserve_fpu) flags_ |= flag_preserve_fpu;
     }
 
-    coroutine_base( controll_block const& callee, bool unwind, bool preserve_fpu) :
+    coroutine_base( coroutine_context const& callee, bool unwind, bool preserve_fpu) :
         coroutine_base_resume<
             Signature,
             coroutine_base< Signature >,

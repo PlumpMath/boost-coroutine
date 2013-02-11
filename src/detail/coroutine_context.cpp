@@ -6,7 +6,9 @@
 
 #define BOOST_COROUTINES_SOURCE
 
-#include "boost/coroutine/detail/controll_block.hpp"
+#include "boost/coroutine/detail/coroutine_context.hpp"
+
+#include "boost/coroutine/detail/stack_context.hpp"
 
 #if defined(BOOST_USE_SEGMENTED_STACKS)
 extern "C" {
@@ -30,50 +32,45 @@ namespace boost {
 namespace coroutines {
 namespace detail {
 
-controll_block::controll_block() :
-    fcontext_t(),
-    ctx_( this)
-#if defined(BOOST_USE_SEGMENTED_STACKS)
-    , seg_()
-#endif
+coroutine_context::coroutine_context() :
+    fcontext_t(), stack_ctx_( 0), ctx_( this)
 {}
 
-#if defined(BOOST_USE_SEGMENTED_STACKS)
-controll_block::controll_block( controll_block const& other) :
+coroutine_context::coroutine_context( ctx_fn fn, stack_context * stack_ctx) :
+    fcontext_t(), stack_ctx_( stack_ctx),
+    ctx_( context::make_fcontext( stack_ctx_->sp, stack_ctx_->size, fn) )
+{}
+
+coroutine_context::coroutine_context( coroutine_context const& other) :
     fcontext_t(),
-    ctx_( other.ctx_),
-    seg_()
-{ seg_ = const_cast< controll_block * >( & other)->seg_; }
-#else
-controll_block::controll_block( controll_block const& other) :
-    fcontext_t(),
+    stack_ctx_( other.stack_ctx_),
     ctx_( other.ctx_)
 {}
-#endif
 
-controll_block &
-controll_block::operator=( controll_block const& other)
+coroutine_context &
+coroutine_context::operator=( coroutine_context const& other)
 {
     if ( this == & other) return * this;
 
+    stack_ctx_ = other.stack_ctx_;
     ctx_ = other.ctx_;
-#if defined(BOOST_USE_SEGMENTED_STACKS)
-    seg_ = const_cast< controll_block * >( & other)->seg_;
-#endif
 
     return * this;
 }
 
 intptr_t
-controll_block::jump( controll_block & other, intptr_t param, bool preserve_fpu)
+coroutine_context::jump( coroutine_context & other, intptr_t param, bool preserve_fpu)
 {
 #if defined(BOOST_USE_SEGMENTED_STACKS)
-    if ( seg_) __splitstack_getcontext( & seg_[0]);
-    if ( other.seg_) __splitstack_setcontext( & other.seg_[0]);
+    if ( stack_ctx_)
+        __splitstack_getcontext( stack_ctx_->segments_ctx);
+    if ( other.stack_ctx_)
+        __splitstack_setcontext( other.stack_ctx_->segments_ctx);
 #endif
     return context::jump_fcontext( ctx_, other.ctx_, param, preserve_fpu);
 #if defined(BOOST_USE_SEGMENTED_STACKS)
-    if ( seg_) __splitstack_setcontext( & seg_[0]);
+    if ( stack_ctx_)
+        __splitstack_setcontext( stack_ctx_->segments_ctx);
 #endif
 }
 

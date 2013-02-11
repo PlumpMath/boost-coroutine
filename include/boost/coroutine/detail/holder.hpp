@@ -11,7 +11,7 @@
 #include <boost/config.hpp>
 #include <boost/optional.hpp>
 
-#include <boost/coroutine/detail/controll_block.hpp>
+#include <boost/coroutine/detail/coroutine_context.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -24,19 +24,19 @@ namespace detail {
 template< typename Data >
 struct holder
 {
-    controll_block      *   ctx;
+    coroutine_context      *   ctx;
     optional< Data >        data;
     bool                    force_unwind;
 
-    explicit holder( controll_block * ctx_) :
+    explicit holder( coroutine_context * ctx_) :
         ctx( ctx_), data(), force_unwind( false)
     { BOOST_ASSERT( ctx); }
 
-    explicit holder( controll_block * ctx_, Data data_) :
+    explicit holder( coroutine_context * ctx_, Data data_) :
         ctx( ctx_), data( data_), force_unwind( false)
     { BOOST_ASSERT( ctx); }
 
-    explicit holder( controll_block * ctx_, bool force_unwind_) :
+    explicit holder( coroutine_context * ctx_, bool force_unwind_) :
         ctx( ctx_), data(), force_unwind( force_unwind_)
     {
         BOOST_ASSERT( ctx);
@@ -61,10 +61,10 @@ struct holder
 template<>
 struct holder< void >
 {
-    controll_block  *   ctx;
+    coroutine_context  *   ctx;
     bool                force_unwind;
 
-    explicit holder( controll_block * ctx_, bool force_unwind_ = false) :
+    explicit holder( coroutine_context * ctx_, bool force_unwind_ = false) :
         ctx( ctx_), force_unwind( force_unwind_)
     { BOOST_ASSERT( ctx); }
 

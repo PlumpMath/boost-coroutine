@@ -11,7 +11,7 @@ template<
     typename Result
 >
 class coroutine_object< Signature, Fn, StackAllocator, Allocator, Caller, Result, 0 > :
-    private stack_data< StackAllocator >,
+    private stack_tuple< StackAllocator >,
     public coroutine_base< Signature >
 {
 public:
@@ -22,7 +22,7 @@ public:
     >::other                                            allocator_t;
 
 private:
-    typedef stack_data< StackAllocator >                stack_type;
+    typedef stack_tuple< StackAllocator >               pbase_type;
     typedef coroutine_base< Signature >                 base_type;
 
     Fn                      fn_;
@@ -52,15 +52,15 @@ private:
 
     void run_( Caller & c)
     {
-        controll_block callee;
-        controll_block caller;
+        coroutine_context callee;
+        coroutine_context caller;
         try
         {
             fn_( c);
-            holder< Result > hldr_to( & caller);
             this->flags_ |= flag_complete;
             callee = c.impl_->callee_;
-            hldr_to.ctx->jump(
+            holder< Result > hldr_to( & caller);
+            caller.jump(
                 callee,
                 reinterpret_cast< intptr_t >( & hldr_to),
                 this->preserve_fpu() );
@@ -73,9 +73,10 @@ private:
 
         this->flags_ |= flag_complete;
         callee = c.impl_->callee_;
+        holder< Result > hldr_to( & caller);
         caller.jump(
             callee,
-            reinterpret_cast< intptr_t >( & caller),
+            reinterpret_cast< intptr_t >( & hldr_to),
             this->preserve_fpu() );
         BOOST_ASSERT_MSG( false, "coroutine is complete");
     }
@@ -85,10 +86,10 @@ private:
         BOOST_ASSERT( ! this->is_complete() );
 
         this->flags_ |= flag_unwind_stack;
-        holder< void > hldr( & this->caller_, true);
-        hldr.ctx->jump(
+        holder< void > hldr_to( & this->caller_, true);
+        this->caller_.jump(
             this->callee_,
-            reinterpret_cast< intptr_t >( & hldr),
+            reinterpret_cast< intptr_t >( & hldr_to),
             this->preserve_fpu() );
         this->flags_ &= ~flag_unwind_stack;
 
@@ -100,13 +101,10 @@ public:
     coroutine_object( BOOST_RV_REF( Fn) fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        stack_type( stack_alloc, attr.size),
+        pbase_type( stack_alloc, attr.size),
         base_type(
             trampoline1< coroutine_object >,
-            stack_type::sp, stack_type::size,
-#if defined(BOOST_USE_SEGMENTED_STACKS)
-            & stack_type::seg[0],
-#endif
+            & this->stack_ctx,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( forward< Fn >( fn) ),
@@ -116,13 +114,10 @@ public:
     coroutine_object( Fn fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        stack_type( stack_alloc, attr.size),
+        pbase_type( stack_alloc, attr.size),
         base_type(
             trampoline1< coroutine_object >,
-            stack_type::sp, stack_type::size,
-#if defined(BOOST_USE_SEGMENTED_STACKS)
-            & stack_type::seg[0],
-#endif
+            & this->stack_ctx,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
@@ -132,13 +127,10 @@ public:
     coroutine_object( BOOST_RV_REF( Fn) fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        stack_type( stack_alloc, attr.size),
+        pbase_type( stack_alloc, attr.size),
         base_type(
             trampoline1< coroutine_object >,
-            stack_type::sp, stack_type::size,
-#if defined(BOOST_USE_SEGMENTED_STACKS)
-            & stack_type::seg[0],
-#endif
+            & this->stack_ctx,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
@@ -169,7 +161,7 @@ template<
     typename Result
 >
 class coroutine_object< Signature, reference_wrapper< Fn >, StackAllocator, Allocator, Caller, Result, 0 > :
-    private stack_data< StackAllocator >,
+    private stack_tuple< StackAllocator >,
     public coroutine_base< Signature >
 {
 public:
@@ -180,7 +172,7 @@ public:
     >::other                                            allocator_t;
 
 private:
-    typedef stack_data< StackAllocator >                stack_type;
+    typedef stack_tuple< StackAllocator >               pbase_type;
     typedef coroutine_base< Signature >                 base_type;
 
     Fn                      fn_;
@@ -210,15 +202,15 @@ private:
 
     void run_( Caller & c)
     {
-        controll_block callee;
-        controll_block caller;
+        coroutine_context callee;
+        coroutine_context caller;
         try
         {
             fn_( c);
-            holder< Result > hldr_to( & caller);
             this->flags_ |= flag_complete;
             callee = c.impl_->callee_;
-            hldr_to.ctx->jump(
+            holder< Result > hldr_to( & caller);
+            caller.jump(
                 callee,
                 reinterpret_cast< intptr_t >( & hldr_to),
                 this->preserve_fpu() );
@@ -231,9 +223,10 @@ private:
 
         this->flags_ |= flag_complete;
         callee = c.impl_->callee_;
+        holder< Result > hldr_to( & caller);
         caller.jump(
             callee,
-            reinterpret_cast< intptr_t >( & caller),
+            reinterpret_cast< intptr_t >( & hldr_to),
             this->preserve_fpu() );
         BOOST_ASSERT_MSG( false, "coroutine is complete");
     }
@@ -243,10 +236,10 @@ private:
         BOOST_ASSERT( ! this->is_complete() );
 
         this->flags_ |= flag_unwind_stack;
-        holder< void > hldr( & this->caller_, true);
-        hldr.ctx->jump(
+        holder< void > hldr_to( & this->caller_, true);
+        this->caller_.jump(
             this->callee_,
-            reinterpret_cast< intptr_t >( & hldr),
+            reinterpret_cast< intptr_t >( & hldr_to),
             this->preserve_fpu() );
         this->flags_ &= ~flag_unwind_stack;
 
@@ -257,13 +250,10 @@ public:
     coroutine_object( reference_wrapper< Fn > fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        stack_type( stack_alloc, attr.size),
+        pbase_type( stack_alloc, attr.size),
         base_type(
             trampoline1< coroutine_object >,
-            stack_type::sp, stack_type::size,
-#if defined(BOOST_USE_SEGMENTED_STACKS)
-            & stack_type::seg[0],
-#endif
+            & this->stack_ctx,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),
@@ -293,7 +283,7 @@ template<
     typename Result
 >
 class coroutine_object< Signature, const reference_wrapper< Fn >, StackAllocator, Allocator, Caller, Result, 0 > :
-    private stack_data< StackAllocator >,
+    private stack_tuple< StackAllocator >,
     public coroutine_base< Signature >
 {
 public:
@@ -304,7 +294,7 @@ public:
     >::other                                            allocator_t;
 
 private:
-    typedef stack_data< StackAllocator >                stack_type;
+    typedef stack_tuple< StackAllocator >               pbase_type;
     typedef coroutine_base< Signature >                 base_type;
 
     Fn                      fn_;
@@ -334,15 +324,15 @@ private:
 
     void run_( Caller & c)
     {
-        controll_block callee;
-        controll_block caller;
+        coroutine_context callee;
+        coroutine_context caller;
         try
         {
             fn_( c);
-            holder< Result > hldr_to( & caller);
             this->flags_ |= flag_complete;
             callee = c.impl_->callee_;
-            hldr_to.ctx->jump(
+            holder< Result > hldr_to( & caller);
+            caller.jump(
                 callee,
                 reinterpret_cast< intptr_t >( & hldr_to),
                 this->preserve_fpu() );
@@ -355,9 +345,10 @@ private:
 
         this->flags_ |= flag_complete;
         callee = c.impl_->callee_;
+        holder< Result > hldr_to( & caller);
         caller.jump(
             callee,
-            reinterpret_cast< intptr_t >( & caller),
+            reinterpret_cast< intptr_t >( & hldr_to),
             this->preserve_fpu() );
         BOOST_ASSERT_MSG( false, "coroutine is complete");
     }
@@ -367,10 +358,10 @@ private:
         BOOST_ASSERT( ! this->is_complete() );
 
         this->flags_ |= flag_unwind_stack;
-        holder< void > hldr( & this->caller_, true);
-        hldr.ctx->jump(
+        holder< void > hldr_to( & this->caller_, true);
+        this->caller_.jump(
             this->callee_,
-            reinterpret_cast< intptr_t >( & hldr),
+            reinterpret_cast< intptr_t >( & hldr_to),
             this->preserve_fpu() );
         this->flags_ &= ~flag_unwind_stack;
 
@@ -381,13 +372,10 @@ public:
     coroutine_object( const reference_wrapper< Fn > fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
-        stack_type( stack_alloc, attr.size),
+        pbase_type( stack_alloc, attr.size),
         base_type(
             trampoline1< coroutine_object >,
-            stack_type::sp, stack_type::size,
-#if defined(BOOST_USE_SEGMENTED_STACKS)
-            & stack_type::seg[0],
-#endif
+            & this->stack_ctx,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
         fn_( fn),

@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_COROUTINES_DETAIL_CONTROLL_BLOCK_H
-#define BOOST_COROUTINES_DETAIL_CONTROLL_BLOCK_H
+#ifndef BOOST_COROUTINES_DETAIL_COROUTINE_CONTEXT_H
+#define BOOST_COROUTINES_DETAIL_COROUTINE_CONTEXT_H
 
 #include <cstddef>
 
@@ -29,39 +29,28 @@ namespace boost {
 namespace coroutines {
 namespace detail {
 
-class BOOST_COROUTINES_DECL controll_block : private noncopyable,
+struct stack_context;
+
+class BOOST_COROUTINES_DECL coroutine_context : private noncopyable,
                                              private context::fcontext_t
                     
 {
 private:
+    stack_context       *   stack_ctx_;
     context::fcontext_t *   ctx_;
-#if defined(BOOST_USE_SEGMENTED_STACKS)
-    void                **  seg_;
-#endif
 
 public:
     typedef void( * ctx_fn)( intptr_t);
 
-    controll_block();
+    coroutine_context();
 
-#if defined(BOOST_USE_SEGMENTED_STACKS)
-    explicit controll_block( ctx_fn fn, void * sp, std::size_t size,
-                             void ** seg) :
-        fcontext_t(), ctx_( context::make_fcontext( sp, size, fn) ), seg_()
-    {
-        seg_ = seg;
-    }
-#else
-    explicit controll_block( ctx_fn fn, void * sp, std::size_t size) :
-        fcontext_t(), ctx_( context::make_fcontext( sp, size, fn) )
-    {}
-#endif
+    explicit coroutine_context( ctx_fn, stack_context *);
 
-    controll_block( controll_block const&);
+    coroutine_context( coroutine_context const&);
 
-    controll_block& operator=( controll_block const&);
+    coroutine_context& operator=( coroutine_context const&);
 
-    intptr_t jump( controll_block &, intptr_t = 0, bool preserve_fpu = true);
+    intptr_t jump( coroutine_context &, intptr_t = 0, bool = true);
 };
 
 }}}
@@ -70,4 +59,4 @@ public:
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_COROUTINES_DETAIL_CONTROLL_BLOCK_H
+#endif // BOOST_COROUTINES_DETAIL_COROUTINE_CONTEXT_H

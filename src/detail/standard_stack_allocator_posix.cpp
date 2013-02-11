@@ -29,6 +29,8 @@ extern "C" {
 #include <boost/assert.hpp>
 #include <boost/context/fcontext.hpp>
 
+#include <boost/coroutine/detail/stack_context.hpp>
+
 #if !defined (SIGSTKSZ)
 # define SIGSTKSZ (8 * 1024)
 # define UDEF_SIGSTKSZ
@@ -102,8 +104,8 @@ standard_stack_allocator::maximum_stacksize()
     return static_cast< std::size_t >( detail::stacksize_limit().rlim_max);
 }
 
-void *
-standard_stack_allocator::allocate( std::size_t size) const
+void
+standard_stack_allocator::allocate( stack_context & ctx, std::size_t size)
 {
     BOOST_ASSERT( minimum_stacksize() <= size);
     BOOST_ASSERT( is_stack_unbound() || ( maximum_stacksize() >= size) );
@@ -134,22 +136,20 @@ standard_stack_allocator::allocate( std::size_t size) const
     BOOST_ASSERT( 0 == result);
 #endif
 
-    return static_cast< char * >( limit) + size_;
+    ctx.size = size_;
+    ctx.sp = static_cast< char * >( limit) + ctx.size;
 }
 
 void
-standard_stack_allocator::deallocate( void * vp, std::size_t size) const
+standard_stack_allocator::deallocate( stack_context & ctx)
 {
-    BOOST_ASSERT( vp);
-    BOOST_ASSERT( minimum_stacksize() <= size);
-    BOOST_ASSERT( is_stack_unbound() || ( maximum_stacksize() >= size) );
+    BOOST_ASSERT( ctx.sp);
+    BOOST_ASSERT( minimum_stacksize() <= ctx.size);
+    BOOST_ASSERT( is_stack_unbound() || ( maximum_stacksize() >= ctx.size) );
 
-    const std::size_t pages = detail::page_count( size) + 1;
-    const std::size_t size_ = pages * detail::pagesize();
-    BOOST_ASSERT( 0 < size && 0 < size_);
-    void * limit = static_cast< char * >( vp) - size_;
+    void * limit = static_cast< char * >( ctx.sp) - ctx.size;
     // conform to POSIX.4 (POSIX.1b-1993, _POSIX_C_SOURCE=199309L)
-    ::munmap( limit, size_);
+    ::munmap( limit, ctx.size);
 }
 
 }}}

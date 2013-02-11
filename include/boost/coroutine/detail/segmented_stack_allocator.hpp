@@ -7,8 +7,6 @@
 #ifndef BOOST_COROUTINES_DETAIL_SEGMENTED_STACK_ALLOCATOR_H
 #define BOOST_COROUTINES_DETAIL_SEGMENTED_STACK_ALLOCATOR_H
 
-#if defined(BOOST_USE_SEGMENTED_STACKS)
-
 #include <cstddef>
 
 #include <boost/config.hpp>
@@ -23,23 +21,30 @@ namespace boost {
 namespace coroutines {
 namespace detail {
 
+struct stack_context;
+
+#if defined(BOOST_USE_SEGMENTED_STACKS)
 class segmented_stack_allocator
 {
 public:
+    static bool is_stack_unbound();
+
     static std::size_t default_stacksize();
 
-    void * allocate( std::size_t min_size, void * seq[BOOST_COROUTINES_SEGMENTS],
-                     std::size_t * size) const;
+    static std::size_t minimum_stacksize();
 
-    void deallocate( void * seq[BOOST_COROUTINES_SEGMENTS]) const;
+    static std::size_t maximum_stacksize();
+
+    void allocate( stack_context &, std::size_t size);
+
+    void deallocate( stack_context &);
 };
+#endif
 
 }}}
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_SUFFIX
-#endif
-
 #endif
 
 #endif // BOOST_COROUTINES_DETAIL_SEGMENTED_STACK_ALLOCATOR_H
