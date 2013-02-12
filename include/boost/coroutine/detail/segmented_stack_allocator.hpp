@@ -19,9 +19,10 @@
 
 namespace boost {
 namespace coroutines {
-namespace detail {
 
 struct stack_context;
+
+namespace detail {
 
 #if defined(BOOST_USE_SEGMENTED_STACKS)
 class segmented_stack_allocator

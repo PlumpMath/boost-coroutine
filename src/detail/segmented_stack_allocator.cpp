@@ -13,7 +13,7 @@
 #include <boost/assert.hpp>
 #include <boost/context/fcontext.hpp>
 
-#include <boost/coroutine/detail/stack_context.hpp>
+#include <boost/coroutine/stack_context.hpp>
 
 extern "C" {
     
@@ -22,6 +22,8 @@ void *__splitstack_makecontext( std::size_t,
                                 std::size_t *);
 
 void __splitstack_releasecontext( void * [BOOST_COROUTINES_SEGMENTS]);
+
+void __splitstack_resetcontext( void * [BOOST_COROUTINES_SEGMENTS]);
 
 void __splitstack_block_signals_context( void * [BOOST_COROUTINES_SEGMENTS],
                                          int * new_value, int * old_value);

@@ -24,7 +24,7 @@ extern "C" {
 #include <boost/context/detail/config.hpp>
 #include <boost/context/fcontext.hpp>
 
-#include <boost/coroutine/detail/stack_context.hpp>
+#include <boost/coroutine/stack_context.hpp>
 
 # if defined(BOOST_MSVC)
 # pragma warning(push)
@@ -121,7 +121,7 @@ standard_stack_allocator::allocate( stack_context & ctx, std::size_t size)
     void * limit = ::VirtualAlloc( 0, size_, MEM_COMMIT, PAGE_READWRITE);
     if ( ! limit) throw std::bad_alloc();
 
-    std::memset( limit, size_, '\0');
+    std::memset( limit, '\0', size_);
 
     DWORD old_options;
 #if defined(BOOST_DISABLE_ASSERTS)

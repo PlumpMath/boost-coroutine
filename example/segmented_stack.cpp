@@ -39,8 +39,11 @@ void foo( coro_t & c)
 
 void thread_fn()
 {
-    coro_t c( foo);
-    c();
+    {
+        coro_t c( foo);
+        c();
+        int i = 7;
+    }
 }
 
 int main( int argc, char * argv[])

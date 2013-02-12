@@ -27,8 +27,8 @@
 #include <boost/coroutine/detail/flags.hpp>
 #include <boost/coroutine/detail/holder.hpp>
 #include <boost/coroutine/detail/param.hpp>
-#include <boost/coroutine/detail/stack_context.hpp>
 #include <boost/coroutine/flags.hpp>
+#include <boost/coroutine/stack_context.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -62,8 +62,8 @@ void trampoline2( intptr_t vp)
 template< typename StackAllocator >
 struct stack_tuple
 {
-    stack_context       stack_ctx;
-    StackAllocator      stack_alloc;
+    coroutines::stack_context   stack_ctx;
+    StackAllocator              stack_alloc;
 
     stack_tuple( StackAllocator const& stack_alloc_, std::size_t size) :
         stack_ctx(),

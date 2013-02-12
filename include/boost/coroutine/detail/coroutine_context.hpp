@@ -15,6 +15,7 @@
 #include <boost/utility.hpp>
 
 #include <boost/coroutine/detail/config.hpp>
+#include "boost/coroutine/stack_context.hpp"
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -29,10 +30,10 @@ namespace boost {
 namespace coroutines {
 namespace detail {
 
-struct stack_context;
 
 class BOOST_COROUTINES_DECL coroutine_context : private noncopyable,
-                                             private context::fcontext_t
+                                                private context::fcontext_t,
+                                                private stack_context
                     
 {
 private:

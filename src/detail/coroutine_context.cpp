@@ -8,8 +8,6 @@
 
 #include "boost/coroutine/detail/coroutine_context.hpp"
 
-#include "boost/coroutine/detail/stack_context.hpp"
-
 #if defined(BOOST_USE_SEGMENTED_STACKS)
 extern "C" {
 
@@ -33,8 +31,12 @@ namespace coroutines {
 namespace detail {
 
 coroutine_context::coroutine_context() :
-    fcontext_t(), stack_ctx_( 0), ctx_( this)
-{}
+    fcontext_t(), stack_ctx_( this), ctx_( this)
+{
+#if defined(BOOST_USE_SEGMENTED_STACKS)
+    __splitstack_getcontext( stack_ctx_->segments_ctx);
+#endif
+}
 
 coroutine_context::coroutine_context( ctx_fn fn, stack_context * stack_ctx) :
     fcontext_t(), stack_ctx_( stack_ctx),

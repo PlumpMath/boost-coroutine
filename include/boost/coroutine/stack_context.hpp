@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_COROUTINES_DETAIL_STACK_CONTEXT_H
-#define BOOST_COROUTINES_DETAIL_STACK_CONTEXT_H
+#ifndef BOOST_COROUTINES_STACK_CONTEXT_H
+#define BOOST_COROUTINES_STACK_CONTEXT_H
 
 #include <cstddef>
 
@@ -19,7 +19,6 @@
 
 namespace boost {
 namespace coroutines {
-namespace detail {
 
 #if defined(BOOST_USE_SEGMENTED_STACKS)
 struct stack_context
@@ -46,10 +45,10 @@ struct stack_context
 };
 #endif
 
-}}}
+}}
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_SUFFIX
 #endif
 
-#endif // BOOST_COROUTINES_DETAIL_STACK_CONTEXT_H
+#endif // BOOST_COROUTINES_STACK_CONTEXT_H

@@ -26,9 +26,10 @@
 
 namespace boost {
 namespace coroutines {
-namespace detail {
 
 struct stack_context;
+
+namespace detail {
 
 template< typename Signature >
 class coroutine_base : private noncopyable,

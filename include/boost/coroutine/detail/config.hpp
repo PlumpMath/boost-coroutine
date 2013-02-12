@@ -39,6 +39,8 @@
 # include <boost/config/auto_link.hpp>
 #endif
 
-#define BOOST_COROUTINES_SEGMENTS 10
+#if defined(BOOST_USE_SEGMENTED_STACKS)
+# define BOOST_COROUTINES_SEGMENTS 10
+#endif
 
 #endif // BOOST_COROUTINES_DETAIL_CONFIG_H

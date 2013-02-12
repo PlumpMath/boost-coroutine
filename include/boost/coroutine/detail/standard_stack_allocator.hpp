@@ -19,9 +19,10 @@
 
 namespace boost {
 namespace coroutines {
-namespace detail {
 
 struct stack_context;
+
+namespace detail {
 
 class standard_stack_allocator
 {
