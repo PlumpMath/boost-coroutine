@@ -23,6 +23,7 @@
 #include <boost/coroutine/detail/arg.hpp>
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_base.hpp>
+#include <boost/coroutine/detail/coroutine_context.hpp>
 #include <boost/coroutine/detail/exceptions.hpp>
 #include <boost/coroutine/detail/flags.hpp>
 #include <boost/coroutine/detail/holder.hpp>
@@ -43,7 +44,13 @@ void trampoline1( intptr_t vp)
 {
     BOOST_ASSERT( vp);
 
-    reinterpret_cast< Coroutine * >( vp)->run();
+    tuple< coroutine_context const*, Coroutine * > * tpl(
+        reinterpret_cast< tuple< coroutine_context const*, Coroutine * > * >(
+            vp) );
+    coroutine_context const* ctx( get< 0 >( * tpl) );
+    Coroutine * coro( get< 1 >( * tpl) );
+
+    coro->run( * ctx);
 }
 
 template< typename Coroutine, typename Arg >
@@ -51,12 +58,14 @@ void trampoline2( intptr_t vp)
 {
     BOOST_ASSERT( vp);
 
-    tuple< Coroutine *, Arg > * tpl(
-        reinterpret_cast< tuple< Coroutine *, Arg > * >( vp) );
-    Coroutine * coro( get< 0 >( * tpl) );
-    Arg arg( get< 1 >( * tpl) );
+    tuple< coroutine_context const*, Coroutine *, Arg > * tpl(
+        reinterpret_cast< tuple< coroutine_context const*, Coroutine *, Arg > * >(
+            vp) );
+    coroutine_context const* ctx( get< 0 >( * tpl) );
+    Coroutine * coro( get< 1 >( * tpl) );
+    Arg arg( get< 2 >( * tpl) );
 
-    coro->run( arg);
+    coro->run( * ctx, arg);
 }
 
 template< typename StackAllocator >

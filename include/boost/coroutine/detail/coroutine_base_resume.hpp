@@ -43,15 +43,16 @@ class coroutine_base_resume< Signature, D, void, 0 >
 public:
     void resume()
     {
-        holder< void > hldr_to( & static_cast< D * >( this)->caller_);
+        coroutine_context local_ctx;
+        holder< void > hldr_to( & local_ctx);
         holder< void > * hldr_from(
             reinterpret_cast< holder< void > * >(
-                hldr_to.ctx->jump(
-                    static_cast< D * >( this)->callee_,
+                local_ctx.jump(
+                    static_cast< D * >( this)->ctx_,
                     reinterpret_cast< intptr_t >( & hldr_to),
                     static_cast< D * >( this)->preserve_fpu() ) ) );
         BOOST_ASSERT( hldr_from->ctx);
-        static_cast< D * >( this)->callee_ = * hldr_from->ctx;
+        static_cast< D * >( this)->ctx_ = * hldr_from->ctx;
         if ( hldr_from->force_unwind) throw forced_unwind();
         if ( static_cast< D * >( this)->except_)
             rethrow_exception( static_cast< D * >( this)->except_);
@@ -67,15 +68,16 @@ public:
         BOOST_ASSERT( static_cast< D * >( this));
         BOOST_ASSERT( ! static_cast< D * >( this)->is_complete() );
 
-        holder< void > hldr_to( & static_cast< D * >( this)->caller_);
+        coroutine_context local_ctx;
+        holder< void > hldr_to( & local_ctx);
         holder< Result > * hldr_from(
             reinterpret_cast< holder< Result > * >(
-                hldr_to.ctx->jump(
-                    static_cast< D * >( this)->callee_,
+                local_ctx.jump(
+                    static_cast< D * >( this)->ctx_,
                     reinterpret_cast< intptr_t >( & hldr_to),
                     static_cast< D * >( this)->preserve_fpu() ) ) );
         BOOST_ASSERT( hldr_from->ctx);
-        static_cast< D * >( this)->callee_ = * hldr_from->ctx;
+        static_cast< D * >( this)->ctx_ = * hldr_from->ctx;
         result_ = hldr_from->data;
         if ( hldr_from->force_unwind) throw forced_unwind();
         if ( static_cast< D * >( this)->except_)
@@ -100,15 +102,16 @@ public:
         BOOST_ASSERT( static_cast< D * >( this));
         BOOST_ASSERT( ! static_cast< D * >( this)->is_complete() );
 
-        holder< arg_type > hldr_to( & static_cast< D * >( this)->caller_, a1);
+        coroutine_context local_ctx;
+        holder< arg_type > hldr_to( & local_ctx, a1);
         holder< void > * hldr_from(
             reinterpret_cast< holder< void > * >(
-                hldr_to.ctx->jump(
-                    static_cast< D * >( this)->callee_,
+                local_ctx.jump(
+                    static_cast< D * >( this)->ctx_,
                     reinterpret_cast< intptr_t >( & hldr_to),
                     static_cast< D * >( this)->preserve_fpu() ) ) );
         BOOST_ASSERT( hldr_from->ctx);
-        static_cast< D * >( this)->callee_ = * hldr_from->ctx;
+        static_cast< D * >( this)->ctx_ = * hldr_from->ctx;
         if ( hldr_from->force_unwind) throw forced_unwind();
         if ( static_cast< D * >( this)->except_)
             rethrow_exception( static_cast< D * >( this)->except_);
@@ -126,16 +129,16 @@ public:
         BOOST_ASSERT( static_cast< D * >( this));
         BOOST_ASSERT( ! static_cast< D * >( this)->is_complete() );
 
-        coroutine_context caller;
-        holder< arg_type > hldr_to( & static_cast< D * >( this)->caller_, a1);
+        coroutine_context local_ctx;
+        holder< arg_type > hldr_to( & local_ctx, a1);
         holder< Result > * hldr_from(
             reinterpret_cast< holder< Result > * >(
-                hldr_to.ctx->jump(
-                    static_cast< D * >( this)->callee_,
+                local_ctx.jump(
+                    static_cast< D * >( this)->ctx_,
                     reinterpret_cast< intptr_t >( & hldr_to),
                     static_cast< D * >( this)->preserve_fpu() ) ) );
         BOOST_ASSERT( hldr_from->ctx);
-        static_cast< D * >( this)->callee_ = * hldr_from->ctx;
+        static_cast< D * >( this)->ctx_ = * hldr_from->ctx;
         result_ = hldr_from->data;
         if ( hldr_from->force_unwind) throw forced_unwind();
         if ( static_cast< D * >( this)->except_)
@@ -168,17 +171,18 @@ public: \
         BOOST_ASSERT( static_cast< D * >( this)); \
         BOOST_ASSERT( ! static_cast< D * >( this)->is_complete() ); \
 \
+        coroutine_context local_ctx; \
         holder< arg_type > hldr_to( \
-            & static_cast< D * >( this)->caller_, \
+            & local_ctx, \
             arg_type(BOOST_COROUTINE_BASE_RESUME_VALS(n) ) ); \
         holder< void > * hldr_from( \
             reinterpret_cast< holder< void > * >( \
-                hldr_to.ctx->jump( \
-                    static_cast< D * >( this)->callee_, \
+                local_ctx.jump( \
+                    static_cast< D * >( this)->ctx_, \
                     reinterpret_cast< intptr_t >( & hldr_to), \
                     static_cast< D * >( this)->preserve_fpu() ) ) ); \
         BOOST_ASSERT( hldr_from->ctx); \
-        static_cast< D * >( this)->callee_ = * hldr_from->ctx; \
+        static_cast< D * >( this)->ctx_ = * hldr_from->ctx; \
         if ( hldr_from->force_unwind) throw forced_unwind(); \
         if ( static_cast< D * >( this)->except_) \
             rethrow_exception( static_cast< D * >( this)->except_); \
@@ -196,17 +200,18 @@ public: \
         BOOST_ASSERT( static_cast< D * >( this)); \
         BOOST_ASSERT( ! static_cast< D * >( this)->is_complete() ); \
 \
+        coroutine_context local_ctx; \
         holder< arg_type > hldr_to( \
-            & static_cast< D * >( this)->caller_, \
+            & local_ctx, \
             arg_type(BOOST_COROUTINE_BASE_RESUME_VALS(n) ) ); \
         holder< Result > * hldr_from( \
             reinterpret_cast< holder< Result > * >( \
-                hldr_to.ctx->jump( \
-                    static_cast< D * >( this)->callee_, \
+                local_ctx.jump( \
+                    static_cast< D * >( this)->ctx_, \
                     reinterpret_cast< intptr_t >( & hldr_to), \
                     static_cast< D * >( this)->preserve_fpu() ) ) ); \
         BOOST_ASSERT( hldr_from->ctx); \
-        static_cast< D * >( this)->callee_ = * hldr_from->ctx; \
+        static_cast< D * >( this)->ctx_ = * hldr_from->ctx; \
         result_ = hldr_from->data; \
         if ( hldr_from->force_unwind) throw forced_unwind(); \
         if ( static_cast< D * >( this)->except_) \

@@ -29,9 +29,9 @@ public:
         coroutine_caller< Signature, Allocator >
     >::other   allocator_t;
 
-    coroutine_caller( coroutine_context const& callee, bool unwind, bool preserve_fpu,
+    coroutine_caller( coroutine_context const& ctx, bool unwind, bool preserve_fpu,
                     allocator_t const& alloc) BOOST_NOEXCEPT :
-        coroutine_base< Signature >( callee, unwind, preserve_fpu),
+        coroutine_base< Signature >( ctx, unwind, preserve_fpu),
         alloc_( alloc)
     {}
 

@@ -50,8 +50,7 @@ private:
     friend class coroutine_object;
 
     unsigned int        use_count_;
-    coroutine_context   caller_;
-    coroutine_context   callee_;
+    coroutine_context   ctx_;
     int                 flags_;
     exception_ptr       except_;
 
@@ -68,8 +67,7 @@ public:
             function_traits< Signature >::arity
         >(),
         use_count_( 0),
-        caller_(),
-        callee_( fn, stack_ctx),
+        ctx_( fn, stack_ctx),
         flags_( 0),
         except_()
     {
@@ -77,7 +75,7 @@ public:
         if ( preserve_fpu) flags_ |= flag_preserve_fpu;
     }
 
-    coroutine_base( coroutine_context const& callee, bool unwind, bool preserve_fpu) :
+    coroutine_base( coroutine_context const& ctx, bool unwind, bool preserve_fpu) :
         coroutine_base_resume<
             Signature,
             coroutine_base< Signature >,
@@ -85,8 +83,7 @@ public:
             function_traits< Signature >::arity
         >(),
         use_count_( 0),
-        caller_(),
-        callee_( callee),
+        ctx_( ctx),
         flags_( 0),
         except_()
     {

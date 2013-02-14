@@ -39,43 +39,47 @@ private:
 
     void enter_()
     {
+        coroutine_context local_ctx;
+        tuple< coroutine_context const*, coroutine_object * > tpl(
+            & local_ctx, this);
         holder< void > * hldr_from(
             reinterpret_cast< holder< void > * >(
-                this->caller_.jump(
-                    this->callee_,
-                    reinterpret_cast< intptr_t >( this),
+                local_ctx.jump(
+                    this->ctx_,
+                    reinterpret_cast< intptr_t >( & tpl),
                     this->preserve_fpu() ) ) );
-        this->callee_ = * hldr_from->ctx;
+        this->ctx_ = * hldr_from->ctx;
         if ( this->except_) rethrow_exception( this->except_);
     }
 
     void enter_( typename detail::param< arg_type >::type arg)
     {
-        tuple< coroutine_object *,
+        coroutine_context local_ctx;
+        tuple< coroutine_context const*, coroutine_object *,
             typename detail::param< arg_type >::type
-        > tpl( this, arg);
+        > tpl( & local_ctx, this, arg);
         holder< void > * hldr_from(
             reinterpret_cast< holder< void > * >(
-                this->caller_.jump(
-                    this->callee_,
+                local_ctx.jump(
+                    this->ctx_,
                     reinterpret_cast< intptr_t >( & tpl),
                     this->preserve_fpu() ) ) );
-        this->callee_ = * hldr_from->ctx;
+        this->ctx_ = * hldr_from->ctx;
         if ( this->except_) rethrow_exception( this->except_);
     }
 
     void run_( Caller & c)
     {
-        coroutine_context callee;
-        coroutine_context caller;
+        coroutine_context ctx;
+        coroutine_context local_ctx;
         try
         {
             fn_( c);
             this->flags_ |= flag_complete;
-            callee = c.impl_->callee_;
-            holder< void > hldr_to( & caller);
-            caller.jump(
-                callee,
+            ctx = c.impl_->ctx_;
+            holder< void > hldr_to( & local_ctx);
+            local_ctx.jump(
+                ctx,
                 reinterpret_cast< intptr_t >( & hldr_to),
                 this->preserve_fpu() );
             BOOST_ASSERT_MSG( false, "coroutine is complete");
@@ -86,10 +90,10 @@ private:
         { this->except_ = current_exception(); }
 
         this->flags_ |= flag_complete;
-        callee = c.impl_->callee_;
-        holder< void > hldr_to( & caller);
-        caller.jump(
-            callee,
+        ctx = c.impl_->ctx_;
+        holder< void > hldr_to( & local_ctx);
+        local_ctx.jump(
+            ctx,
             reinterpret_cast< intptr_t >( & hldr_to),
             this->preserve_fpu() );
         BOOST_ASSERT_MSG( false, "coroutine is complete");
@@ -100,9 +104,10 @@ private:
         BOOST_ASSERT( ! this->is_complete() );
 
         this->flags_ |= flag_unwind_stack;
-        holder< arg_type > hldr_to( & this->caller_, true);
-        this->caller_.jump(
-            this->callee_,
+        coroutine_context local_ctx;
+        holder< arg_type > hldr_to( & local_ctx, true);
+        local_ctx.jump(
+            this->ctx_,
             reinterpret_cast< intptr_t >( & hldr_to),
             this->preserve_fpu() );
         this->flags_ &= ~flag_unwind_stack;
@@ -197,15 +202,15 @@ public:
             unwind_stack_();
     }
 
-    void run()
+    void run( coroutine_context const& ctx)
     {
-        Caller c( this->caller_, false, this->preserve_fpu(), alloc_);
+        Caller c( ctx, false, this->preserve_fpu(), alloc_);
         run_( c);
     }
 
-    void run( typename detail::param< arg_type >::type arg)
+    void run( coroutine_context const& ctx, typename detail::param< arg_type >::type arg)
     {
-        Caller c( this->caller_, false, this->preserve_fpu(), alloc_);
+        Caller c( ctx, false, this->preserve_fpu(), alloc_);
         c.impl_->result_ = arg;
         run_( c);
     }
@@ -249,43 +254,47 @@ private:
 
     void enter_()
     {
+        coroutine_context local_ctx;
+        tuple< coroutine_context const*, coroutine_object * > tpl(
+            & local_ctx, this);
         holder< void > * hldr_from(
             reinterpret_cast< holder< void > * >(
-                this->caller_.jump(
-                    this->callee_,
-                    reinterpret_cast< intptr_t >( this),
+                local_ctx.jump(
+                    this->ctx_,
+                    reinterpret_cast< intptr_t >( & tpl),
                     this->preserve_fpu() ) ) );
-        this->callee_ = * hldr_from->ctx;
+        this->ctx_ = * hldr_from->ctx;
         if ( this->except_) rethrow_exception( this->except_);
     }
 
     void enter_( typename detail::param< arg_type >::type arg)
     {
-        tuple< coroutine_object *,
+        coroutine_context local_ctx;
+        tuple< coroutine_context const*, coroutine_object *,
             typename detail::param< arg_type >::type
-        > tpl( this, arg);
+        > tpl( & local_ctx, this, arg);
         holder< void > * hldr_from(
             reinterpret_cast< holder< void > * >(
-                this->caller_.jump(
-                    this->callee_,
+                local_ctx.jump(
+                    this->ctx_,
                     reinterpret_cast< intptr_t >( & tpl),
                     this->preserve_fpu() ) ) );
-        this->callee_ = * hldr_from->ctx;
+        this->ctx_ = * hldr_from->ctx;
         if ( this->except_) rethrow_exception( this->except_);
     }
 
     void run_( Caller & c)
     {
-        coroutine_context callee;
-        coroutine_context caller;
+        coroutine_context ctx;
+        coroutine_context local_ctx;
         try
         {
             fn_( c);
             this->flags_ |= flag_complete;
-            callee = c.impl_->callee_;
-            holder< void > hldr_to( & caller);
-            caller.jump(
-                callee,
+            ctx = c.impl_->ctx_;
+            holder< void > hldr_to( & local_ctx);
+            local_ctx.jump(
+                ctx,
                 reinterpret_cast< intptr_t >( & hldr_to),
                 this->preserve_fpu() );
             BOOST_ASSERT_MSG( false, "coroutine is complete");
@@ -296,10 +305,10 @@ private:
         { this->except_ = current_exception(); }
 
         this->flags_ |= flag_complete;
-        callee = c.impl_->callee_;
-        holder< void > hldr_to( & caller);
-        caller.jump(
-            callee,
+        ctx = c.impl_->ctx_;
+        holder< void > hldr_to( & local_ctx);
+        local_ctx.jump(
+            ctx,
             reinterpret_cast< intptr_t >( & hldr_to),
             this->preserve_fpu() );
         BOOST_ASSERT_MSG( false, "coroutine is complete");
@@ -310,9 +319,10 @@ private:
         BOOST_ASSERT( ! this->is_complete() );
 
         this->flags_ |= flag_unwind_stack;
-        holder< arg_type > hldr_to( & this->caller_, true);
-        this->caller_.jump(
-            this->callee_,
+        coroutine_context local_ctx;
+        holder< arg_type > hldr_to( & local_ctx, true);
+        local_ctx.jump(
+            this->ctx_,
             reinterpret_cast< intptr_t >( & hldr_to),
             this->preserve_fpu() );
         this->flags_ &= ~flag_unwind_stack;
@@ -354,15 +364,15 @@ public:
             unwind_stack_();
     }
 
-    void run()
+    void run( coroutine_context const& ctx)
     {
-        Caller c( this->caller_, false, this->preserve_fpu(), alloc_);
+        Caller c( ctx, false, this->preserve_fpu(), alloc_);
         run_( c);
     }
 
-    void run( typename detail::param< arg_type >::type arg)
+    void run( coroutine_context const& ctx, typename detail::param< arg_type >::type arg)
     {
-        Caller c( this->caller_, false, this->preserve_fpu(), alloc_);
+        Caller c( ctx, false, this->preserve_fpu(), alloc_);
         c.impl_->result_ = arg;
         run_( c);
     }
@@ -406,43 +416,47 @@ private:
 
     void enter_()
     {
+        coroutine_context local_ctx;
+        tuple< coroutine_context const*, coroutine_object * > tpl(
+            & local_ctx, this);
         holder< void > * hldr_from(
             reinterpret_cast< holder< void > * >(
-                this->caller_.jump(
-                    this->callee_,
-                    reinterpret_cast< intptr_t >( this),
+                local_ctx.jump(
+                    this->ctx_,
+                    reinterpret_cast< intptr_t >( & tpl),
                     this->preserve_fpu() ) ) );
-        this->callee_ = * hldr_from->ctx;
+        this->ctx_ = * hldr_from->ctx;
         if ( this->except_) rethrow_exception( this->except_);
     }
 
     void enter_( typename detail::param< arg_type >::type arg)
     {
-        tuple< coroutine_object *,
+        coroutine_context local_ctx;
+        tuple< coroutine_context const*, coroutine_object *,
             typename detail::param< arg_type >::type
-        > tpl( this, arg);
+        > tpl( & local_ctx, this, arg);
         holder< void > * hldr_from(
             reinterpret_cast< holder< void > * >(
-                this->caller_.jump(
-                    this->callee_,
+                local_ctx.jump(
+                    this->ctx_,
                     reinterpret_cast< intptr_t >( & tpl),
                     this->preserve_fpu() ) ) );
-        this->callee_ = * hldr_from->ctx;
+        this->ctx_ = * hldr_from->ctx;
         if ( this->except_) rethrow_exception( this->except_);
     }
 
     void run_( Caller & c)
     {
-        coroutine_context callee;
-        coroutine_context caller;
+        coroutine_context ctx;
+        coroutine_context local_ctx;
         try
         {
             fn_( c);
             this->flags_ |= flag_complete;
-            callee = c.impl_->callee_;
-            holder< void > hldr_to( & caller);
-            caller.jump(
-                callee,
+            ctx = c.impl_->ctx_;
+            holder< void > hldr_to( & local_ctx);
+            local_ctx.jump(
+                ctx,
                 reinterpret_cast< intptr_t >( & hldr_to),
                 this->preserve_fpu() );
             BOOST_ASSERT_MSG( false, "coroutine is complete");
@@ -453,10 +467,10 @@ private:
         { this->except_ = current_exception(); }
 
         this->flags_ |= flag_complete;
-        callee = c.impl_->callee_;
-        holder< void > hldr_to( & caller);
-        caller.jump(
-            callee,
+        ctx = c.impl_->ctx_;
+        holder< void > hldr_to( & local_ctx);
+        local_ctx.jump(
+            ctx,
             reinterpret_cast< intptr_t >( & hldr_to),
             this->preserve_fpu() );
         BOOST_ASSERT_MSG( false, "coroutine is complete");
@@ -467,9 +481,10 @@ private:
         BOOST_ASSERT( ! this->is_complete() );
 
         this->flags_ |= flag_unwind_stack;
-        holder< arg_type > hldr_to( & this->caller_, true);
-        this->caller_.jump(
-            this->callee_,
+        coroutine_context local_ctx;
+        holder< arg_type > hldr_to( & local_ctx, true);
+        local_ctx.jump(
+            this->ctx_,
             reinterpret_cast< intptr_t >( & hldr_to),
             this->preserve_fpu() );
         this->flags_ &= ~flag_unwind_stack;
@@ -511,15 +526,15 @@ public:
             unwind_stack_();
     }
 
-    void run()
+    void run( coroutine_context const& ctx)
     {
-        Caller c( this->caller_, false, this->preserve_fpu(), alloc_);
+        Caller c( ctx, false, this->preserve_fpu(), alloc_);
         run_( c);
     }
 
-    void run( typename detail::param< arg_type >::type arg)
+    void run( coroutine_context const& ctx, typename detail::param< arg_type >::type arg)
     {
-        Caller c( this->caller_, false, this->preserve_fpu(), alloc_);
+        Caller c( ctx, false, this->preserve_fpu(), alloc_);
         c.impl_->result_ = arg;
         run_( c);
     }
