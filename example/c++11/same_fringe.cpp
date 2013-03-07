@@ -7,50 +7,69 @@
 #include <cstddef>
 #include <cstdlib>
 #include <iostream>
-#include <string>
-#include <utility>
-#include <functional>
-
-#include <boost/range.hpp>
 
 #include "tree.h"
 
-bool match_trees( coro_t & c1, coro_t & c2)
+class coro_visitor : public visitor
 {
-    return std::equal(
-        boost::begin( c1),
-        boost::end( c1),
-        boost::begin( c2) );
-}
+private:
+    boost::coroutines::coroutine< void( leaf&) >   &   c_;
 
-std::pair< node::ptr_t, node::ptr_t > create_eq_trees()
+public:
+    coro_visitor( boost::coroutines::coroutine< void( leaf&) > & c) :
+        c_( c)
+    {}
+
+    void visit( branch & b)
+    {
+        if ( b.left) b.left->accept( * this);
+        if ( b.right) b.right->accept( * this);
+    }
+
+    void visit( leaf & l)
+    { c_( l); }
+};
+
+node::ptr_t create_tree1()
 {
-    branch::ptr_t tree1 = branch::create(
+    return branch::create(
         leaf::create( "A"),
         branch::create(
             leaf::create( "B"),
             leaf::create( "C") ) );
+}
 
-    branch::ptr_t tree2 = branch::create(
+node::ptr_t create_tree2()
+{
+    return branch::create(
         branch::create(
             leaf::create( "A"),
             leaf::create( "B") ),
         leaf::create( "C") );
-
-    return std::make_pair( tree1, tree2);
 }
 
 int main()
 {
-    {
-        std::pair< node::ptr_t, node::ptr_t > pt = create_eq_trees();
-        coro_t te1( std::bind( enumerate_leafs, std::placeholders::_1, pt.first) );
-        coro_t te2( std::bind( enumerate_leafs, std::placeholders::_1, pt.second) );
-        bool result = match_trees( te1, te2);
-        std::cout << std::boolalpha << "eq. trees matched == " << result << std::endl;
-    }
+    node::ptr_t t1 = create_tree1();
+    boost::coroutines::coroutine< leaf&() > c1(
+        [&]( boost::coroutines::coroutine< void( leaf &) > & c) {
+            coro_visitor v( c);
+            t1->accept( v);
+        });
 
-    std::cout << "Done" << std::endl;
+    node::ptr_t t2 = create_tree2();
+    boost::coroutines::coroutine< leaf&() > c2(
+        [&]( boost::coroutines::coroutine< void( leaf &) > & c) {
+            coro_visitor v( c);
+            t2->accept( v);
+        });
+
+    bool result = std::equal(
+            boost::begin( c1),
+            boost::end( c1),
+            boost::begin( c2) );
+
+    std::cout << std::boolalpha << "same fringe == " << result << "\nDone" << std::endl;
 
     return EXIT_SUCCESS;
 }
