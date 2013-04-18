@@ -23,6 +23,7 @@
 #include <boost/utility/result_of.hpp>
 
 #include <boost/coroutine/attributes.hpp>
+#include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_context.hpp>
 #include <boost/coroutine/stack_allocator.hpp>
 #include <boost/coroutine/v1/detail/arg.hpp>
