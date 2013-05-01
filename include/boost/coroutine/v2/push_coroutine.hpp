@@ -25,7 +25,7 @@
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_context.hpp>
 #include <boost/coroutine/stack_allocator.hpp>
-#include <boost/coroutine/v2/coroutine_base.hpp.hpp>
+#include <boost/coroutine/v2/push_coroutine_base.hpp>
 #include <boost/coroutine/v2/push_coroutine_object.hpp.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
@@ -40,8 +40,8 @@ template< typename Arg >
 class push_coroutine
 {
 private:
-    typedef detail::coroutine_base< Arg >   base_t;
-    typedef typename base_t::ptr_t          ptr_t;
+    typedef detail::push_coroutine_base< Arg >  base_t;
+    typedef typename base_t::ptr_t              ptr_t;
 
     struct dummy
     { void nonnull() {} };
@@ -270,7 +270,7 @@ public:
         impl_->resume( boost::forward< Arg >( arg) );
     }
 #else
-    void operator()( bOOST_RV_REF( Arg) arg)
+    void operator()( BOOST_RV_REF( Arg) arg)
     {
         BOOST_ASSERT( * this);
 

@@ -25,7 +25,7 @@
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_context.hpp>
 #include <boost/coroutine/stack_allocator.hpp>
-#include <boost/coroutine/v2/coroutine_base.hpp.hpp>
+#include <boost/coroutine/v2/pull_coroutine_base.hpp.hpp>
 #include <boost/coroutine/v2/pull_coroutine_object.hpp.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
@@ -40,8 +40,8 @@ template< typename R >
 class pull_coroutine
 {
 private:
-    typedef detail::coroutine_base< R > base_t;
-    typedef typename base_t::ptr_t      ptr_t;
+    typedef detail::pull_coroutine_base< R >    base_t;
+    typedef typename base_t::ptr_t              ptr_t;
 
     struct dummy
     { void nonnull() {} };
