@@ -8,6 +8,7 @@
 #define BOOST_COROUTINES_V2_PUSH_COROUTINE_H
 
 #include <cstddef>
+#include <iterator>
 #include <memory>
 
 #include <boost/assert.hpp>
@@ -26,7 +27,7 @@
 #include <boost/coroutine/detail/coroutine_context.hpp>
 #include <boost/coroutine/stack_allocator.hpp>
 #include <boost/coroutine/v2/push_coroutine_base.hpp>
-#include <boost/coroutine/v2/push_coroutine_object.hpp.hpp>
+#include <boost/coroutine/v2/push_coroutine_object.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -34,7 +35,6 @@
 
 namespace boost {
 namespace coroutines {
-namespace detail {
 
 template< typename Arg >
 class push_coroutine
@@ -267,14 +267,14 @@ public:
     {
         BOOST_ASSERT( * this);
 
-        impl_->resume( boost::forward< Arg >( arg) );
+        impl_->push( forward< Arg >( arg) );
     }
 #else
     void operator()( BOOST_RV_REF( Arg) arg)
     {
         BOOST_ASSERT( * this);
 
-        impl_->resume( boost::forward< Arg >( arg) );
+        impl_->push( forward< Arg >( arg) );
     }
 #endif
 
@@ -282,14 +282,50 @@ public:
     {
         BOOST_ASSERT( * this);
 
-        impl_->resume( arg);
+        impl_->push( arg);
     }
+
+    class iterator : public std::iterator< std::output_iterator_tag, void, void, void, void >
+    {
+    private:
+       push_coroutine< Arg >    *   c_;
+
+    public:
+        iterator() :
+           c_( 0)
+        {}
+
+        explicit iterator( push_coroutine< Arg > * c) :
+            c_( c)
+        {}
+
+        iterator & operator=( Arg a)
+        {
+            BOOST_ASSERT( c_);
+            if ( ! ( * c_)( a) ) c_ = 0;
+            return * this;
+        }
+
+        bool operator==( iterator const& other)
+        { return other.c_ == c_; }
+
+        bool operator!=( iterator const& other)
+        { return other.c_ != c_; }
+
+        iterator & operator*()
+        { return * this; }
+
+        iterator & operator++()
+        { return * this; }
+    };
+
+    struct const_iterator;
 };
 
 template< typename Arg >
 void swap( push_coroutine< Arg > & l, push_coroutine< Arg > & r) BOOST_NOEXCEPT
 { l.swap( r); }
-#if 0
+
 template< typename Arg >
 inline
 typename push_coroutine< Arg >::iterator
@@ -341,13 +377,13 @@ end( push_coroutine< Arg > const& c)
 }
 
 template< typename Arg >
-struct range_mutable_iterator< coroutines::coroutine< Arg > >
-{ typedef typename coroutines::coroutine< Arg >::iterator type; };
+struct range_mutable_iterator< coroutines::push_coroutine< Arg > >
+{ typedef typename coroutines::push_coroutine< Arg >::iterator type; };
 
 template< typename Arg >
-struct range_const_iterator< coroutines::coroutine< Arg > >
-{ typedef typename coroutines::coroutine< Arg >::const_iterator type; };
-#endif
+struct range_const_iterator< coroutines::push_coroutine< Arg > >
+{ typedef typename coroutines::push_coroutine< Arg >::const_iterator type; };
+
 }
 
 #ifdef BOOST_HAS_ABI_HEADERS

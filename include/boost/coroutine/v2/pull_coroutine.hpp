@@ -8,6 +8,7 @@
 #define BOOST_COROUTINES_V2_PULL_COROUTINE_H
 
 #include <cstddef>
+#include <iterator>
 #include <memory>
 
 #include <boost/assert.hpp>
@@ -34,7 +35,6 @@
 
 namespace boost {
 namespace coroutines {
-namespace detail {
 
 template< typename R >
 class pull_coroutine
@@ -266,7 +266,7 @@ public:
     {
         BOOST_ASSERT( * this);
 
-        impl_->resume();
+        impl_->pull();
     }
 
     bool has_result() const
@@ -282,12 +282,168 @@ public:
    
         return impl_->get(); 
     }
+
+    class iterator : public std::iterator< std::input_iterator_tag, typename remove_reference< Result >::type >
+    {
+    private:
+        pull_coroutine< R > *   c_;
+        optional< Result >      val_;
+
+        void fetch_()
+        {
+            BOOST_ASSERT( c_);
+
+            if ( ! c_->has_result() )
+            {
+                c_ = 0;
+                val_ = none;
+                return;
+            }
+            val_ = c_->get();
+        }
+
+        void increment_()
+        {
+            BOOST_ASSERT( c_);
+            BOOST_ASSERT( * c_);
+
+            ( * c_)();
+            fetch_();
+        }
+
+    public:
+        typedef typename iterator::pointer      pointer_t;
+        typedef typename iterator::reference    reference_t;
+
+        iterator() :
+            c_( 0), val_()
+        {}
+
+        explicit iterator( pull_coroutine< R > * c) :
+            c_( c), val_()
+        { fetch_(); }
+
+        iterator( iterator const& other) :
+            c_( other.c_), val_( other.val_)
+        {}
+
+        iterator & operator=( iterator const& other)
+        {
+            if ( this == & other) return * this;
+            c_ = other.c_;
+            val_ = other.val_;
+            return * this;
+        }
+
+        bool operator==( iterator const& other)
+        { return other.c_ == c_ && other.val_ == val_; }
+
+        bool operator!=( iterator const& other)
+        { return other.c_ != c_ || other.val_ != val_; }
+
+        iterator & operator++()
+        {
+            increment_();
+            return * this;
+        }
+
+        iterator operator++( int)
+        {
+            iterator tmp( * this);
+            ++*this;
+            return tmp;
+        }
+
+        reference_t operator*() const
+        { return const_cast< optional< Result > & >( val_).get(); }
+
+        pointer_t operator->() const
+        { return const_cast< optional< Result > & >( val_).get_ptr(); }
+    };
+
+    class const_iterator : public std::iterator< std::input_iterator_tag, const typename remove_reference< Result >::type >
+    {
+    private:
+        pull_coroutine< R > *   c_;
+        optional< Result >      val_;
+
+        void fetch_()
+        {
+            BOOST_ASSERT( c_);
+
+            if ( ! c_->has_result() )
+            {
+                c_ = 0;
+                val_ = none;
+                return;
+            }
+            val_ = c_->get();
+        }
+
+        void increment_()
+        {
+            BOOST_ASSERT( c_);
+            BOOST_ASSERT( * c_);
+
+            ( * c_)();
+            fetch_();
+        }
+
+    public:
+        typedef typename const_iterator::pointer      pointer_t;
+        typedef typename const_iterator::reference    reference_t;
+
+        const_iterator() :
+            c_( 0), val_()
+        {}
+
+        explicit const_iterator( pull_coroutine< R > const* c) :
+            c_( const_cast< pull_coroutine< R > * >( c) ), val_()
+        { fetch_(); }
+
+        const_iterator( const_iterator const& other) :
+            c_( other.c_), val_( other.val_)
+        {}
+
+        const_iterator & operator=( const_iterator const& other)
+        {
+            if ( this == & other) return * this;
+            c_ = other.c_;
+            val_ = other.val_;
+            return * this;
+        }
+
+        bool operator==( const_iterator const& other)
+        { return other.c_ == c_ && other.val_ == val_; }
+
+        bool operator!=( const_iterator const& other)
+        { return other.c_ != c_ || other.val_ != val_; }
+
+        const_iterator & operator++()
+        {
+            increment_();
+            return * this;
+        }
+
+        const_iterator operator++( int)
+        {
+            const_iterator tmp( * this);
+            ++*this;
+            return tmp;
+        }
+
+        reference_t operator*() const
+        { return val_.get(); }
+
+        pointer_t operator->() const
+        { return val_.get_ptr(); }
+    };
 };
 
 template< typename R >
 void swap( pull_coroutine< R > & l, pull_coroutine< R > & r) BOOST_NOEXCEPT
 { l.swap( r); }
-#if 0
+
 template< typename R >
 inline
 typename pull_coroutine< R >::iterator
@@ -339,13 +495,13 @@ end( pull_coroutine< R > const& c)
 }
 
 template< typename R >
-struct range_mutable_iterator< coroutines::coroutine< R > >
-{ typedef typename coroutines::coroutine< R >::iterator type; };
+struct range_mutable_iterator< coroutines::pull_coroutine< R > >
+{ typedef typename coroutines::pull_coroutine< R >::iterator type; };
 
 template< typename R >
-struct range_const_iterator< coroutines::coroutine< R > >
-{ typedef typename coroutines::coroutine< R >::const_iterator type; };
-#endif
+struct range_const_iterator< coroutines::pull_coroutine< R > >
+{ typedef typename coroutines::pull_coroutine< R >::const_iterator type; };
+
 }
 
 #ifdef BOOST_HAS_ABI_HEADERS
