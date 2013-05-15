@@ -14,17 +14,17 @@
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include <boost/move/move.hpp>
+#include <boost/optional.hpp>
 #include <boost/range.hpp>
 #include <boost/type_traits/decay.hpp>
-#include <boost/type_traits/function_traits.hpp>
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/utility/enable_if.hpp>
-#include <boost/utility/result_of.hpp>
 
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_context.hpp>
+#include <boost/coroutine/detail/param.hpp>
 #include <boost/coroutine/stack_allocator.hpp>
 #include <boost/coroutine/v2/pull_coroutine_base.hpp.hpp>
 #include <boost/coroutine/v2/pull_coroutine_object.hpp.hpp>
@@ -276,18 +276,19 @@ public:
         return impl_->has_result(); 
     }
 
-    R get() const
+    typename param< Result >::type get() const
     {
         BOOST_ASSERT( * this);
+        BOOST_ASSERT( has_result() );
    
         return impl_->get(); 
     }
 
-    class iterator : public std::iterator< std::input_iterator_tag, typename remove_reference< Result >::type >
+    class iterator : public std::iterator< std::input_iterator_tag, typename remove_reference< R >::type >
     {
     private:
         pull_coroutine< R > *   c_;
-        optional< Result >      val_;
+        optional< R >           val_;
 
         void fetch_()
         {
@@ -355,17 +356,17 @@ public:
         }
 
         reference_t operator*() const
-        { return const_cast< optional< Result > & >( val_).get(); }
+        { return const_cast< optional< R > & >( val_).get(); }
 
         pointer_t operator->() const
-        { return const_cast< optional< Result > & >( val_).get_ptr(); }
+        { return const_cast< optional< R > & >( val_).get_ptr(); }
     };
 
-    class const_iterator : public std::iterator< std::input_iterator_tag, const typename remove_reference< Result >::type >
+    class const_iterator : public std::iterator< std::input_iterator_tag, const typename remove_reference< R >::type >
     {
     private:
         pull_coroutine< R > *   c_;
-        optional< Result >      val_;
+        optional< R >      val_;
 
         void fetch_()
         {

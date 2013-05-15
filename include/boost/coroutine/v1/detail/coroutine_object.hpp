@@ -26,6 +26,7 @@
 #include <boost/coroutine/detail/holder.hpp>
 #include <boost/coroutine/detail/param.hpp>
 #include <boost/coroutine/detail/stack_tuple.hpp>
+#include <boost/coroutine/detail/trampoline.hpp>
 #include <boost/coroutine/flags.hpp>
 #include <boost/coroutine/stack_context.hpp>
 #include <boost/coroutine/stack_context.hpp>
@@ -44,27 +45,6 @@
 namespace boost {
 namespace coroutines {
 namespace detail {
-
-template< typename Coroutine >
-void trampoline1( intptr_t vp)
-{
-    BOOST_ASSERT( vp);
-
-    reinterpret_cast< Coroutine * >( vp)->run();
-}
-
-template< typename Coroutine, typename Arg >
-void trampoline2( intptr_t vp)
-{
-    BOOST_ASSERT( vp);
-
-    tuple< Coroutine *, Arg > * tpl(
-        reinterpret_cast< tuple< Coroutine *, Arg > * >( vp) );
-    Coroutine * coro( get< 0 >( * tpl) );
-    Arg arg( get< 1 >( * tpl) );
-
-    coro->run( arg);
-}
 
 template<
     typename Signature,

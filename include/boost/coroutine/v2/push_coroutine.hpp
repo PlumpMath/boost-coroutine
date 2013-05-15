@@ -20,7 +20,6 @@
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/utility/enable_if.hpp>
-#include <boost/utility/result_of.hpp>
 
 #include <boost/coroutine/attributes.hpp>
 #include <boost/coroutine/detail/config.hpp>
@@ -71,7 +70,8 @@ public:
         impl_()
     {
         typedef detail::push_coroutine_object<
-                Arg, Fn, stack_allocator, std::allocator< push_coroutine >
+                Arg, Fn, stack_allocator, std::allocator< push_coroutine >,
+
             >                               object_t;
         typename object_t::allocator_t a( alloc);
         impl_ = ptr_t(
@@ -263,13 +263,20 @@ public:
     { impl_.swap( other.impl_); }
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-    void operator()( Arg && arg)
+    void operator()( BOOST_RV_REF( Arg) arg)
     {
         BOOST_ASSERT( * this);
 
         impl_->push( forward< Arg >( arg) );
     }
 #else
+    void operator()( Arg arg)
+    {
+        BOOST_ASSERT( * this);
+
+        impl_->push( arg);
+    }
+
     void operator()( BOOST_RV_REF( Arg) arg)
     {
         BOOST_ASSERT( * this);
@@ -277,13 +284,6 @@ public:
         impl_->push( forward< Arg >( arg) );
     }
 #endif
-
-    void operator()( Arg arg)
-    {
-        BOOST_ASSERT( * this);
-
-        impl_->push( arg);
-    }
 
     class iterator : public std::iterator< std::output_iterator_tag, void, void, void, void >
     {

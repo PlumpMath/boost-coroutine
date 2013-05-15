@@ -4,8 +4,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_COROUTINES_V2_DETAIL_PUSH_COROUTINE_OBJECT_H
-#define BOOST_COROUTINES_V2_DETAIL_PUSH_COROUTINE_OBJECT_H
+#ifndef BOOST_COROUTINES_V2_DETAIL_PULL_COROUTINE_OBJECT_H
+#define BOOST_COROUTINES_V2_DETAIL_PULL_COROUTINE_OBJECT_H
 
 #include <cstddef>
 
@@ -29,7 +29,7 @@
 #include <boost/coroutine/detail/trampoline.hpp>
 #include <boost/coroutine/flags.hpp>
 #include <boost/coroutine/stack_context.hpp>
-#include <boost/coroutine/v2/detail/push_coroutine_base.hpp>
+#include <boost/coroutine/v2/detail/pull_coroutine_base.hpp>
 
 #ifdef BOOST_MSVC
  #pragma warning (push)
@@ -50,42 +50,43 @@ template<
     typename StackAllocator, typename Allocator,
     typename Caller
 >
-class push_coroutine_object< Arg, Fn, StackAllocator, Allocator, Caller > :
+class pull_coroutine_object< Arg, Fn, StackAllocator, Allocator, Caller > :
     private stack_tuple< StackAllocator >,
-    public push_coroutine_base< Arg >
+    public pull_coroutine_base< Arg >
 {
 public:
     typedef typename Allocator::template rebind<
-        push_coroutine_object<
+        pull_coroutine_object<
             Arg, Fn, StackAllocator, Allocator, Caller
         >
     >::other                                            allocator_t;
 
 private:
     typedef stack_tuple< StackAllocator >               pbase_type;
-    typedef push_coroutine_base< Arg >                  base_type;
+    typedef pull_coroutine_base< Arg >                  base_type;
 
     Fn                      fn_;
     allocator_t             alloc_;
 
-    static void destroy_( allocator_t & alloc, push_coroutine_object * p)
+    static void destroy_( allocator_t & alloc, pull_coroutine_object * p)
     {
         alloc.destroy( p);
         alloc.deallocate( p, 1);
     }
 
-    push_coroutine_object( push_coroutine_object &);
-    push_coroutine_object & operator=( push_coroutine_object const&);
+    pull_coroutine_object( pull_coroutine_object &);
+    pull_coroutine_object & operator=( pull_coroutine_object const&);
 
     void enter_()
     {
-        holder< void > * hldr_from(
-            reinterpret_cast< holder< void > * >(
+        holder< R > * hldr_from(
+            reinterpret_cast< holder< R > * >(
                 caller_.jump(
                     callee_,
                     reinterpret_cast< intptr_t >( this),
                     preserve_fpu() ) ) );
         callee_ = * hldr_from->ctx;
+        result_ = hldr_from->data;
         if ( except_) rethrow_exception( except_);
     }
 
@@ -106,12 +107,12 @@ private:
 
 public:
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-    push_coroutine_object( Fn && fn, attributes const& attr,
+    pull_coroutine_object( Fn && fn, attributes const& attr,
                            StackAllocator const& stack_alloc,
                            allocator_t const& alloc) :
         pbase_type( stack_alloc, attr.size),
         base_type(
-            trampoline1< push_coroutine_object >,
+            trampoline1< pull_coroutine_object >,
             & stack_ctx,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
@@ -119,12 +120,12 @@ public:
         alloc_( alloc)
     { enter_(); }
 #else
-    push_coroutine_object( Fn fn, attributes const& attr,
+    pull_coroutine_object( Fn fn, attributes const& attr,
                            StackAllocator const& stack_alloc,
                            allocator_t const& alloc) :
         pbase_type( stack_alloc, attr.size),
         base_type(
-            trampoline1< push_coroutine_object >,
+            trampoline1< pull_coroutine_object >,
             & stack_ctx,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
@@ -132,12 +133,12 @@ public:
         alloc_( alloc)
     { enter_(); }
 
-    push_coroutine_object( BOOST_RV_REF( Fn) fn, attributes const& attr,
+    pull_coroutine_object( BOOST_RV_REF( Fn) fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         pbase_type( stack_alloc, attr.size),
         base_type(
-            trampoline1< push_coroutine_object >,
+            trampoline1< pull_coroutine_object >,
             & stack_ctx,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
@@ -146,7 +147,7 @@ public:
     { enter_(); }
 #endif
 
-    ~push_coroutine_object()
+    ~pull_coroutine_object()
     {
         if ( ! is_complete() && force_unwind() )
             unwind_stack_();
@@ -158,18 +159,8 @@ public:
         coroutine_context caller;
 
         {
-            holder< void > hldr_to( & caller);
-            holder< Arg > * hldr_from(
-                reinterpret_cast< holder< Arg > * >(
-                    caller.jump(
-                        caller_,
-                        reinterpret_cast< intptr_t >( & hldr_to),
-                        preserve_fpu() ) ) );
-            BOOST_ASSERT( hldr_from->ctx);
-            BOOST_ASSERT( hldr_from->data);
-
-            // create pull_coroutine
-            Caller c( * hldr_from->ctx, false, preserve_fpu(), alloc_, hdlr_from->data);
+            // create push_coroutine
+            Caller c( * hldr_from->ctx, false, preserve_fpu(), alloc_);
             try
             { fn_( c); }
             catch ( forced_unwind const&)
@@ -180,12 +171,12 @@ public:
         }
 
         flags_ |= flag_complete;
-        holder< void > hldr_to( & caller);
+        holder< R > hldr_to( & caller);
         caller.jump(
             callee,
             reinterpret_cast< intptr_t >( & hldr_to),
             preserve_fpu() );
-        BOOST_ASSERT_MSG( false, "push_coroutine is complete");
+        BOOST_ASSERT_MSG( false, "pull_coroutine is complete");
     }
 
     void deallocate_object()
@@ -198,37 +189,37 @@ template<
     typename StackAllocator, typename Allocator,
     typename Caller
 >
-class push_coroutine_object< Arg, reference_wrapper< Fn >, StackAllocator, Allocator, Caller > :
+class pull_coroutine_object< Arg, reference_wrapper< Fn >, StackAllocator, Allocator, Caller > :
     private stack_tuple< StackAllocator >,
-    public push_coroutine_base< Arg >
+    public pull_coroutine_base< Arg >
 {
 public:
     typedef typename Allocator::template rebind<
-        push_coroutine_object<
+        pull_coroutine_object<
             Arg, Fn, StackAllocator, Allocator, Caller
         >
     >::other                                            allocator_t;
 
 private:
     typedef stack_tuple< StackAllocator >               pbase_type;
-    typedef push_coroutine_base< Arg >                  base_type;
+    typedef pull_coroutine_base< Arg >                  base_type;
 
     Fn                      fn_;
     allocator_t             alloc_;
 
-    static void destroy_( allocator_t & alloc, push_coroutine_object * p)
+    static void destroy_( allocator_t & alloc, pull_coroutine_object * p)
     {
         alloc.destroy( p);
         alloc.deallocate( p, 1);
     }
 
-    push_coroutine_object( push_coroutine_object &);
-    push_coroutine_object & operator=( push_coroutine_object const&);
+    pull_coroutine_object( pull_coroutine_object &);
+    pull_coroutine_object & operator=( pull_coroutine_object const&);
 
     void enter_()
     {
-        holder< void > * hldr_from(
-            reinterpret_cast< holder< void > * >(
+        holder< R > * hldr_from(
+            reinterpret_cast< holder< R > * >(
                 caller_.jump(
                     callee_,
                     reinterpret_cast< intptr_t >( this),
@@ -253,12 +244,12 @@ private:
     }
 
 public:
-    push_coroutine_object( reference_wrapper< Fn > fn, attributes const& attr,
+    pull_coroutine_object( reference_wrapper< Fn > fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         pbase_type( stack_alloc, attr.size),
         base_type(
-            trampoline1< push_coroutine_object >,
+            trampoline1< pull_coroutine_object >,
             & stack_ctx,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
@@ -266,7 +257,7 @@ public:
         alloc_( alloc)
     { enter_(); }
 
-    ~push_coroutine_object()
+    ~pull_coroutine_object()
     {
         if ( ! is_complete() && force_unwind() )
             unwind_stack_();
@@ -278,18 +269,8 @@ public:
         coroutine_context caller;
 
         {
-            holder< void > hldr_to( & caller);
-            holder< Arg > * hldr_from(
-                reinterpret_cast< holder< Arg > * >(
-                    caller.jump(
-                        caller_,
-                        reinterpret_cast< intptr_t >( & hldr_to),
-                        preserve_fpu() ) ) );
-            BOOST_ASSERT( hldr_from->ctx);
-            BOOST_ASSERT( hldr_from->data);
-
             // create pull_coroutine
-            Caller c( * hldr_from->ctx, false, preserve_fpu(), alloc_, hdlr_from->data);
+            Caller c( * hldr_from->ctx, false, preserve_fpu(), alloc_);
             try
             { fn_( c); }
             catch ( forced_unwind const&)
@@ -300,12 +281,12 @@ public:
         }
 
         flags_ |= flag_complete;
-        holder< void > hldr_to( & caller);
+        holder< R > hldr_to( & caller);
         caller.jump(
             callee,
             reinterpret_cast< intptr_t >( & hldr_to),
             preserve_fpu() );
-        BOOST_ASSERT_MSG( false, "push_coroutine is complete");
+        BOOST_ASSERT_MSG( false, "pull_coroutine is complete");
     }
 
     void deallocate_object()
@@ -318,37 +299,37 @@ template<
     typename StackAllocator, typename Allocator,
     typename Caller
 >
-class push_coroutine_object< Arg, const reference_wrapper< Fn >, StackAllocator, Allocator, Caller > :
+class pull_coroutine_object< Arg, const reference_wrapper< Fn >, StackAllocator, Allocator, Caller > :
     private stack_tuple< StackAllocator >,
-    public push_coroutine_base< Arg >
+    public pull_coroutine_base< Arg >
 {
 public:
     typedef typename Allocator::template rebind<
-        push_coroutine_object<
+        pull_coroutine_object<
             Arg, Fn, StackAllocator, Allocator, Caller
         >
     >::other                                            allocator_t;
 
 private:
     typedef stack_tuple< StackAllocator >               pbase_type;
-    typedef push_coroutine_base< Arg >                  base_type;
+    typedef pull_coroutine_base< Arg >                  base_type;
 
     Fn                      fn_;
     allocator_t             alloc_;
 
-    static void destroy_( allocator_t & alloc, push_coroutine_object * p)
+    static void destroy_( allocator_t & alloc, pull_coroutine_object * p)
     {
         alloc.destroy( p);
         alloc.deallocate( p, 1);
     }
 
-    push_coroutine_object( push_coroutine_object &);
-    push_coroutine_object & operator=( push_coroutine_object const&);
+    pull_coroutine_object( pull_coroutine_object &);
+    pull_coroutine_object & operator=( pull_coroutine_object const&);
 
     void enter_()
     {
-        holder< void > * hldr_from(
-            reinterpret_cast< holder< void > * >(
+        holder< R > * hldr_from(
+            reinterpret_cast< holder< R > * >(
                 caller_.jump(
                     callee_,
                     reinterpret_cast< intptr_t >( this),
@@ -373,12 +354,12 @@ private:
     }
 
 public:
-    push_coroutine_object( const reference_wrapper< Fn > fn, attributes const& attr,
+    pull_coroutine_object( const reference_wrapper< Fn > fn, attributes const& attr,
                       StackAllocator const& stack_alloc,
                       allocator_t const& alloc) :
         pbase_type( stack_alloc, attr.size),
         base_type(
-            trampoline1< push_coroutine_object >,
+            trampoline1< pull_coroutine_object >,
             & stack_ctx,
             stack_unwind == attr.do_unwind,
             fpu_preserved == attr.preserve_fpu),
@@ -386,7 +367,7 @@ public:
         alloc_( alloc)
     { enter_(); }
 
-    ~push_coroutine_object()
+    ~pull_coroutine_object()
     {
         if ( ! is_complete() && force_unwind() )
             unwind_stack_();
@@ -398,18 +379,8 @@ public:
         coroutine_context caller;
 
         {
-            holder< void > hldr_to( & caller);
-            holder< Arg > * hldr_from(
-                reinterpret_cast< holder< Arg > * >(
-                    caller.jump(
-                        caller_,
-                        reinterpret_cast< intptr_t >( & hldr_to),
-                        preserve_fpu() ) ) );
-            BOOST_ASSERT( hldr_from->ctx);
-            BOOST_ASSERT( hldr_from->data);
-
             // create pull_coroutine
-            Caller c( * hldr_from->ctx, false, preserve_fpu(), alloc_, hdlr_from->data);
+            Caller c( * hldr_from->ctx, false, preserve_fpu(), alloc_);
             try
             { fn_( c); }
             catch ( forced_unwind const&)
@@ -420,12 +391,12 @@ public:
         }
 
         flags_ |= flag_complete;
-        holder< void > hldr_to( & caller);
+        holder< R > hldr_to( & caller);
         caller.jump(
             callee,
             reinterpret_cast< intptr_t >( & hldr_to),
             preserve_fpu() );
-        BOOST_ASSERT_MSG( false, "push_coroutine is complete");
+        BOOST_ASSERT_MSG( false, "pull_coroutine is complete");
     }
 
     void deallocate_object()
@@ -442,4 +413,4 @@ public:
  #pragma warning (pop)
 #endif
 
-#endif // BOOST_COROUTINES_V2_DETAIL_PUSH_COROUTINE_OBJECT_H
+#endif // BOOST_COROUTINES_V2_DETAIL_PULL_COROUTINE_OBJECT_H
