@@ -45,19 +45,17 @@ namespace coroutines {
 namespace detail {
 
 template<
-    typename Arg,
-    typename Fn,
-    typename StackAllocator, typename Allocator,
-    typename Caller
+    typename Arg, typename Fn,
+    typename StackAllocator, typename Allocator
 >
-class pull_coroutine_object< Arg, Fn, StackAllocator, Allocator, Caller > :
+class pull_coroutine_object< Arg, Fn, StackAllocator, Allocator > :
     private stack_tuple< StackAllocator >,
     public pull_coroutine_base< Arg >
 {
 public:
     typedef typename Allocator::template rebind<
         pull_coroutine_object<
-            Arg, Fn, StackAllocator, Allocator, Caller
+            Arg, Fn, StackAllocator, Allocator
         >
     >::other                                            allocator_t;
 
@@ -184,19 +182,17 @@ public:
 };
 
 template<
-    typename Arg,
-    typename Fn,
-    typename StackAllocator, typename Allocator,
-    typename Caller
+    typename Arg, typename Fn,
+    typename StackAllocator, typename Allocator
 >
-class pull_coroutine_object< Arg, reference_wrapper< Fn >, StackAllocator, Allocator, Caller > :
+class pull_coroutine_object< Arg, reference_wrapper< Fn >, StackAllocator, Allocator > :
     private stack_tuple< StackAllocator >,
     public pull_coroutine_base< Arg >
 {
 public:
     typedef typename Allocator::template rebind<
         pull_coroutine_object<
-            Arg, Fn, StackAllocator, Allocator, Caller
+            Arg, Fn, StackAllocator, Allocator
         >
     >::other                                            allocator_t;
 
@@ -294,19 +290,17 @@ public:
 };
 
 template<
-    typename Arg,
-    typename Fn,
-    typename StackAllocator, typename Allocator,
-    typename Caller
+    typename Arg, typename Fn,
+    typename StackAllocator, typename Allocator
 >
-class pull_coroutine_object< Arg, const reference_wrapper< Fn >, StackAllocator, Allocator, Caller > :
+class pull_coroutine_object< Arg, const reference_wrapper< Fn >, StackAllocator, Allocator > :
     private stack_tuple< StackAllocator >,
     public pull_coroutine_base< Arg >
 {
 public:
     typedef typename Allocator::template rebind<
         pull_coroutine_object<
-            Arg, Fn, StackAllocator, Allocator, Caller
+            Arg, Fn, StackAllocator, Allocator
         >
     >::other                                            allocator_t;
 

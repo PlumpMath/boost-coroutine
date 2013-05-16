@@ -25,8 +25,9 @@
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/detail/coroutine_context.hpp>
 #include <boost/coroutine/stack_allocator.hpp>
-#include <boost/coroutine/v2/push_coroutine_base.hpp>
-#include <boost/coroutine/v2/push_coroutine_object.hpp>
+#include <boost/coroutine/v2/detail/push_coroutine_base.hpp>
+#include <boost/coroutine/v2/detail/push_coroutine_caller.hpp>
+#include <boost/coroutine/v2/detail/push_coroutine_object.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -50,6 +51,22 @@ private:
     ptr_t  impl_;
 
     BOOST_MOVABLE_BUT_NOT_COPYABLE( push_coroutine)
+
+    template< typename Allocator >
+    push_coroutine( detail::coroutine_context const& callee,
+                    bool unwind, bool preserve_fpu,
+                    Allocator const& alloc) :
+        impl_()
+    {
+        typedef detail::push_coroutine_caller<
+                Arg, Allocator
+        >                               caller_t;
+        typename caller_t::allocator_t a( alloc);
+        impl_ = ptr_t(
+            // placement new
+            ::new( a.allocate( 1) ) caller_t(
+                callee, unwind, preserve_fpu, a) );
+    }
 
 public:
     push_coroutine() BOOST_NOEXCEPT :
