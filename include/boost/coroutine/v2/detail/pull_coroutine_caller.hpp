@@ -8,6 +8,7 @@
 
 #include <boost/config.hpp>
 #include <boost/context/fcontext.hpp>
+#include <boost/optional.hpp>
 
 #include <boost/coroutine/detail/config.hpp>
 #include <boost/coroutine/v2/detail/pull_coroutine_base.hpp>
@@ -29,8 +30,8 @@ public:
     >::other   allocator_t;
 
     pull_coroutine_caller( coroutine_context const& callee, bool unwind, bool preserve_fpu,
-                           allocator_t const& alloc) BOOST_NOEXCEPT :
-        pull_coroutine_base< R >( callee, unwind, preserve_fpu),
+                           allocator_t const& alloc, optional< R > const& data) BOOST_NOEXCEPT :
+        pull_coroutine_base< R >( callee, unwind, preserve_fpu, data),
         alloc_( alloc)
     {}
 

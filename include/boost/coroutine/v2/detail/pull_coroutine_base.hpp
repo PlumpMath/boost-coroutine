@@ -66,13 +66,14 @@ public:
     }
 
     pull_coroutine_base( coroutine_context const& callee,
-                         bool unwind, bool preserve_fpu) :
+                         bool unwind, bool preserve_fpu,
+                         optional< R > const& result) :
         use_count_( 0),
         flags_( 0),
         except_(),
         caller_(),
         callee_( callee),
-        result_()
+        result_( result)
     {
         if ( unwind) flags_ |= flag_force_unwind;
         if ( preserve_fpu) flags_ |= flag_preserve_fpu;
