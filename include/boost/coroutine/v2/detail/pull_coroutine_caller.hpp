@@ -48,6 +48,33 @@ private:
     }
 };
 
+template< typename Allocator >
+class pull_coroutine_caller< void, Allocator > : public  pull_coroutine_base< void >
+{
+public:
+    typedef typename Allocator::template rebind<
+        pull_coroutine_caller< void, Allocator >
+    >::other   allocator_t;
+
+    pull_coroutine_caller( coroutine_context const& callee, bool unwind, bool preserve_fpu,
+                           allocator_t const& alloc) BOOST_NOEXCEPT :
+        pull_coroutine_base< void >( callee, unwind, preserve_fpu),
+        alloc_( alloc)
+    {}
+
+    void deallocate_object()
+    { destroy_( alloc_, this); }
+
+private:
+    allocator_t   alloc_;
+
+    static void destroy_( allocator_t & alloc, pull_coroutine_caller * p)
+    {
+        alloc.destroy( p);
+        alloc.deallocate( p, 1);
+    }
+};
+
 }}}
 
 #ifdef BOOST_HAS_ABI_HEADERS

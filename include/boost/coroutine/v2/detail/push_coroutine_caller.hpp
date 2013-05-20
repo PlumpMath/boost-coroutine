@@ -28,8 +28,8 @@ public:
         push_coroutine_caller< Arg, Allocator >
     >::other   allocator_t;
 
-    push_coroutine_caller( coroutine_context const& callee, bool unwind, bool preserve_fpu,
-                    allocator_t const& alloc) BOOST_NOEXCEPT :
+    push_coroutine_caller( coroutine_context const& callee, bool unwind,
+                           bool preserve_fpu, allocator_t const& alloc) BOOST_NOEXCEPT :
         push_coroutine_base< Arg >( callee, unwind, preserve_fpu),
         alloc_( alloc)
     {}
