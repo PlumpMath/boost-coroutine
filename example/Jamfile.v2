@@ -77,10 +77,10 @@ exe same_fringe
 #    : asio/stream_server.cpp
 #    ;
 
-exe same_fringe11
-    : c++11/same_fringe.cpp
-    ;
-
-exe fibonacci11
-    : c++11/fibonacci.cpp
-    ;
+#exe same_fringe11
+#    : c++11/same_fringe.cpp
+#    ;
+#
+#exe fibonacci11
+#    : c++11/fibonacci.cpp
+#    ;

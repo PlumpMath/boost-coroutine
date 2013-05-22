@@ -178,7 +178,7 @@ public:
         }
 
         this->flags_ |= flag_complete;
-        holder< void > hldr_to( & caller);
+        holder< Arg > hldr_to( & caller);
         caller.jump(
             callee,
             reinterpret_cast< intptr_t >( & hldr_to),
@@ -297,7 +297,7 @@ public:
         }
 
         this->flags_ |= flag_complete;
-        holder< void > hldr_to( & caller);
+        holder< Arg > hldr_to( & caller);
         caller.jump(
             callee,
             reinterpret_cast< intptr_t >( & hldr_to),
@@ -416,7 +416,7 @@ public:
         }
 
         this->flags_ |= flag_complete;
-        holder< void > hldr_to( & caller);
+        holder< Arg > hldr_to( & caller);
         caller.jump(
             callee,
             reinterpret_cast< intptr_t >( & hldr_to),
