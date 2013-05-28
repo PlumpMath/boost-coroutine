@@ -429,7 +429,7 @@ public:
     {
         BOOST_ASSERT( * this);
 
-        impl_->push( forward< Arg & >( arg) );
+        impl_->push( arg);
         return * this;
     }
 
@@ -631,7 +631,7 @@ public:
     {
         BOOST_ASSERT( * this);
 
-        impl_->push( forward< Arg const& >( arg) );
+        impl_->push( arg);
         return * this;
     }
 
