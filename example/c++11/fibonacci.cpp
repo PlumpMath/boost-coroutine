@@ -9,7 +9,7 @@
 
 #include <boost/coroutine/all.hpp>
 
-#ifdef BOOST_COROUTINES_V2
+#ifdef BOOST_COROUTINES_BIDIRECT
 int main()
 {
     boost::coroutines::pull_coroutine< int > c(
