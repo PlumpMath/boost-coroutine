@@ -39,6 +39,8 @@
 
 [def __ctx__ ['context]]
 [def __coro__ ['coroutine]]
+[def __push_coro__ ['push_coroutine]]
+[def __pull_coro__ ['pull_coroutine]]
 [def __coro_fn__ ['coroutine-function]]
 [def __coros__ ['coroutines]]
 [def __not_a_coro__ ['not-a-coroutine]]
