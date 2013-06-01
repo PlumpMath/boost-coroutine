@@ -12,7 +12,7 @@
 #include <boost/range.hpp>
 #include <boost/coroutine/all.hpp>
 
-#ifdef BOOST_COROUTINES_BIDIRECT
+#ifdef BOOST_COROUTINES_UNIDIRECT
 void power( boost::coroutines::push_coroutine< int > & c, int number, int exponent)
 {
     int counter = 0;

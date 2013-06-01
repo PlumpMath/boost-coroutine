@@ -10,7 +10,7 @@
 #include <boost/bind.hpp>
 #include <boost/coroutine/all.hpp>
 
-#ifdef BOOST_COROUTINES_BIDIRECT
+#ifdef BOOST_COROUTINES_UNIDIRECT
 struct X : private boost::noncopyable
 {
     X() { std::cout << "X()" << std::endl; }

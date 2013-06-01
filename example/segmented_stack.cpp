@@ -31,7 +31,7 @@ void bar( int i)
     }
 }
 
-#ifdef BOOST_COROUTINES_BIDIRECT
+#ifdef BOOST_COROUTINES_UNIDIRECT
 void foo( boost::coroutines::pull_coroutine< void > & c)
 {
     bar( count);

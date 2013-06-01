@@ -32,7 +32,7 @@ namespace coro = boost::coroutines;
 # define CALL_COROUTINE(z,n,unused) \
     c();
 
-#ifdef BOOST_COROUTINES_BIDIRECT
+#ifdef BOOST_COROUTINES_UNIDIRECT
 void fn( boost::coroutines::push_coroutine< void > & c)
 { while ( true) c(); }
 
