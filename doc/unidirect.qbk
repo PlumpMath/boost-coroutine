@@ -7,7 +7,7 @@
 
 [section:unidirect Unidirectional coroutine (version 2)]
 
-[note This is the default interface (BOOST_COROUTINES_V2).]
+[note This is the default interface (BOOST_COROUTINES_UNIDIRECT).]
 
 Two kinds of __coros__ are provided - __push_coro__ for transfering data to
 and __pull_coro__ for transfering data from the other execution context.
@@ -38,8 +38,8 @@ executed in a new __ctx__ (CPU registers and stack space).
 [note __coro_fn__ is required to return ['void] and accept a reference of type
 __push_coro__ (if called by __pull_coro__) or vice versa.]
 
-The template argument determines the data-types transferred to
-__coro_fn__ and from __coro_fn__.
+The template argument determines the data-type transferred to/from
+__coro_fn__.
 
         void f( boost:::coroutines::pull_coroutine< std::string > & c)
         {
@@ -56,37 +56,9 @@ __coro_fn__ and from __coro_fn__.
 
 
 The __coro_fn__ is started at __coro__ construction (similar to __thread__)
-in a newly created __coro__ complete with registers, flags, stack and
-instruction pointer.
-If __coro_fn__ requires some arguments (types defined by __signature__)
-on start-up those parameters must be applied to the __coro__ constructor.
-A single arguments can be passed as it is:
-
-        typedef boost::coroutines::coroutine< int( std::string const&) > coro_t;
-
-        // void f( boost::coroutine< std::string const&( int) > & ca)
-        void f( coro_t::caller_type & ca);
-
-        std::string str("abc");
-        coro_t c( f, str);
-
-
-For multiple arguments __args__ must be used (it is a typedef of __tuple__):
-
-        typedef boost::coroutines::coroutine< int( int, std::string const&) > coro_t;
-
-        // void f( boost::coroutine< boost::tuple< int, std::string const& >( int) > & ca)
-        void f( coro_t::caller_type & ca);
-
-        std::string str("abc");
-        coro_t c( f, coro_t::arguments( 7, str) );
-
-
-[note The maximum number of arguments is limited to 10 (limit defined by
-__boost_tuple__).]
-
-[note Parameters bound with __bind__ to __coro_fn__ will not be part of the
-__coro_op__ signature.]
+in a newly created __pull_coro__ complete with registers, flags, stack and
+instruction pointer. In the case of __push_coro__ the __coro_fn__ is entered
+when __push_coro_op__ is called the first time.
 
 __attrs__, an additional constructor argument of __coro__, defines the stack
 size, stack unwinding and floating-point preserving behaviour used for __ctx__
@@ -101,12 +73,12 @@ constructor.
 
 [heading Calling a coroutine]
 
-The execution control is transferred to __coro__ at construction (__coro_fn__
-entered) - when control should be returned to the original calling routine,
-invoke __coro_op__ on the first argument of type __coro_caller__ inside
+For __pull_coro__ the execution control is transferred to __coro__ at
+construction (__coro_fn__ entered) - when control should be returned to the
+original calling routine, invoke __coro_op__ on the first argument of type __coro_caller__ inside
 __coro_fn__. __coro_caller__ is a typedef of __coro__ with an inverted
-__signature__. Inverted __signature__ means that the return type becomes an
-argument and vice versa. Multiple arguments are wrapped into __tuple__.
+__signature__.
+Multiple arguments are wrapped into __tuple__.
 
         void f( boost::coroutines::coroutine< std::string const&( int) & ca);
         boost::coroutines::coroutine< int( std::string const&) > c1( f);
@@ -120,10 +92,7 @@ pointer) is saved and the original context information is restored. Calling
 __coro_op__ resumes execution in the coroutine after saving the new state of the
 original routine.
 
-        typedef boost::coroutines::coroutine< void() > coro_t;
-
-        // void fn( boost::coroutines::coroutine< void() > & ca, int j)
-        void fn( coro_t::caller_type & ca, int j)
+        void fn( boost::coroutines::pull_coroutine< void > & c, int j)
         {
             for( int i = 0; i < j; ++i)
             {
@@ -132,9 +101,9 @@ original routine.
                 // save current coroutine
                 // value of local variable is preserved
                 // transfer execution control back to main()
-                ca();
+                c();
 
-                // coroutine<>::operator()() was called
+                // push_coroutine<>::operator()() was called
                 // execution control transferred back from main()
             }
         }
@@ -142,7 +111,7 @@ original routine.
         int main( int argc, char * argv[])
         {
             // bind parameter '7' to coroutine-fn
-            coro_t c( boost::bind( fn, _1, 7) );
+            boost::coroutines::push_coroutine< void > c( boost::bind( fn, _1, 7) );
 
             std::cout << "main() starts coroutine c" << std::endl;
 
@@ -182,30 +151,24 @@ undefined behaviour.]
 
 [heading Transfer of data]
 
-__signature__, the template argument of __coro__, defines the types transferred
-to and returned from the __coro_fn__, e.g. it determines the signature of
-__coro_op__ and the return-type of __coro_get__.
+The template argument of __push_coro__, defines the types transferred
+to and in the case of __pull_coroutine__ the type transfered from the __coro_fn__.
 
-[note __coro_caller__ is not part of __signature__ and __coro_fn__ is required
-to return void and accept __coro_caller__ as argument.]
+__push_coro_op__ accepts argument defined as template argument and returns void.
+The arguments passed to __push_coro_op__, in one coroutine,
+is returned (as a __tuple__) by __pull_coro_get__ in the other coroutine.
 
-__coro_op__  accepts arguments as defined in __signature__ and returns a
-reference to __coro__. The arguments passed to __coro_op__, in one coroutine,
-is returned (as a __tuple__) by __coro_get__ in the other coroutine.
 If __coro__ is constructed and arguments are passed to the constructor, the
 __coro_fn__ will be entered and the arguments are accessed thorough __coro_get__
 in __coro_fn__ on entry.
 
-The value given to __coro_op__ of __coro_caller__, in one coroutine, is returned by
-__coro_get__ in the other routine.
+The value given to __push_coro_op__, in one coroutine, is returned by
+__pull_coro_get__ in the other routine.
 
-        typedef boost::coroutines::coroutine< int( int) >    coro_t;
-
-        // void fn( boost::coroutines::coroutine< int( int) > & ca)
-        void fn( coro_t::caller_type & ca)
+        void fn( boost::coroutines::pull_coroutine< int > & c)
         {
             // access the integer argument given to coroutine ctor
-            int i = ca.get();
+            int i = c.get();
             std::cout << "fn(): local variable i == " << i << std::endl;
 
             // save current coroutine context and
@@ -213,7 +176,7 @@ __coro_get__ in the other routine.
             // pass content of variable 'i' to caller
             // after execution control is returned back coroutine<>::operator()
             // returns and the transferred integer s accessed via coroutine<>::get()
-            i = ca( i).get();
+            i = c().get();
 
             // i == 10 because c( 10) in main()
             std::cout << "fn(): local variable i == " << i << std::endl;
@@ -247,32 +210,24 @@ __coro_get__ in the other routine.
 
 [heading __coro_fn__ with multiple arguments]
 
-If __coro_fn__ has more than one argument __coro_op__ has the same size of
-arguments and __coro_get__ from __coro_caller__ returns a __tuple__ corresponding
-to the arguments of __signature__. __tie__ helps to access the values stored in
-the __tuple__ returned by __coro_get__.
+__tuple__ can be used to transfer mutliple data types.
 
-        typedef boost::coroutines::coroutine< int(int,int) > coro_t;
-
-        // void fn( boost::coroutines::coroutine< boost::tuple< int, int >( int) > & ca)
-        void fn( coro_t::caller_type & ca)
+        void fn( boost::coroutines::pull_coroutine< boost::tuple< int, int > > & c)
         {
             int a, b;
-            boost::tie( a, b) = ca.get();
-            boost::tie( a, b) = ca( a + b).get();
-            ca( a + b);
+            boost::tie( a, b) = c.get();
+            std::cout << "main(): " << a << " + " << b << " == " << a + b << std::endl;
+            boost::tie( a, b) = c().get();
+            std::cout << "main(): " << a << " + " << b << " == " << a + b << std::endl;
         }
 
         int main( int argc, char * argv[])
         {
             std::cout << "main(): call coroutine c" << std::endl;
-            coro_t coro( fn, coro_t::arguments( 3, 7) );
+            boost::coroutines::push_coroutine< boost::tuple< int, int > c( fn);
 
-            int res = coro.get();
-            std::cout << "main(): 3 + 7 == " << res << std::endl;
-
-            res = coro( 5, 7).get();
-            std::cout << "main(): 5 + 7 == " << res << std::endl;
+            c( boost::make_tuple( 3, 7) );
+            c( boost::make_tuple( 5, 7) );
 
             std::cout << "Done" << std::endl;
 
@@ -578,18 +533,12 @@ fpu registers for performance reasons.
 [note According to the calling convention the FPU registers are preserved by default.]
 
 
-[section:coroutine Class `coroutine`]
+[section:push_coro Class `push_coroutine`]
 
     #include <boost/coroutine/coroutine.hpp>
 
-    template< typename Signature >
-    class coroutine;
-
-    template<
-        typename R,
-        typename ArgTypes...
-    >
-    class coroutine< R ( ArgTypes...) >
+    template< typename Arg >
+    class push_coroutine
     {
     public:
         typedef unspec-type caller_type;
