@@ -73,24 +73,25 @@ constructor.
 
 [heading Calling a coroutine]
 
-For __pull_coro__ the execution control is transferred to __coro__ at
-construction (__coro_fn__ entered) - when control should be returned to the
-original calling routine, invoke __coro_op__ on the first argument of type __coro_caller__ inside
-__coro_fn__. __coro_caller__ is a typedef of __coro__ with an inverted
-__signature__.
+Using __pull_coro__ requires that __coro_fn__ takes __push_coro__ as first
+arguement and vice versa.
+For __pull_coro__ __coro_fn__ is entered at construction and if control should
+be returned to the original calling routine __push_coro_op__ (first argument of
+__coro_fn__).
+
+        void f( boost::coroutines::push_coroutine< std::string > & c);
+        boost::coroutines::pull_coroutine< std::string > c( f);
+
 Multiple arguments are wrapped into __tuple__.
 
-        void f( boost::coroutines::coroutine< std::string const&( int) & ca);
-        boost::coroutines::coroutine< int( std::string const&) > c1( f);
-
-        void g( boost::coroutines::coroutine< boost::tuple< X, Y >( int) & ca);
-        boost::coroutines::coroutine< int( X, X) > c2( g);
+        void g( boost::coroutines::pull_coroutine< boost::tuple< X, Y > > & c);
+        boost::coroutines::push_coroutine< boost::tuple< X, Y > > c( g);
 
 
 The current coroutine information (registers, flags, and stack and instruction
 pointer) is saved and the original context information is restored. Calling
-__coro_op__ resumes execution in the coroutine after saving the new state of the
-original routine.
+__push_coro_op__/__pull_coro_op__ resumes execution in the coroutine after
+saving the new state of the original routine.
 
         void fn( boost::coroutines::pull_coroutine< void > & c, int j)
         {
@@ -157,10 +158,6 @@ to and in the case of __pull_coroutine__ the type transfered from the __coro_fn_
 __push_coro_op__ accepts argument defined as template argument and returns void.
 The arguments passed to __push_coro_op__, in one coroutine,
 is returned (as a __tuple__) by __pull_coro_get__ in the other coroutine.
-
-If __coro__ is constructed and arguments are passed to the constructor, the
-__coro_fn__ will be entered and the arguments are accessed thorough __coro_get__
-in __coro_fn__ on entry.
 
 The value given to __push_coro_op__, in one coroutine, is returned by
 __pull_coro_get__ in the other routine.
