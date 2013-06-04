@@ -53,6 +53,10 @@ exe echo
     : echo.cpp
     ;
 
+exe echosse
+    : echosse.cpp
+    ;
+
 exe power
     : power.cpp
     ;
