@@ -74,13 +74,19 @@ constructor.
 [heading Calling a coroutine]
 
 Using __pull_coro__ requires that __coro_fn__ takes __push_coro__ as first
-arguement and vice versa.
+argument and vice versa.
 For __pull_coro__ __coro_fn__ is entered at construction and if control should
 be returned to the original calling routine __push_coro_op__ (first argument of
-__coro_fn__).
+__coro_fn__) has to be invoked.
 
-        void f( boost::coroutines::push_coroutine< std::string > & c);
+        void f( boost::coroutines::push_coroutine< std::string > & c)
+        {
+            c("abc");
+        }
+
         boost::coroutines::pull_coroutine< std::string > c( f);
+        std::string str = c.get();
+        c();
 
 Multiple arguments are wrapped into __tuple__.
 
@@ -146,33 +152,34 @@ saving the new state of the original routine.
             main() calls coroutine c
             Done
 
-[warning Calling __coro_op__ from inside the [_same] coroutine results in
-undefined behaviour.]
+[warning Calling __push_coro_op__/__pull_coro_op__ from inside the [_same]
+coroutine results in undefined behaviour.]
 
 
 [heading Transfer of data]
 
 The template argument of __push_coro__, defines the types transferred
-to and in the case of __pull_coroutine__ the type transfered from the __coro_fn__.
+to and in the case of __pull_coroutine__ the type transfered from
+__coro_fn__.
 
-__push_coro_op__ accepts argument defined as template argument and returns void.
-The arguments passed to __push_coro_op__, in one coroutine,
-is returned (as a __tuple__) by __pull_coro_get__ in the other coroutine.
+__push_coro_op__ accepts argument defined as template argument and returns a
+refernce to __push_coro__.
+The arguments passed to __push_coro_op__, in one coroutine, is returned by
+__pull_coro_get__ in the other execution context.
 
 The value given to __push_coro_op__, in one coroutine, is returned by
 __pull_coro_get__ in the other routine.
 
         void fn( boost::coroutines::pull_coroutine< int > & c)
         {
-            // access the integer argument given to coroutine ctor
+            // access the integer argument passed to push_coroutine< int >::operator()
             int i = c.get();
             std::cout << "fn(): local variable i == " << i << std::endl;
 
             // save current coroutine context and
             // transfer execution control back to caller
-            // pass content of variable 'i' to caller
-            // after execution control is returned back coroutine<>::operator()
-            // returns and the transferred integer s accessed via coroutine<>::get()
+            // after execution control returns from pull_coroutine< int >::operator()
+            // the transferred integer s accessed via pull_coroutine< int >::get()
             i = c().get();
 
             // i == 10 because c( 10) in main()
@@ -251,9 +258,9 @@ after `c` is gone will fail!
             void g();
         };
 
-        typedef boost::coroutines::coroutine< X*() >    coro_t;
+        typedef boost::coroutines::pull_coroutine< X* >    coro_t;
 
-        // void fn( boost::coroutines::coroutine< void( X*) > & ca)
+        // void fn( boost::coroutines::push_coroutine< X* > & ca)
         void fn( coro_t::caller_t & ca) {
             X local;
             ca( & local);
@@ -274,20 +281,19 @@ after `c` is gone will fail!
 [heading Range iterators]
 
 __boost_coroutine__ provides output- and input-iterators using __boost_range__.
-`coroutine< T() >` can be used via output-iterators using __begin__ and __end__.
+__pull_coro__ can be used via output-iterators using __begin__ and __end__.
 
-        typedef boost::coroutines::coroutine< int() >       coro_t;
+        typedef boost::coroutines::pull_coroutine< int >    coro_t;
         typedef boost::range_iterator< coro_t >::type       iterator_t;
 
-        // void power( boost::coroutines::coroutine< void( int) > & ca, int number, int exponent)
-        void power( coro_t::caller_type & ca, int number, int exponent)
+        void power( boost::coroutines::push_coroutine< int > & c, int number, int exponent)
         {
             int counter = 0;
             int result = 1;
             while ( counter++ < exponent)
             {
                     result = result * number;
-                    ca( result);
+                    c( result);
             }
         }
 
@@ -309,18 +315,17 @@ __boost_coroutine__ provides output- and input-iterators using __boost_range__.
 
 `BOOST_FOREACH` can be used to iterate over the coroutine range too.
 
-        typedef boost::coroutines::coroutine< int() >       coro_t;
+        typedef boost::coroutines::pull_coroutine< int >    coro_t;
         typedef boost::range_iterator< coro_t >::type       iterator_t;
 
-        // void power( boost::coroutines::coroutine< void( int) > & ca, int number, int exponent)
-        void power( coro_t::caller_type & ca, int number, int exponent)
+        void power( boost::coroutines::push_coroutine< int > & c, int number, int exponent)
         {
             int counter = 0;
             int result = 1;
             while ( counter++ < exponent)
             {
                     result = result * number;
-                    ca( result);
+                    c( result);
             }
         }
 
@@ -340,38 +345,40 @@ __boost_coroutine__ provides output- and input-iterators using __boost_range__.
             Done
 
 
-Input iterators are created from coroutines of type `coroutine< void( T) >`.
+Input iterators can be created from __push_coro__.
 
 
 
 [heading Exit a __coro_fn__]
 
 __coro_fn__ is exited with a simple return statement jumping back to the calling
-routine. The __coro__ becomes complete, e.g. __coro_bool__ will return 'false'.
+routine. The __pull_coro__/__push_coro__ becomes complete, e.g. __coro_bool__
+will return 'false'.
 
         typedef boost::coroutines::coroutine< int(int,int) > coro_t;
 
-        // void power( boost::coroutines::coroutine< boost::tuple< int, int >( int) > & ca, int number, int exponent)
-        void fn( coro_t::caller_type & ca)
+        void power( boost::coroutines::pull_coroutine< boost::tuple< int, int > > & c, int number, int exponent)
         {
             int a, b;
+
             boost::tie( a, b) = ca.get();
-            boost::tie( a, b) = ca( a + b).get();
-            ca( a + b);
+            std::cout << "main(): " << a << " + " << b " == " << a + b << std::endl;
+            c();
+
+            boost::tie( a, b) = ca.get();
+            std::cout << "main(): " << a << " + " << b " == " << a + b << std::endl;
+            c();
         }
 
         int main( int argc, char * argv[])
         {
             std::cout << "main(): call coroutine c" << std::endl;
-            coro_t coro( fn, coro_t::arguments( 3, 7) );
+            coro_t c( power);
+            c( boost::make_tuple( 3, 7) );
+            BOOST_ASSERT( c);
 
-            BOOST_ASSERT( coro);
-            int res = coro.get();
-            std::cout << "main(): 3 + 7 == " << res << std::endl;
-
-            res = coro( 5, 7).get();
-            BOOST_ASSERT( ! coro);
-            std::cout << "main(): 5 + 7 == " << res << std::endl;
+            c( boot::make_tuple( 5, 7) );
+            BOOST_ASSERT( ! c);
 
             std::cout << "Done" << std::endl;
 
@@ -394,18 +401,15 @@ An exception thrown inside __coro_fn__ will transferred via exception-pointer
 (see __boost_exception__ for details) and re-thrown by constructor or
 __coro_op__.
 
-        typedef boost::coroutines::coroutine< void() >    coro_t;
-
-        // void fn( boost::coroutines::coroutine< void() > & ca)
-        void fn( coro_t::caller_type & ca)
+        void f( boost::coroutines::push_coroutine< void > & c)
         {
-            ca();
+            c();
             throw std::runtime_error("abc");
         }
 
         int main( int argc, char * argv[])
         {
-            coro_t c( f);
+            boost::coroutines::pull_coroutine< void > c( f);
             try
             {
                 c();
@@ -461,8 +465,6 @@ Stack unwinding assumes the following preconditions:
 After unwinding, a __coro__ is complete.
 
 
-        typedef boost::coroutines::coroutine< void() >    coro_t;
-
         struct X
         {
             X()
@@ -472,8 +474,7 @@ After unwinding, a __coro__ is complete.
             { std::cout << "~X()" << std::endl; }
         };
 
-        // void fn( boost::coroutines::coroutine< void() > & ca)
-        void fn( coro_t::caller_type & ca)
+        void fn( boost::coroutines::pull_coroutine< void > & c)
         {
             X x;
 
@@ -481,14 +482,14 @@ After unwinding, a __coro__ is complete.
             {
                 std::cout << "fn(): " << i << std::endl;
                 // transfer execution control back to main()
-                ca();
+                c();
             }
         }
 
         int main( int argc, char * argv[])
         {
             {
-                coro_t c( fn,
+                boost::coroutines::push_coroutine< void > c( fn,
                           boost::coroutines::attributes(
                             boost::ctx::default_stacksize(),
                             boost::coroutines::stack_unwind) );
@@ -538,17 +539,14 @@ fpu registers for performance reasons.
     class push_coroutine
     {
     public:
-        typedef unspec-type caller_type;
-        typedef unspec-type arguments;
-
-        coroutine();
+        push_coroutine();
 
         template<
             typename Fn,
             typename StackAllocator = stack_allocator,
             typename Allocator = std::allocator< coroutine >
         >
-        coroutine( Fn fn, attributes const& attr = attributes(),
+        push_coroutine( Fn fn, attributes const& attr = attributes(),
                    StackAllocator const& stack_alloc = StackAllocator(),
                    Allocator const& alloc = Allocator() );
 
@@ -557,61 +555,35 @@ fpu registers for performance reasons.
             typename StackAllocator = stack_allocator,
             typename Allocator = std::allocator< coroutine >
         >
-        coroutine( Fn fn, arguments const& args,
-                   attributes const& attr = attributes(),
-                   StackAllocator const& stack_alloc = StackAllocator(),
-                   Allocator const& alloc = Allocator() );
-
-        template<
-            typename Fn,
-            typename StackAllocator = stack_allocator,
-            typename Allocator = std::allocator< coroutine >
-        >
-        coroutine( Fn && fn, attributes const& attr = attributes(),
+        push_coroutine( Fn && fn, attributes const& attr = attributes(),
                    StackAllocator stack_alloc = StackAllocator(),
                    Allocator const& alloc = Allocator() );
 
-        template<
-            typename Fn,
-            typename StackAllocator = stack_allocator,
-            typename Allocator = std::allocator< coroutine >
-        >
-        coroutine( Fn && fn arguments const& args,
-                   attributes const& attr = attributes(),
-                   StackAllocator stack_alloc = StackAllocator(),
-                   Allocator const& alloc = Allocator() );
+        push_coroutine( push_coroutine && other);
 
-        coroutine( coroutine && other);
-
-        coroutine & operator=( coroutine && other);
+        push_coroutine & operator=( push_coroutine && other);
 
         operator unspecified-bool-type() const;
 
         bool operator!() const;
 
-        void swap( coroutine & other);
+        void swap( push_coroutine & other);
 
         bool empty() const;
 
-        coroutine & operator()(A0 a0, ..., A9 a9);
-
-        R get() const;
+        push_coroutine & operator()( Arg arg);
     };
 
-    template< typename Signature >
-    void swap( coroutine< Signature > & l, coroutine< Signature > & r);
+    template< typename Arg >
+    void swap( push_coroutine< Arg > & l, push_coroutine< Arg > & r);
 
-    template< typename T >
-    range_iterator< coroutine< T() > >::type begin( coroutine< T() > &);
-    template< typename T >
-    range_iterator< coroutine< void(T) > >::type begin( coroutine< void(T) > &);
+    template< typename Arg >
+    range_iterator< push_coroutine< Arg > >::type begin( push_coroutine< Arg > &);
 
-    template< typename T >
-    range_iterator< coroutine< T() > >::type end( coroutine< T() > &);
-    template< typename T >
-    range_iterator< coroutine< void(T) > >::type end( coroutine< void(T) > &);
+    template< typename Arg >
+    range_iterator< push_coroutine< Arg > >::type end( push_coroutine< Arg > &);
 
-[heading `coroutine()`]
+[heading `push_coroutine()`]
 [variablelist
 [[Effects:] [Creates a coroutine representing __not_a_coro__.]]
 [[Throws:] [Nothing.]]
@@ -682,14 +654,6 @@ Otherwise false.]]
 [[Throws:] [Exceptions thrown inside __coro_fn__.]]
 ]
 
-[heading `R get()()`]
-[variablelist
-[[Preconditions:] [`*this` is not a __not_a_coro__, `! is_complete()`.]]
-[[Returns:] [Returns data transferred from coroutine-function via __coro_op__
-of __coro_caller__.]]
-[[Throws:] [Nothing.]]
-]
-
 [heading `void swap( coroutine & other)`]
 [variablelist
 [[Effects:] [Swaps the internal data from `*this` with the values
@@ -707,8 +671,8 @@ the arguments passed to __coro_op__.]]
 
 [heading Non-member function `swap()`]
 
-    template< typename Signature >
-    void swap( coroutine< Signature > & l, coroutine< Signature > & r);
+    template< typename Arg >
+    void swap( push_coroutine< Arg > & l, push_coroutine< Arg > & r);
 
 [variablelist
 [[Effects:] [As if 'l.swap( r)'.]]
