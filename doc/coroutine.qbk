@@ -10,7 +10,7 @@
 __boost_coroutine__ provides two interfaces - one with uni- and one with bidirectional
 data transfer.
 
-[include old.qbk]
 [include unidirect.qbk]
+[include old.qbk]
 
 [endsect]

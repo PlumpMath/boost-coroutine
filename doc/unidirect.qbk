@@ -7,7 +7,7 @@
 
 [section:unidirect Unidirectional coroutine (version 2)]
 
-[note This is the default interface (BOOST_COROUTINES_UNIDIRECT).]
+[note This is the default interface (macro BOOST_COROUTINES_UNIDIRECT).]
 
 Two kinds of __coros__ are provided - __push_coro__ for transfering data to
 and __pull_coro__ for transfering data from the other execution context.
@@ -590,7 +590,7 @@ fpu registers for performance reasons.
 ]
 
 [heading `template< typename Fn, typename StackAllocator, typename Allocator >
-          coroutine( Fn fn, attributes const& attr, StackAllocator const& stack_alloc, Allocator const& alloc)`]
+          push_coroutine( Fn fn, attributes const& attr, StackAllocator const& stack_alloc, Allocator const& alloc)`]
 [variablelist
 [[Preconditions:] [`size` > minimum_stacksize(), `size` < maximum_stacksize()
 when ! is_stack_unbound().]]
@@ -601,7 +601,7 @@ data are allocated by Allocator.]]
 ]
 
 [heading `template< typename Fn, typename StackAllocator, typename Allocator >
-          coroutine( Fn && fn, attributes const& attr, StackAllocator const& stack_alloc, Allocator const& alloc)`]
+          push_coroutine( Fn && fn, attributes const& attr, StackAllocator const& stack_alloc, Allocator const& alloc)`]
 [variablelist
 [[Preconditions:] [`size` > minimum_stacksize(), `size` < maximum_stacksize()
 when ! is_stack_unbound().]]
@@ -611,14 +611,14 @@ For allocating/deallocating the stack `stack_alloc` is used and internal
 data are allocated by Allocator.]]
 ]
 
-[heading `coroutine( coroutine && other)`]
+[heading `push_coroutine( push_coroutine && other)`]
 [variablelist
 [[Effects:] [Moves the internal data of `other` to `*this`.
 `other` becomes __not_a_coro__.]]
 [[Throws:] [Nothing.]]
 ]
 
-[heading `coroutine & operator=( coroutine && other)`]
+[heading `push_coroutine & operator=( push_coroutine && other)`]
 [variablelist
 [[Effects:] [Destroys the internal data of `*this` and moves the
 internal data of `other` to `*this`. `other` becomes __not_a_coro__.]]
@@ -646,15 +646,15 @@ Otherwise false.]]
 [[Throws:] [Nothing.]]
 ]
 
-[heading `coroutine<> & operator()(A0 a0, A9 a9)`]
+[heading `push_coroutine<> & operator()(Arg arg)`]
 [variablelist
 [[Preconditions:] [operator unspecified-bool-type() returns true for `*this`.]
-[[Effects:] [Execution control is transferred to __coro_fn__ and the arguments
-`a0`,..., are passed to the coroutine-function.]]
+[[Effects:] [Execution control is transferred to __coro_fn__ and the argument
+`arg` is passed to the coroutine-function.]]
 [[Throws:] [Exceptions thrown inside __coro_fn__.]]
 ]
 
-[heading `void swap( coroutine & other)`]
+[heading `void swap( push_coroutine & other)`]
 [variablelist
 [[Effects:] [Swaps the internal data from `*this` with the values
 of `other`.]]
@@ -678,36 +678,199 @@ the arguments passed to __coro_op__.]]
 [[Effects:] [As if 'l.swap( r)'.]]
 ]
 
-[heading Non-member function `begin( coroutine< T() > &)`]
-    template< typename T >
-    range_iterator< coroutine< T() > >::type begin( coroutine< T() > &);
-
-[variablelist
-[[Returns:] [Returns a range-iterator (input-iterator).]]
-]
-
-[heading Non-member function `begin( coroutine< void(T) > &)`]
-    template< typename T >
-    range_iterator< coroutine< void(T) > >::type begin( coroutine< void(T) > &);
+[heading Non-member function `begin( push_coroutine< Arg > &)`]
+    template< typename Arg >
+    range_iterator< push_coroutine< Arg > >::type begin( push_coroutine< Arg > &);
 
 [variablelist
 [[Returns:] [Returns a range-iterator (output-iterator).]]
 ]
 
-[heading Non-member function `end( coroutine< T() > &)`]
-    template< typename T >
-    range_iterator< coroutine< T() > >::type end( coroutine< T() > &);
-
-[variablelist
-[[Returns:] [Returns a end range-iterator (input-iterator).]]
-]
-
-[heading Non-member function `end( coroutine< void(T) > &)`]
-    template< typename T >
-    range_iterator< coroutine< void(T) > >::type end( coroutine< void(T) > &);
+[heading Non-member function `end( push_coroutine< Arg > &)`]
+    template< typename Arg >
+    range_iterator< push_coroutine< Arg > >::type end( push_coroutine< Arg > &);
 
 [variablelist
 [[Returns:] [Returns a end range-iterator (output-iterator).]]
+]
+
+[endsect]
+
+
+[section:pull_coro Class `pull_coroutine`]
+
+    #include <boost/coroutine/coroutine.hpp>
+
+    template< typename R >
+    class pull_coroutine
+    {
+    public:
+        pull_coroutine();
+
+        template<
+            typename Fn,
+            typename StackAllocator = stack_allocator,
+            typename Allocator = std::allocator< coroutine >
+        >
+        pull_coroutine( Fn fn, attributes const& attr = attributes(),
+                   StackAllocator const& stack_alloc = StackAllocator(),
+                   Allocator const& alloc = Allocator() );
+
+        template<
+            typename Fn,
+            typename StackAllocator = stack_allocator,
+            typename Allocator = std::allocator< coroutine >
+        >
+        pull_coroutine( Fn && fn, attributes const& attr = attributes(),
+                   StackAllocator stack_alloc = StackAllocator(),
+                   Allocator const& alloc = Allocator() );
+
+        pull_coroutine( pull_coroutine && other);
+
+        pull_coroutine & operator=( pull_coroutine && other);
+
+        operator unspecified-bool-type() const;
+
+        bool operator!() const;
+
+        void swap( pull_coroutine & other);
+
+        bool empty() const;
+
+        pull_coroutine & operator()();
+
+        bool has_result() const;
+
+        R get() const;
+    };
+
+    template< typename R >
+    void swap( pull_coroutine< R > & l, pull_coroutine< R > & r);
+
+    template< typename R >
+    range_iterator< pull_coroutine< R > >::type begin( pull_coroutine< R > &);
+
+    template< typename R >
+    range_iterator< pull_coroutine< R > >::type end( pull_coroutine< R > &);
+
+[heading `pull_coroutine()`]
+[variablelist
+[[Effects:] [Creates a coroutine representing __not_a_coro__.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading `template< typename Fn, typename StackAllocator, typename Allocator >
+          pull_coroutine( Fn fn, attributes const& attr, StackAllocator const& stack_alloc, Allocator const& alloc)`]
+[variablelist
+[[Preconditions:] [`size` > minimum_stacksize(), `size` < maximum_stacksize()
+when ! is_stack_unbound().]]
+[[Effects:] [Creates a coroutine which will execute `fn`. Argument `attr`
+determines stack clean-up and preserving floating-point registers.
+For allocating/deallocating the stack `stack_alloc` is used and internal
+data are allocated by Allocator.]]
+[[Throws:] [Exceptions thrown inside __coro_fn__.]]
+]
+
+[heading `template< typename Fn, typename StackAllocator, typename Allocator >
+          pull_coroutine( Fn && fn, attributes const& attr, StackAllocator const& stack_alloc, Allocator const& alloc)`]
+[variablelist
+[[Preconditions:] [`size` > minimum_stacksize(), `size` < maximum_stacksize()
+when ! is_stack_unbound().]]
+[[Effects:] [Creates a coroutine which will execute `fn`. Argument `attr`
+determines stack clean-up and preserving floating-point registers.
+For allocating/deallocating the stack `stack_alloc` is used and internal
+data are allocated by Allocator.]]
+[[Throws:] [Exceptions thrown inside __coro_fn__.]]
+]
+
+[heading `pull_coroutine( pull_coroutine && other)`]
+[variablelist
+[[Effects:] [Moves the internal data of `other` to `*this`.
+`other` becomes __not_a_coro__.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading `pull_coroutine & operator=( pull_coroutine && other)`]
+[variablelist
+[[Effects:] [Destroys the internal data of `*this` and moves the
+internal data of `other` to `*this`. `other` becomes __not_a_coro__.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading `operator unspecified-bool-type() const`]
+[variablelist
+[[Returns:] [If `*this` refers to __not_a_coro__ or the coroutine-function
+has returned (completed), the function returns false. Otherwise true.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading `bool operator!() const`]
+[variablelist
+[[Returns:] [If `*this` refers to __not_a_coro__ or the coroutine-function
+has returned (completed), the function returns true. Otherwise false.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading `bool empty()`]
+[variablelist
+[[Returns:] [If `*this` refers to __not_a_coro__, the function returns true.
+Otherwise false.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading `pull_coroutine<> & operator()()`]
+[variablelist
+[[Preconditions:] [`*this` is not a __not_a_coro__.]]
+[[Effects:] [Execution control is transferred to __coro_fn__ (no parameter are
+passed to the coroutine-function).]]
+[[Throws:] [Exceptions thrown inside __coro_fn__.]]
+]
+
+[heading `bool has_result()`]
+[variablelist
+[[Preconditions:] [`*this` is not a __not_a_coro__.]]
+[[Returns:] [If `*this` has a, the function returns true. Otherwise false.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading `R get()()`]
+[variablelist
+[[Preconditions:] [`*this` is not a __not_a_coro__.]]
+[[Returns:] [Returns data transferred from coroutine-function via
+__push_coro_op__.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading `void swap( pull_coroutine & other)`]
+[variablelist
+[[Effects:] [Swaps the internal data from `*this` with the values
+of `other`.]]
+[[Throws:] [Nothing.]]
+]
+
+[heading Non-member function `swap()`]
+
+    template< typename R >
+    void swap( pull_coroutine< R > & l, pull_coroutine< R > & r);
+
+[variablelist
+[[Effects:] [As if 'l.swap( r)'.]]
+]
+
+[heading Non-member function `begin( pull_coroutine< R > &)`]
+    template< typename R >
+    range_iterator< pull_coroutine< R > >::type begin( pull_coroutine< R > &);
+
+[variablelist
+[[Returns:] [Returns a range-iterator (input-iterator).]]
+]
+
+[heading Non-member function `end( pull_coroutine< R > &)`]
+    template< typename R >
+    range_iterator< pull_coroutine< R > >::type end( pull_coroutine< R > &);
+
+[variablelist
+[[Returns:] [Returns a end range-iterator (input-iterator).]]
 ]
 
 [endsect]
