@@ -54,6 +54,10 @@
 # define BOOST_COROUTINES_OLD
 #endif
 
+#if defined(BOOST_COROUTINES_BIDIRECT)
+# define BOOST_COROUTINES_OLD
+#endif
+
 #if ! defined(BOOST_COROUTINES_OLD)
 # define BOOST_COROUTINES_UNIDIRECT
 #endif
