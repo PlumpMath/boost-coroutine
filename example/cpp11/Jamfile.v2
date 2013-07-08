@@ -48,3 +48,7 @@ exe same_fringe
 exe fibonacci
     : fibonacci.cpp
     ;
+
+exe await_emu
+    : await_emu.cpp
+    ;
