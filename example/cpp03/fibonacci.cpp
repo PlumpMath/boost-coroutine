@@ -14,6 +14,8 @@
 void fibonacci( boost::coroutines::push_coroutine< int > & c)
 {
     int first = 1, second = 1;
+    c( first);     
+    c( second);     
     while ( true)
     {
         int third = first + second;
@@ -43,6 +45,8 @@ int main()
 void fibonacci( boost::coroutines::coroutine< void( int) > & c)
 {
     int first = 1, second = 1;
+    c( first);     
+    c( second);     
     while ( true)
     {
         int third = first + second;
