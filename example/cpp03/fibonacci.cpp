@@ -11,7 +11,7 @@
 #include <boost/coroutine/all.hpp>
 
 #ifdef BOOST_COROUTINES_UNIDIRECT
-void fibonacci( boost::coroutines::push_coroutine< int > & c)
+void fibonacci( boost::coroutines::coroutine< int >::push_type & c)
 {
     int first = 1, second = 1;
     c( first);     
@@ -27,9 +27,9 @@ void fibonacci( boost::coroutines::push_coroutine< int > & c)
 
 int main()
 {
-    boost::coroutines::pull_coroutine< int > c( fibonacci);
+    boost::coroutines::coroutine< int >::pull_type c( fibonacci);
     boost::range_iterator<
-       boost::coroutines::pull_coroutine< int >
+       boost::coroutines::coroutine< int >::pull_type
     >::type   it( boost::begin( c) );
     for ( int i = 0; i < 10; ++i)
     {

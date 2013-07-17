@@ -12,8 +12,8 @@
 #ifdef BOOST_COROUTINES_UNIDIRECT
 int main()
 {
-    boost::coroutines::pull_coroutine< int > c(
-        [&]( boost::coroutines::push_coroutine< int > & c) {
+    boost::coroutines::coroutine< int >::pull_type c(
+        [&]( boost::coroutines::coroutine< int >::push_type & c) {
             int first = 1, second = 1;
             c( first);
             c( second);
