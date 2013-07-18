@@ -2836,30 +2836,6 @@ typename pull_coroutine< R >::const_iterator
 range_end( pull_coroutine< R > const&)
 { return typename pull_coroutine< R >::const_iterator(); }
 
-template< typename R >
-inline
-typename pull_coroutine< R >::iterator
-begin( pull_coroutine< R > & c)
-{ return boost::begin( c); }
-
-template< typename R >
-inline
-typename pull_coroutine< R >::iterator
-end( pull_coroutine< R > & c)
-{ return boost::end( c); }
-
-template< typename R >
-inline
-typename pull_coroutine< R >::const_iterator
-begin( pull_coroutine< R > const& c)
-{ return boost::const_begin( c); }
-
-template< typename R >
-inline
-typename pull_coroutine< R >::const_iterator
-end( pull_coroutine< R > const& c)
-{ return boost::const_end( c); }
-
 template< typename Arg >
 inline
 typename push_coroutine< Arg >::iterator
@@ -2883,31 +2859,6 @@ inline
 typename push_coroutine< Arg >::const_iterator
 range_end( push_coroutine< Arg > const&)
 { return typename push_coroutine< Arg >::const_iterator(); }
-
-template< typename Arg >
-inline
-typename push_coroutine< Arg >::iterator
-begin( push_coroutine< Arg > & c)
-{ return boost::begin( c); }
-
-template< typename Arg >
-inline
-typename push_coroutine< Arg >::iterator
-end( push_coroutine< Arg > & c)
-{ return boost::end( c); }
-
-template< typename Arg >
-inline
-typename push_coroutine< Arg >::const_iterator
-begin( push_coroutine< Arg > const& c)
-{ return boost::const_begin( c); }
-
-template< typename Arg >
-inline
-typename push_coroutine< Arg >::const_iterator
-end( push_coroutine< Arg > const& c)
-{ return boost::const_end( c); }
-
 
 template< typename T >
 struct coroutine
@@ -2933,6 +2884,34 @@ struct range_mutable_iterator< coroutines::pull_coroutine< R > >
 template< typename R >
 struct range_const_iterator< coroutines::pull_coroutine< R > >
 { typedef typename coroutines::pull_coroutine< R >::const_iterator type; };
+
+}
+
+namespace std {
+
+template< typename R >
+inline
+typename boost::coroutines::pull_coroutine< R >::iterator
+begin( boost::coroutines::pull_coroutine< R > & c)
+{ return boost::begin( c); }
+
+template< typename R >
+inline
+typename boost::coroutines::pull_coroutine< R >::iterator
+end( boost::coroutines::pull_coroutine< R > & c)
+{ return boost::end( c); }
+
+template< typename R >
+inline
+typename boost::coroutines::pull_coroutine< R >::const_iterator
+begin( boost::coroutines::pull_coroutine< R > const& c)
+{ return boost::const_begin( c); }
+
+template< typename R >
+inline
+typename boost::coroutines::pull_coroutine< R >::const_iterator
+end( boost::coroutines::pull_coroutine< R > const& c)
+{ return boost::const_end( c); }
 
 }
 
