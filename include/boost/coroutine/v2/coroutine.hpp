@@ -2913,6 +2913,30 @@ typename boost::coroutines::pull_coroutine< R >::const_iterator
 end( boost::coroutines::pull_coroutine< R > const& c)
 { return boost::const_end( c); }
 
+template< typename R >
+inline
+typename boost::coroutines::push_coroutine< R >::iterator
+begin( boost::coroutines::push_coroutine< R > & c)
+{ return boost::begin( c); }
+
+template< typename R >
+inline
+typename boost::coroutines::push_coroutine< R >::iterator
+end( boost::coroutines::push_coroutine< R > & c)
+{ return boost::end( c); }
+
+template< typename R >
+inline
+typename boost::coroutines::push_coroutine< R >::const_iterator
+begin( boost::coroutines::push_coroutine< R > const& c)
+{ return boost::const_begin( c); }
+
+template< typename R >
+inline
+typename boost::coroutines::push_coroutine< R >::const_iterator
+end( boost::coroutines::push_coroutine< R > const& c)
+{ return boost::const_end( c); }
+
 }
 
 #ifdef BOOST_HAS_ABI_HEADERS
